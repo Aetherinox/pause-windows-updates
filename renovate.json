@@ -1,0 +1,75 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":preserveSemverRanges"
+  ],
+  "timezone": "Etc/UTC",
+  "includeForks": true,
+  "forkProcessing": "enabled",
+  "baseBranches": ["main"],
+  "prCreation": "immediate",
+  "rebaseWhen": "conflicted",
+  "rebaseLabel": "AC › Needs Rebase",
+  "gitAuthor": "EuropaServ <161414668+EuropaServ@users.noreply.github.com>",
+  "updatePinnedDependencies": false,
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "📁 Dependency Dashboard",
+  "dependencyDashboardLabels": ["📰 Progress Report"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["Type ◦ Vulnerability"]
+  },
+  "labels": [
+    "Type ◦ Dependency"
+  ],
+  "major": {
+    "automerge": false
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "npm",
+        "nvm"
+      ],
+      "addLabels": [
+        "Type ◦ Dependency"
+      ],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchManagers": [
+        "npm",
+        "nvm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "addLabels": [
+        "Type ◦ Git Action"
+      ],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": false
+    }
+  ]
+}
