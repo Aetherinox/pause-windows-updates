@@ -32,9 +32,13 @@
   - [All-in-one Batch Utility](#all-in-one-batch-utility)
 - [Notice](#notice)
 - [Install](#install)
-- [Re-enabling Updates](#re-enabling-updates)
+  - [Registry Scripts](#registry-scripts-1)
+  - [All-in-one Batch Utility](#all-in-one-batch-utility-1)
+  - [Confirm](#confirm)
+- [Re-enable Updates](#re-enable-updates)
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
   - [Option 2 (manual)](#option-2-manual)
+  - [Option 3 (batch utility)](#option-3-batch-utility)
 - [Preview](#preview)
 - [Contributors](#contributors)
 
@@ -124,23 +128,30 @@ This script is meant to stop Windows from updating and then automatically restar
 <br />
 
 ## Install
-This repo contains two files in the [Releases](https://github.com/Aetherinox/Windows-Update-Killer/releases) section. Download the included `.reg` files to your local system.
 
-| Filename | Description |
-| --- | --- |
-| `windows-updates-pause.reg` | Pauses all updates until 2051 |
-| `windows-updates-unpause.reg` | Re-enables windows updates |
+This repo contains two different ways you can disable Windows Updates:
+
+
+1. [Registry Scripts](#registry-scripts)
+2. [All-in-One Batch Utility](#all-in-one-batch-utility)
+
+<br />
+
+Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update-Killer/releases) section and pick which file you need to get the job done. They are outlined below:
+
+| <sup><sub>Filename</sub></sup> | <sup><sub>Method</sub></sup> | <sup><sub>Description</sub></sup> |
+| --- | --- | --- |
+| `windows-updates-utility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Update Files</sub></sup> |
+| `windows-updates-pause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Disable Windows Updates until 2051</sub></sup> |
+| `windows-updates-unpause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Enable Windows Updates</sub></sup> |
 
 <br />
 
-> [!NOTE]
-> Depending on your machine's configuration, you may be able to double-click the `.reg` file and auto-install it.
-
-<br />
+### Registry Scripts
 
 - Download the `.reg` file to your computer.
 - Right click on the file and select `Open With`
-  ![](https://github.com/user-attachments/assets/ac56d320-a712-433c-813f-4bbcf7132b84)
+  ![](docs/img/registry/1.gif)
 
 - Select `Registry Editor`
 - Click `Yes` when prompted if you're sure you wish to continue
@@ -148,17 +159,30 @@ This repo contains two files in the [Releases](https://github.com/Aetherinox/Win
 <br />
 
 > [!NOTE]
-> As of 08/03/2024, you no longer have to view the Windows Update window. Updates are automatically paused as soon as the registry tweak is applied. However, the instructions are still provided below:
+> If using the **Registry Scripts method**, depending on your machine's configuration, you may be able to double-click the `.reg` file and auto-install it.
+>
+> If you cannot do the above, right-click the file, select **Open With** and select **Registry Editor**.
 
 <br />
+
+### All-in-one Batch Utility
+
+- Download the `.bat` file to your system.
+- Double-click the file and Command Prompt or Powershell will launch.
+- You will be prompted to give the script permission so that it can modify your registry, select **Yes**.
+- Read the options in the menu, and select the option you want.
+
+<br />
+
+### Confirm
 
 - In Windows, click `Start` -> `Run` -> type `control update` and press ENTER.
   - You can also access the Windows Update window by clicking your start menu, selecting **Run**, and typing:
    ```shell
     ms-settings:windowsupdate
    ```
-- Near the `Pause Updates` section, click the dropdown and select how long you want updates to pause for.
-- Keep the script somewhere in case you need to reinstall / wipe your machine.
+- Near the `Pause Updates` section, if you see a dropdown box, select how long you want updates to pause for.
+- Keep the scripts somewhere in case you need to reinstall / wipe your machine.
 
 <br />
 
@@ -166,14 +190,18 @@ This repo contains two files in the [Releases](https://github.com/Aetherinox/Win
 
 <br />
 
-## Re-enabling Updates
+## Re-enable Updates
+
 You can re-enable Windows updates by performing one of the following:
-- Option 1 - unpause.reg [view](#option-1-unpausereg)
-- Option 2 - manual [view](#option-2-manual)
+
+- Option 1 - [enable using unpause.reg](#option-1-unpausereg)
+- Option 2 - [enable manually](#option-2-manual)
+- Option 3 - [enable using batch `.bat` script](#option-3-batch-utility)
 
 <br />
 
 ### Option 1 (unpause.reg)
+
 This repository includes two scripts:
 - `windows-updates-pause.reg`
 - `windows-updates-unpause.reg`
@@ -185,6 +213,7 @@ Download and run the script `windows-updates-unpause.reg`. Windows updates will 
 <br />
 
 ### Option 2 (manual)
+
 To start Windows updates once again, open your start menu, type `Windows Update Settings`.
 
 <br />
@@ -212,6 +241,22 @@ At the top of the Windows Update interface, click **Resume Updates**.
 <br />
 
 To pause updates again, re-run the `.reg` file in this repo.
+
+<br />
+
+### Option 3 (batch utility)
+
+To re-enable updates using the batch utility, double-click the `.bat` file.
+
+When the options appear, select option `(2)   Enable Updates`
+
+<div align="center">
+
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/enable/3.png" width="530" />
+</p>
+
+</div>
 
 <br />
 
