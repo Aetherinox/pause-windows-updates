@@ -66,13 +66,13 @@ You can pick which one you wish to use from the list below (pick one):
 
 ### Registry Scripts
 
-If you decide to go with the **registry** patch, you simply need to download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
+If you decide to go with the **registry** method, download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
 
 <br />
 
 ### All-in-one Batch Utility
 
-Simply double-click the batch `.bat` file and you will be presented and numerous options that you can choose from:
+To use, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
 
 1. Enable Windows Updates
 2. Disable Windows Updates
@@ -84,7 +84,7 @@ Simply double-click the batch `.bat` file and you will be presented and numerous
 > [!NOTE]
 > When launching the `.bat` file, you will be asked to allow the utility to have administrative permissions. Unfortunately, this script requires these permissions in order to change registry settings.
 >
-> If you do not feel comfortable with this, you may opt to use the [Registry Files Method](#registry-scripts) listed above
+> If you do not feel comfortable with this, you may opt to use the [Registry Scripts method](#registry-scripts) listed above
 
 <br />
 
