@@ -48,7 +48,7 @@
 
 This repository provides two different ways to pause windows updates. 
 
-The [All-In-One Batch method](#all-in-one-batch-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry. 
+The [All-In-One Batch method](#all-in-one-batch-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry. This method can also clean up any existing files on your machine that may be storing old Windows Updates and free up disk-space.
 
 The [Registry Scripts method](#registry-scripts) only allows you to enable or disable windows updates.
 
