@@ -41,5 +41,5 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings]
 "PausedFeatureStatus"=dword:00000001
 "PausedQualityStatus"=dword:00000001
-"PausedQualityDate"="2025-01-01T00:00:00"
-"PausedFeatureDate"="2025-01-01T00:00:00"
+"PausedQualityDate"="2025-01-01T00:00:00Z"
+"PausedFeatureDate"="2025-01-01T00:00:00Z"
