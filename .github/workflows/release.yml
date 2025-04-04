@@ -1,183 +1,205 @@
-name: "📦 Release"
-run-name: "📦 Release"
+name: '📦 Release'
+run-name: '📦 Release'
+
+# #
+#   Triggers
+# #
 
 on:
-  workflow_dispatch:
-    inputs:
+    workflow_dispatch:
+        inputs:
 
-      # ---------------------------------------------------------------------------------------
-      #   Name of the plugin to use when creating the release zip filename
-      #     e.g: win_update_killer-v1.0.0.zip
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   Name of the plugin to use when creating the release zip filename
+            #     e.g: windows-update-utility-v1.0.0.zip
+            # #
 
-      PLUGIN_NAME:
-        description:  "📦 Name of Plugin"
-        required:     true
-        default:      'win_update_killer'
-        type:         string
+            PROJECT_NAME:
+                description:        '📦 Name of Project'
+                required:           true
+                default:            'windows-update-utility'
+                type:               string
 
-      # ---------------------------------------------------------------------------------------
-      #   Version to release
-      #     e.g: v1.0.0
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   Version to release
+            #     e.g: v1.0.0
+            # #
 
-      PLUGIN_VERSION:
-        description:  "📦 Version"
-        required:     true
-        default:      '1.x.x'
-        type:         string
+            PLUGIN_VERSION:
+                description:        '📦 Version'
+                required:           true
+                default:            '1.x.x'
+                type:               string
 
-      # ---------------------------------------------------------------------------------------
-      #   ENABLE:   the changelog generated in releases tab will only display single commits.
-      #   DISABLE:  the changelog shows pull requests completed based on their labels
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   ENABLE:   the changelog generated in releases tab will only display single commits.
+            #   DISABLE:  the changelog shows pull requests completed based on their labels
+            # #
 
-      CHANGELOG_MODE_COMMIT:
-        description:  "📑 Use Commits Instead of PRs"
-        required:     true
-        default:      true
-        type:         boolean
+            CHANGELOG_MODE_COMMIT:
+                description:        '📑 Use Commits Instead of PRs'
+                required:           true
+                default:            true
+                type:               boolean
 
-      # ---------------------------------------------------------------------------------------
-      #   ENABLE:   Will show all types of commits, including uncategorized
-      #   DISABLE:  WIll only show actions that have been categorized using the format
-      #                type(scope): description
-      #                type: description
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   ENABLE:   Will show all types of commits, including uncategorized
+            #   DISABLE:  WIll only show actions that have been categorized using the format
+            #                type(scope): description
+            #                type: description
+            # #
 
-      SHOW_UNCATEGORIZED:
-        description:  "🗂️ Show Uncategorized Commits"
-        required:     true
-        default:      false
-        type:         boolean
+            SHOW_UNCATEGORIZED:
+                description:        '🗂️ Show Uncategorized Commits'
+                required:           true
+                default:            false
+                type:               boolean
 
-      # ---------------------------------------------------------------------------------------
-      #   ENABLE:   released version will be marked as pre-release
-      #   DISABLE:  release version will be marked as stable / normal release
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   ENABLE:     released version will be marked as pre-release
+            #   DISABLE:    release version will be marked as stable / normal release
+            # #
 
-      PRERELEASE:
-        description:  "🧪 Build RC (Pre-release)"
-        required:     true
-        default:      false
-        type:         boolean
+            PRERELEASE:
+                description:        '🧪 Build RC (Pre-release)'
+                required:           true
+                default:            false
+                type:               boolean
 
-      # ---------------------------------------------------------------------------------------
-      #   Release Candidate version number
-      #   this will be added to the end of your released app in the releases page.
-      #     e.g: win_update_killer-v1.0.0-rc.1
-      # ---------------------------------------------------------------------------------------
+            # #
+            #   Release Candidate version number
+            #   this will be added to the end of your released app in the releases page.
+            #     e.g: windows-update-utility-v1.0.0-rc.1
+            # #
 
-      VERSION_RC:
-        description:  "🧪 RC (Pre-release) Ver (win_update_killer-rc.v1)"
-        required:     false
-        type:         string
-        default:      "1"
+            VERSION_RC:
+                description:        '🧪 RC (Pre-release) Ver (windows-update-utility-rc.v1)'
+                required:           false
+                type:               string
+                default:            '1'
 
-# ---------------------------------------------------------------------------------------
+# #
 #   environment variables
-# ---------------------------------------------------------------------------------------
+# #
 
 env:
-    PLUGIN_NAME:            win_update_killer
-    ASSIGN_USER:            Aetherinox
-    BOT_NAME_1:             AdminServ
-    BOT_NAME_2:             AdminServX
-    BOT_NAME_3:             EuropaServ
-    BOT_NAME_DEPENDABOT:    dependabot[bot]
+    PROJECT_NAME:                   ${{ github.event.inputs.PROJECT_NAME || 'windows-update-utility' }}
+    CHANGELOG_MODE_COMMIT:          true
+    SHOW_UNCATEGORIZED:             false
+    PRERELEASE:                     false
+    VERSION_RC:                     '1'
+    ASSIGN_USER:                    Aetherinox
+    BOT_NAME_1:                     EuropaServ
+    BOT_NAME_2:                     BinaryServ
+    BOT_NAME_DEPENDABOT:            dependabot[bot]
+    BOT_NAME_RENOVATE:              renovate[bot]
 
-# ---------------------------------------------------------------------------------------
+# #
 #   jobs
-# ---------------------------------------------------------------------------------------
+# #
 
 jobs:
 
-    # ---------------------------------------------------------------------------------------
-    #   JOB > INITIALIZE
-    # ---------------------------------------------------------------------------------------
+    # #
+    #   Jobs › Upload
+    # #
 
     job-upload:
         name: >-
-          📦 Package › Upload
+            📦 Package › Upload
         runs-on: ubuntu-latest
         permissions:
             contents: write
             packages: write
         steps:
 
-            # ---------------------------------------------------------------------------------------
-            #   Job > Start
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Start
+            # #
 
-            - name: "✅ Start"
-              id: task_build_start
+            - name: '✅ Start'
+              id: task_upload_start
               run: |
-                echo "Starting build"
+                  echo 'Starting build'
 
-            # ---------------------------------------------------------------------------------------
-            #   Job > Checkout
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Checkout
+            # #
 
-            - name: "☑️ Checkout"
-              id: task_build_checkout
+            - name: '☑️ Checkout'
+              id: task_upload_checkout
               uses: actions/checkout@v4
               with:
-                fetch-depth: 0
+                  fetch-depth: 0
 
-            # ---------------------------------------------------------------------------------------
-            #   Job > Get Previous Tag
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Get Previous Tag
+            # #
 
-            - name: "🏷️ Get Previous tag"
-              id: task_tag_previous
-              uses: "WyriHaximus/github-action-get-previous-tag@v1"
+            - name: '🏷️ Get Previous tag'
+              id: task_upload_tag_previous
+              uses: 'WyriHaximus/github-action-get-previous-tag@v1'
               with:
-                fallback: 1.0.0
+                  fallback: 1.0.0
 
-            # ---------------------------------------------------------------------------------------
-            #   Job > Print Current Version
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Print Current Version Tag
+            # #
 
-            - name: "🔨 Debug: Previous Github Tag"
-              id: task_build_getver
+            - name: '🔨 Debug: Previous Github Tag'
+              id: task_upload_build_ver_get
               run: |
-                echo -e ${{ steps.task_tag_previous.outputs.tag }}
+                  echo -e ${{ steps.task_upload_tag_previous.outputs.tag }}
 
-            # ---------------------------------------------------------------------------------------
-            #   Upload artifacts > windows-updates-pause.reg
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Artifacts › windows-updates-utility.bat
+            # #
 
             - name: >-
-                📋 Upload Artifacts › windows-updates-pause.reg
-              id: task_build_artifact_reg_pause
+                  📋 Upload Artifacts › windows-updates-utility.bat
+              id: task_upload_artifact_reg_bat
               uses: actions/upload-artifact@v4
               if: always()
               with:
-                name: windows-updates-pause.reg
-                path: windows-updates-pause.reg
-                retention-days: 30
+                  name: windows-updates-utility.bat
+                  path: windows-updates-utility.bat
+                  retention-days: 30
 
-            # ---------------------------------------------------------------------------------------
-            #   Upload artifacts > windows-updates-unpause.reg
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Artifacts › windows-updates-pause.reg
+            # #
 
             - name: >-
-                📋 Upload Artifacts › windows-updates-unpause.reg
-              id: task_build_artifact_reg_unpause
+                  📋 Upload Artifacts › windows-updates-pause.reg
+              id: task_upload_artifact_reg_pause
               uses: actions/upload-artifact@v4
               if: always()
               with:
-                name: windows-updates-unpause.reg
-                path: windows-updates-unpause.reg
-                retention-days: 30
+                  name: windows-updates-pause.reg
+                  path: windows-updates-pause.reg
+                  retention-days: 30
 
-    # ---------------------------------------------------------------------------------------
+            # #
+            #   Upload › Artifacts › windows-updates-unpause.reg
+            # #
+
+            - name: >-
+                  📋 Upload Artifacts › windows-updates-unpause.reg
+              id: task_upload_artifact_reg_unpause
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: windows-updates-unpause.reg
+                  path: windows-updates-unpause.reg
+                  retention-days: 30
+
+    # #
     #   Job > Release
-    # ---------------------------------------------------------------------------------------
+    # #
 
     job-release:
         name: >-
-          📦 Package › Release
+            📦 Package › Release
         runs-on: ubuntu-latest
         needs: [ job-upload ]
         permissions:
@@ -185,234 +207,325 @@ jobs:
             packages: write
         steps:
 
-            # ---------------------------------------------------------------------------------------
+            # #
             #   Dist Releases > Checkout
-            # ---------------------------------------------------------------------------------------
+            # #
 
-            - name: "☑️ Checkout"
-              uses: actions/checkout@v4
+            - name: '☑️ Checkout'
               id: task_release_checkout
+              uses: actions/checkout@v4
               with:
-                fetch-depth: 0
+                  fetch-depth: 0
 
-            # ---------------------------------------------------------------------------------------
-            #   Debug : View passed values
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Set Env Variables
+            # #
 
-            - name: "⚙️ Debug › Passed Values"
+            - name: >-
+                🕛 Get Timestamp
+              id: task_release_label_set_timestamp
+              run: |
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
+            #   Dist Releases › View passed values
+            # #
+
+            - name: '⚙️ Debug › Passed Values'
               id: task_release_debug_print_vals_1
               run: |
-                echo "VERSION ............. ${{ inputs.PLUGIN_VERSION }}"
+                  echo "TAG VERSION (Previous) ........... ${{ env.VERSION_TAG_PREV }}"
+                  echo "TAG VERSION (Next) ............... ${{ inputs.PLUGIN_VERSION }}"
 
-            # ---------------------------------------------------------------------------------------
-            #   [ Tag ]: Pre Create
+            # #
+            #   Dist Releases › Tags › Pre Create
             #
             #   in order to use the changelog github action, you must pre-create the tag otherwise
             #   the changelog action will have no idea what tag you are going to be creating and
             #   the list of commits will not be for the correct release.
-            # ---------------------------------------------------------------------------------------
+            # #
 
-            - name: "🔖 Tag › Pre Create ${{ inputs.PLUGIN_VERSION }}"
+            - name: '🔖 Tag › Pre Create ${{ inputs.PLUGIN_VERSION }}'
+              id: task_release_tag_create
               uses: rickstaa/action-create-tag@v1
-              id: task_release_tag
               with:
-                tag: ${{ inputs.PLUGIN_VERSION }}
-                tag_exists_error: false
-                message: "Latest release"
-                gpg_private_key: ${{ secrets.ADMINSERV_GPG_KEY_ASC }}
-                gpg_passphrase: ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
+                  tag: ${{ inputs.PLUGIN_VERSION }}
+                  tag_exists_error: false
+                  message: "Latest release"
+                  gpg_private_key: ${{ secrets.ADMINSERV_GPG_KEY_ASC }}
+                  gpg_passphrase: ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
 
-            # ---------------------------------------------------------------------------------------
-            #   [ Tag ]: Confirm
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Tags › Confirm
+            # #
 
-            - name: "🔖 Tag › Confirm ${{ inputs.PLUGIN_VERSION }}"
+            - name: '🔖 Tag › Confirm ${{ inputs.PLUGIN_VERSION }}'
+              id: task_release_tag_get
               run: |
-                echo "Tag already present: ${{ env.TAG_EXISTS }}"
-                echo "Tag already present: ${{ steps.task_release_tag.outputs.tag_exists }}"
+                  echo "Tag already present: ${{ env.TAG_EXISTS }}"
+                  echo "Tag already present: ${{ steps.task_release_tag_create.outputs.tag_exists }}"
 
-            # ---------------------------------------------------------------------------------------
-            #   Contributor Images
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Contributor Images
+            # #
 
-            - name: "🥸 Contributors › Generate"
+            - name: '🥸 Contributors › Generate'
               id: task_release_contribs_generate
               uses: jaywcjlove/github-action-contributors@main
               with:
-                filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
-                output: CONTRIBUTORS.svg
-                avatarSize: 42
+                  filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
+                  output: CONTRIBUTORS.svg
+                  avatarSize: 42
 
-            # ---------------------------------------------------------------------------------------
-            #   Generate Changelog
+            # #
+            #   Dist Releases › Generate Changelog
             #
             #   generates a changelog from the github api. requires a PREVIOUS_TAG in order to figure
             #   out the changes made between the two versions.
             #
             #   outputs:
             #     ${{ steps.changelog.outputs.changelog }}
-            # ---------------------------------------------------------------------------------------
+            # #
 
-            - name: "📝 Changelog › Pre Setup (Categorized Commits)"
+            - name: '📝 Changelog › Pre Setup (Categorized Commits)'
               id: task_release_changelog_commits_tags_print
               run: |
-                echo "TAG_LAST=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-                echo "COMMIT_LAST=$(git rev-parse HEAD)" >> $GITHUB_ENV
+                  echo "TAG_LAST=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+                  echo "COMMIT_LAST=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-            - name: "📝 Changelog › Build (Categorized)"
+            # #
+            #   Dist Releases › Release › Changelog › Build (Categorized)
+            #
+            #   generates a changelog from the github api. requires a TAG_LAST in order to figure
+            #   out the changes made between the two versions.
+            #
+            #   outputs:
+            #       ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+            # #
+
+            - name: '📝 Changelog › Build (Categorized)'
               id: task_release_changelog_categorized
-              if: ${{ startsWith( inputs.SHOW_UNCATEGORIZED, false ) }}
               uses: mikepenz/release-changelog-builder-action@v5
+              if: |
+                  startsWith( inputs.SHOW_UNCATEGORIZED, false ) ||
+                  startsWith( env.SHOW_UNCATEGORIZED, false )
               with:
-                token: ${{ secrets.ADMINSERV_TOKEN }}
-                configuration: ".github/changelog-configuration.json"
-                ignorePreReleases: false
-                commitMode: ${{ inputs.CHANGELOG_MODE_COMMIT }}
-                fetchReleaseInformation: true
-                fetchViaCommits: true
-                configurationJson: |
-                  {
-                    "template": "## Release Info \n| Item | Value |\n| --- | --- |\n|<sub>Stamp</sub>|<sub>`#{{FROM_TAG}}-#{{FROM_TAG_DATE}} 🔺 #{{TO_TAG}}-#{{TO_TAG_DATE}}`</sub>|\n|<sub>Last Release</sub>|<sub>`#{{DAYS_SINCE}} days ago`</sub>|\n\n<br>\n\n---\n\n<br>\n\n### What's New\nThis release contains the following changes:\n\n<br>\n\n---\n\n<br>\n\n### Statistics\nHow the files have changed:\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Changes  : <b>#{{CHANGES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li><li>PRs (categorized) : <b>#{{CATEGORIZED_COUNT}}</b></li><li>PRs (uncategorized) : <b>#{{UNCATEGORIZED_COUNT}}</b></li><li>PRs (open) : <b>#{{OPEN_COUNT}}</b></li>\n<br />\n</ul>\n\n<br>\n\n---\n\n<br>\n\n### Pull Requests\nThis release is associated with the following pull requests:\n#{{CHANGELOG}}\n\n<br>\n\n---\n\n<br>\n\n"
-                  }
+                  token: ${{ secrets.ADMINSERV_TOKEN }}
+                  #fromTag: "${{ env.TAG_LAST }}"
+                  #toTag: "${{ github.ref }}"
+                  configuration: ".github/changelog-configuration.json"
+                  ignorePreReleases: false
+                  commitMode: ${{ inputs.CHANGELOG_MODE_COMMIT || env.CHANGELOG_MODE_COMMIT }}
+                  fetchReleaseInformation: true
+                  fetchViaCommits: true
+                  configurationJson: |
+                    {
+                      "template": "## Release Info \n| Item | Value |\n| --- | --- |\n|<sub>Stamp</sub>|<sub>`#{{FROM_TAG}}-#{{FROM_TAG_DATE}} 🔺 #{{TO_TAG}}-#{{TO_TAG_DATE}}`</sub>|\n|<sub>Last Release</sub>|<sub>`#{{DAYS_SINCE}} days ago`</sub>|\n\n<br>\n\n---\n\n<br>\n\n### What's New\nThis release contains the following changes:\n\n<br>\n\n---\n\n<br>\n\n### Statistics\nHow the files have changed:\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Changes  : <b>#{{CHANGES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li><li>PRs (categorized) : <b>#{{CATEGORIZED_COUNT}}</b></li><li>PRs (uncategorized) : <b>#{{UNCATEGORIZED_COUNT}}</b></li><li>PRs (open) : <b>#{{OPEN_COUNT}}</b></li>\n<br />\n</ul>\n\n<br>\n\n---\n\n<br>\n\n### Pull Requests\nThis release is associated with the following pull requests:\n#{{CHANGELOG}}\n\n<br>\n\n---\n\n<br>\n\n"
+                    }
               env:
-                GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
 
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Release › Changelog › Build (Uncategorized)
+            #
+            #   generates a changelog from the github api. requires a TAG_LAST in order to figure
+            #   out the changes made between the two versions.
+            #
+            #   outputs:
+            #       ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+            #
             #   shows only categorized commits using the commit standards
             #                type(scope): description
             #                type: description
-            # ---------------------------------------------------------------------------------------
+            # #
 
-            - name: "📝 Changelog › Build (Uncategorized)"
+            - name: '📝 Changelog › Build (Uncategorized)'
               id: task_release_changelog_uncategorized
-              if: ${{ startsWith( inputs.SHOW_UNCATEGORIZED, true ) }}
               uses: mikepenz/release-changelog-builder-action@v5
+              if: |
+                  startsWith( inputs.SHOW_UNCATEGORIZED, true ) ||
+                  startsWith( env.SHOW_UNCATEGORIZED, true )
               with:
-                token: ${{ secrets.ADMINSERV_TOKEN }}
-                configuration: ".github/changelog-configuration.json"
-                ignorePreReleases: false
-                commitMode: ${{ inputs.CHANGELOG_MODE_COMMIT }}
-                fetchReleaseInformation: true
-                fetchViaCommits: true
-                configurationJson: |
-                  {
-                    "template": "## Release Info \n| Item | Value |\n| --- | --- |\n|<sub>Stamp</sub>|<sub>`#{{FROM_TAG}}-#{{FROM_TAG_DATE}} 🔺 #{{TO_TAG}}-#{{TO_TAG_DATE}}`</sub>|\n|<sub>Last Release</sub>|<sub>`#{{DAYS_SINCE}} days ago`</sub>|\n\n<br>\n\n---\n\n<br>\n\n### What's New\nThis release contains the following changes:\n\n<br>\n\n---\n\n<br>\n\n### Statistics\nHow the files have changed:\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Changes  : <b>#{{CHANGES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li><li>PRs (categorized) : <b>#{{CATEGORIZED_COUNT}}</b></li><li>PRs (uncategorized) : <b>#{{UNCATEGORIZED_COUNT}}</b></li><li>PRs (open) : <b>#{{OPEN_COUNT}}</b></li>\n<br />\n</ul>\n\n<br>\n\n---\n\n<br>\n\n### Commits (#{{UNCATEGORIZED_COUNT}})\nThe following commits are uncategorized:\n#{{UNCATEGORIZED}}\n\n<br>\n\n---\n\n<br>\n\n### Pull Requests\nThis release is associated with the following pull requests:\n#{{CHANGELOG}}\n\n<br>\n\n"
-                  }
+                  token: ${{ secrets.ADMINSERV_TOKEN }}
+                  configuration: ".github/changelog-configuration.json"
+                  ignorePreReleases: false
+                  commitMode: ${{ inputs.CHANGELOG_MODE_COMMIT }}
+                  fetchReleaseInformation: true
+                  fetchViaCommits: true
+                  configurationJson: |
+                    {
+                      "template": "## Release Info \n| Item | Value |\n| --- | --- |\n|<sub>Stamp</sub>|<sub>`#{{FROM_TAG}}-#{{FROM_TAG_DATE}} 🔺 #{{TO_TAG}}-#{{TO_TAG_DATE}}`</sub>|\n|<sub>Last Release</sub>|<sub>`#{{DAYS_SINCE}} days ago`</sub>|\n\n<br>\n\n---\n\n<br>\n\n### What's New\nThis release contains the following changes:\n\n<br>\n\n---\n\n<br>\n\n### Statistics\nHow the files have changed:\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Changes  : <b>#{{CHANGES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li><li>PRs (categorized) : <b>#{{CATEGORIZED_COUNT}}</b></li><li>PRs (uncategorized) : <b>#{{UNCATEGORIZED_COUNT}}</b></li><li>PRs (open) : <b>#{{OPEN_COUNT}}</b></li>\n<br />\n</ul>\n\n<br>\n\n---\n\n<br>\n\n### Commits (#{{UNCATEGORIZED_COUNT}})\nThe following commits are uncategorized:\n#{{UNCATEGORIZED}}\n\n<br>\n\n---\n\n<br>\n\n### Pull Requests\nThis release is associated with the following pull requests:\n#{{CHANGELOG}}\n\n<br>\n\n"
+                    }
               env:
-                GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
 
-            # ---------------------------------------------------------------------------------------
-            #   Fetch Changelog
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Release › Changelog › Convert step into ENV
+            #
+            #   This is a requirement in order for the action mikepenz/release-changelog-builder-action@v5 to work properly.
+            #   If you use special characters like quotes and tildes in your push comments, bash will have no way of knowing
+            #   if it's part of the changelog, or code itself.
+            #
+            #   By converting the step into an env var, we quote the text, and it fixes the issue.
+            #
+            #   For every step that you need to print the changelog text, first define the env var
+            #   env:
+            #       CHANGELOG_CATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+            #
+            #   Then you can call the changelog in the body / run command with
+            #       echo "$CHANGELOG_CATEGORIZED"
+            # #
 
-            - name: "📝 Changelog › Print (Categorized)"
-              id: task_release_changelog_print_categorized
-              if: ${{ startsWith( inputs.SHOW_UNCATEGORIZED, false ) }}
+            - name: '🙊 Changelog › Step to Env › Categorized'
+              id: task_release_changelog_escape_categorized
+              if: |
+                  startsWith( inputs.SHOW_UNCATEGORIZED, false ) ||
+                  startsWith( env.SHOW_UNCATEGORIZED, false )
+              env:
+                  CHANGELOG_CATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
               run: |
-                echo "${{ steps.task_release_changelog_categorized.outputs.changelog }}"
+                  echo "$CHANGELOG_CATEGORIZED"
 
-            - name: "📝 Changelog › Print (Uncategorized)"
-              id: task_release_changelog_print_uncategorized
-              if: ${{ startsWith( inputs.SHOW_UNCATEGORIZED, true ) }}
+            - name: '🙊 Changelog › Step to Env › Uncategorized'
+              id: task_release_changelog_escape_uncategorized
+              if: |
+                  startsWith( inputs.SHOW_UNCATEGORIZED, true ) ||
+                  startsWith( env.SHOW_UNCATEGORIZED, true )
+              env:
+                  CHANGELOG_UNCATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
               run: |
-                echo "${{ steps.task_release_changelog_uncategorized.outputs.changelog }}"
+                  echo "$CHANGELOG_UNCATEGORIZED"
 
-            # ---------------------------------------------------------------------------------------
-            #   artifacts > download
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Artifacts > Download
+            # #
 
-            - name: "📁 Download › Artifacts › windows-updates-pause.reg"
+            - name: '📁 Download › Artifacts › windows-updates-utility.bat'
               uses: actions/download-artifact@v4
               with:
-                name: windows-updates-pause.reg
+                  name: windows-updates-utility.bat
 
-            - name: "📁 Download › Artifacts › windows-updates-unpause.reg"
+            - name: '📁 Download › Artifacts › windows-updates-pause.reg'
               uses: actions/download-artifact@v4
               with:
-                name: windows-updates-unpause.reg
+                  name: windows-updates-pause.reg
 
-            # ---------------------------------------------------------------------------------------
-            #   Clean dist folder since we're getting the files from artifacts
-            # ---------------------------------------------------------------------------------------
+            - name: '📁 Download › Artifacts › windows-updates-unpause.reg'
+              uses: actions/download-artifact@v4
+              with:
+                  name: windows-updates-unpause.reg
 
-            - name: "⚙️ Debug › Clean Dist Folder"
+            # #
+            #   Dist Releases › List Tree
+            # #
+
+            - name: '⚙️ Debug › Tree Listing'
+              id: task_release_debug_tree
               run: |
-                tree
+                  tree
 
-            # ---------------------------------------------------------------------------------------
-            #   [ Release ]: Post Release
+            # #
+            #   Dist Releases › Post Release (Stable)
             #
             #   outputs:
-            #     [RELEASE ID]:
-            #       ${{ steps.task_release_bundle_rc.outputs.id
-            #       ${{ steps.task_release_bundle_st.outputs.id
-            # ---------------------------------------------------------------------------------------
+            #       [RELEASE ID]:
+            #           ${{ steps.task_release_bundle_rc.outputs.id
+            #           ${{ steps.task_release_bundle_st.outputs.id
+            # #
 
-            - name: "🏳️ Post › Stable"
+            - name: '🏳️ Post › Stable'
               id: task_release_bundle_st
-              if: ${{ startsWith( inputs.PRERELEASE, false ) }}
               uses: softprops/action-gh-release@v2
+              if: |
+                  startsWith( inputs.PRERELEASE, false ) ||
+                  startsWith( env.PRERELEASE, false )
               env:
-                GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN_CL }}
               with:
-                token: ${{ secrets.ADMINSERV_TOKEN_CL }}
-                name: v${{ inputs.PLUGIN_VERSION }}
-                tag_name: ${{ inputs.PLUGIN_VERSION }}
-                target_commitish: ${{ github.event.inputs.branch }}
-                draft: false
-                generate_release_notes: false
-                files: |
-                  windows-updates-pause.reg
-                  windows-updates-unpause.reg
-                prerelease: false
-                body: |
-                  ${{ steps.task_release_changelog_categorized.outputs.changelog }}
-                  ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
+                  token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  name: v${{ inputs.PLUGIN_VERSION }}
+                  tag_name: ${{ inputs.PLUGIN_VERSION }}
+                  target_commitish: ${{ github.event.inputs.branch }}
+                  draft: false
+                  generate_release_notes: false
+                  files: |
+                      windows-updates-utility.bat
+                      windows-updates-pause.reg
+                      windows-updates-unpause.reg
+                  prerelease: false
+                  body: |
+                      ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+                      ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
 
-            - name: "🏳️ Post › Release Candidate"
+            # #
+            #   Dist Releases › Post Release (Release Candidate)
+            #
+            #   outputs:
+            #       [RELEASE ID]:
+            #           ${{ steps.task_release_bundle_rc.outputs.id
+            #           ${{ steps.task_release_bundle_st.outputs.id
+            # #
+
+            - name: '🏳️ Post › Release Candidate'
+              uses: softprops/action-gh-release@v2
               id: task_release_bundle_rc
-              if: ${{ startsWith( inputs.PRERELEASE, true ) }}
-              uses: softprops/action-gh-release@v2
+              if: |
+                  startsWith( inputs.PRERELEASE, true ) ||
+                  startsWith( env.PRERELEASE, true )
               env:
-                GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
               with:
-                token: ${{ secrets.ADMINSERV_TOKEN }}
-                name: v${{ inputs.PLUGIN_VERSION }}
-                tag_name: ${{ inputs.PLUGIN_VERSION }}
-                target_commitish: ${{ github.event.inputs.branch }}
-                draft: false
-                generate_release_notes: false
-                files: |
-                  windows-updates-pause.reg
-                  windows-updates-unpause.reg
-                prerelease: false
-                body: |
-                  > [!WARNING]
-                  > This is a **release candidate**, which means it is not a stable release and could contain bugs. You should download it at your own risk.
+                  token: ${{ secrets.ADMINSERV_TOKEN }}
+                  name: v${{ inputs.PLUGIN_VERSION }}
+                  tag_name: ${{ inputs.PLUGIN_VERSION }}
+                  target_commitish: ${{ github.event.inputs.branch }}
+                  draft: false
+                  generate_release_notes: false
+                  files: |
+                      windows-updates-utility.bat
+                      windows-updates-pause.reg
+                      windows-updates-unpause.reg
+                  prerelease: false
+                  body: |
+                      > [!WARNING]
+                      > This is a **release candidate**, which means it is not a stable release and could contain bugs. You should download it at your own risk.
 
-                  ${{ steps.task_release_changelog_categorized.outputs.changelog }}
-                  ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
+                      ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+                      ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
 
-            # ---------------------------------------------------------------------------------------
-            #   Print Status
-            # ---------------------------------------------------------------------------------------
+            # #
+            #   Dist Releases › Print Status
+            #
+            #   For every step that you need to print the changelog text, first define the env var
+            #   env:
+            #       CHANGELOG_CATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+            #
+            #   Then you can call the changelog in the body / run command with
+            #       echo "$CHANGELOG_CATEGORIZED"
+            # #
 
-            - name: "🎛️ Status › Print"
+            - name: '🎛️ Status › Print'
               id: task_release_status_print
+              env:
+                  CHANGELOG_CATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
+                  CHANGELOG_UNCATEGORIZED: ${{ steps.task_release_changelog_categorized.outputs.changelog }}
               run: |
-                echo "Printing Variables"
-                echo
-                echo "---- CHANGELOG ---------------------------------------------------------------"
-                echo "${{ steps.task_release_changelog_categorized.outputs.changelog }}"
-                echo "${{ steps.task_release_changelog_uncategorized.outputs.changelog }}"
-                echo "---- CHANGELOG ---------------------------------------------------------------"
-                echo ""
-                echo ""
-                echo "---- VARIABLES ---------------------------------------------------------------"
-                echo "Package Version ............ ${{ inputs.PLUGIN_VERSION }}"
-                echo "Tag: Previous .............. ${{ env.TAG_LAST }}"
-                echo "Tag: Now.... ............... ${{ github.ref }}"
-                echo "Last Commit ................ ${{ env.COMMIT_LAST }}"
-                echo "ST Output ID ............... ${{ steps.task_release_bundle_st.outputs.id }}"
-                echo "RC Output ID ............... ${{ steps.task_release_bundle_rc.outputs.id }}"
-                echo "---- CHANGELOG ---------------------------------------------------------------"
+                  echo "Printing Variables"
+                  echo
+                  echo "---- CHANGELOG ---------------------------------------------------------------"
+                  echo "$CHANGELOG_CATEGORIZED"
+                  echo "$CHANGELOG_UNCATEGORIZED"
+                  echo "---- CHANGELOG ---------------------------------------------------------------"
+                  echo ""
+                  echo ""
+                  echo "---- VARIABLES ---------------------------------------------------------------"
+                  echo "Package Version ............ ${{ inputs.PLUGIN_VERSION }}"
+                  echo "Tag: Previous .............. ${{ env.TAG_LAST }}"
+                  echo "Tag: Now.... ............... ${{ github.ref }}"
+                  echo "Last Commit ................ ${{ env.COMMIT_LAST }}"
+                  echo "ST Output ID ............... ${{ steps.task_release_bundle_st.outputs.id }}"
+                  echo "RC Output ID ............... ${{ steps.task_release_bundle_rc.outputs.id }}"
+                  echo "---- CHANGELOG ---------------------------------------------------------------"
