@@ -70,6 +70,16 @@ If you decide to go with the **registry** method, download the `.reg` file, and 
 
 <br />
 
+<div align="center">
+
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/registry/1.gif" width="640" />
+</p>
+
+</div>
+
+<br />
+
 ### All-in-one Batch Utility
 
 To use, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
@@ -78,6 +88,15 @@ To use, double-click the batch `.bat` file. You will be presented and numerous o
 2. Disable Windows Updates
 3. Disable Windows Telemetry
 4. Clean Updates Folder
+
+<div align="center">
+
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/batch/1.png" width="320" />
+  <img src="docs/img/batch/2.png" width="320" /> 
+</p>
+
+</div>
 
 <br />
 
