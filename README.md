@@ -92,8 +92,8 @@ To use, double-click the batch `.bat` file. You will be presented and numerous o
 <div align="center">
 
 <p float="left">
-  <img style="padding-right:15px;" src="docs/img/batch/1.png" width="320" />
-  <img src="docs/img/batch/2.png" width="320" /> 
+  <img style="padding-right:15px;" src="docs/img/batch/1.png" width="340" />
+  <img src="docs/img/batch/2.png" width="340" /> 
 </p>
 
 </div>
@@ -191,7 +191,9 @@ To start Windows updates once again, open your start menu, type `Windows Update 
 
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/71bbb55d-076e-4b52-83b9-cc9bdf7f60df" width="330">
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/enable/1.png" width="330" />
+</p>
 
 </div>
 
@@ -201,7 +203,9 @@ At the top of the Windows Update interface, click **Resume Updates**.
 
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/85310c9b-4117-4cbf-9e2a-2003c93e842c" width="530">
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/enable/2.png" width="530" />
+</p>
 
 </div>
 
@@ -219,7 +223,9 @@ To pause updates again, re-run the `.reg` file in this repo.
 
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/f8c2ef68-cfb1-4428-a07a-88ce314356a5" width="530">
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/preview/1.gif" width="530" />
+</p>
 
 </div>
 
@@ -227,7 +233,11 @@ To pause updates again, re-run the `.reg` file in this repo.
 
 ## Contributors
 
+<div align="center">
+
 ![Alt](https://repobeats.axiom.co/api/embed/fec3c11bcd253185c455fdd2bc60c8dc13d3ced8.svg "Repobeats analytics image")
+
+</div>
 
 <br />
 <br />
