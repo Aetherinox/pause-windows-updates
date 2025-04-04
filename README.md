@@ -1,10 +1,10 @@
 <div align="center">
 <h6>No updates until 12-31-2051</h6>
-<h1>♾️ Windows Update Killer ♾️</h1>
+<h1>♾️ Pause Windows Update ♾️</h1>
 
 <br />
 
-<p>A simple windows registry tweak which allows you to pause Windows updates until 12-31-2051.</p>
+<p>A registry tweak and batch utility which allows you to pause Windows updates up until 12-31-2051.</p>
 
 <br />
 
@@ -28,8 +28,9 @@
 <br />
 
 - [About](#about)
-  - [Why?](#why)
-  - [But... Updates Good](#but-updates-good)
+  - [Registry Scripts](#registry-scripts)
+  - [All-in-one Batch Utility](#all-in-one-batch-utility)
+- [Notice](#notice)
 - [Install](#install)
 - [Re-enabling Updates](#re-enabling-updates)
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
@@ -43,10 +44,47 @@
 
 <br />
 
+## About
+
+This repository provides two different ways to pause windows updates. 
+
+The [All-In-One Batch method](#all-in-one-batch-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry. 
+
+The [Registry Scripts method](#registry-scripts) only allows you to enable or disable windows updates.
+
+<br />
+
+You can pick which one you wish to use from the list below (pick one):
+
+1. [Registry Scripts](#registry-scripts)
+     - `windows-updates-pause.reg`
+     - `windows-updates-unpause.reg`
+2. [All-in-One Batch Utility](#all-in-one-batch-utility)
+     - `windows-updates-utility.bat`
+
+<br />
+
+### Registry Scripts
+
+If you decide to go with the **registry** patch, you simply need to download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
+
+<br />
+
+### All-in-one Batch Utility
+
+Simply double-click the batch `.bat` file and you will be presented and numerous options that you can choose from:
+
+1. Enable Windows Updates
+2. Disable Windows Updates
+3. Disable Windows Telemetry
+4. Clean Updates Folder
+
+<br />
+
 > [!NOTE]
-> Want to secure Windows or block off Microsoft's servers from communicating with your machine?
-> 
-> Visit my new [Blocklist Repository](https://github.com/Aetherinox/blocklists). Take back control over your machine and network with a large collection of IPs to add to your firewall. Includes Microsoft, Bing, Google, Facebook, and even geographical location blocking.
+> When launching the `.bat` file, you will be asked to allow the utility to have administrative permissions. Unfortunately, this script requires these permissions in order to change registry settings.
+>
+> If you do not feel comfortable with this, you may opt to use the [Registry Files Method](#registry-scripts) listed above
 
 <br />
 
@@ -54,25 +92,11 @@
 
 <br />
 
-## About
-This is a simple no-nonsense script to pause Windows update until 2051.
-Pretty much allowing you to update whenever you want instead of waking up to a rebooted machine.
+## Notice
 
-<br />
+While this repository allows you to disable Windows Updates, we recommend you manually run Windows Updates every few months to ensure that your system has the latest patches. By completely refusing to install Windows Updates, you may be exposed to potential security vulnerabilities.
 
-> [!WARNING]
-> This script is meant to be used in situations where you do not want your system automatically restarting while it is idle. I highly recommnend that you do run Windows updates once per month and ensure that you have the latest packages installed. Some of these updates could include security patches for important vulnerabilities.
-
-<br />
-
-### Why?
-I was tired of the complicated methods. I don't like having my machine reboot and me not being able to control Windows Update. It's my biggest pet peeve with Windows. This script makes my life so much easier because now I don't have to deal with it. The point was just to have a stupid simple solution using a script anyone can open in notepad and view the code. Without fear of viruses and people injecting crap onto your system. Enjoy.
-
-<br />
-
-### But... Updates Good
-Yes, I get it. _"Thou shalt not leave thy computer outdated too long"_.
-I don't. But I keep certain apps running for work, and they can remain open for days as I work on a project. I don't like waking up to my entire machine sitting at user sign-in. I like to work on my projects, and then once I have some spare time, I'll run updates when I want to, not when the machine decides to.
+This script is meant to stop Windows from updating and then automatically restarting your system when you least expect it, and puts you back in control.
 
 <br />
 
