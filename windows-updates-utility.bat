@@ -60,6 +60,16 @@ set brown=[38;5;94m
 set white=[37m
 
 :: # #
+::  define services
+::      uhssvc              Microsoft Update Health Service
+::      UsoSvc              Update Orchestrator Service
+::      WaaSMedicSvc        Windows Update Medic Service
+::      wuauserv            Windows Update Service
+:: # #
+
+set lstServices=uhssvc UsoSvc WaaSMedicSvc wuauserv
+
+:: # #
 ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
 ::                  registry will return the following for auto update status
 ::                      0x0         updates are enabled
@@ -366,6 +376,15 @@ if /i "%noUpdatesState%" == "0x0" (
 :taskUpdatesDisable
     echo.   %bluel% Motice  %u%         Disabling updates%u%
 
+    :: manage services
+    echo.   %bluel% Notice  %u%         Disabling Windows Update Services ...
+    for %%i in (%lstServices%) do (
+        echo.   %bluel%                  %crimson%Disabled %yellowl%%%i%u%
+        net stop %%i >nul 2>&1
+        sc config %%i start= disabled >nul 2>&1
+        sc failure %%i reset= 0 actions= "" >nul 2>&1
+    )
+
     :: Windows Update > Dates
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "2025-01-01T00:00:00Z" /f >nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /t REG_SZ /d "2051-12-31T00:00:00Z" /f >nul
@@ -377,7 +396,8 @@ if /i "%noUpdatesState%" == "0x0" (
     reg add "HKLM\Software\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursEnd" /t REG_DWORD /d "0x00000007" /f >nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /t REG_DWORD /d "0x00002727" /f >nul
 
-    :: Services\WaaSMedicSvc
+    :: Services\WaaSMedicSvc / disable windows update service
+    ::      0 = Boot  '1 = System  '2 = Automatic  3 = Manual  4 = Disabled
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d "0x00000004" /f >nul
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "FailureActions" /t REG_BINARY /d 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 /f >nul
 
@@ -412,6 +432,14 @@ if /i "%noUpdatesState%" == "0x0" (
 :taskUpdatesEnable
     echo.   %bluel% Motice  %u%         Enabling updates%u%
 
+    :: manage services
+    echo.   %bluel% Notice  %u%         Enabling Windows Update Services ...
+    for %%i in (%lstServices%) do (
+        echo.   %bluel%                  %green%Enabled %yellowl%%%i%u%
+        net start %%i >nul 2>&1
+        sc config %%i start= auto >nul 2>&1
+    )
+
     :: Windows Update > Dates
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "" /f >nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /t REG_SZ /d "" /f >nul
@@ -423,8 +451,9 @@ if /i "%noUpdatesState%" == "0x0" (
     reg add "HKLM\Software\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursEnd" /t REG_DWORD /d "0x00000007" /f >nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /t REG_DWORD /d "0x00002727" /f >nul
 
-    :: Services\WaaSMedicSvc
-    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d "00000004" /f >nul
+    :: Services\WaaSMedicSvc / enables windows update service
+    ::      0 = Boot  '1 = System  '2 = Automatic  3 = Manual  4 = Disabled
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d "00000003" /f >nul
     reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "FailureActions" /t REG_BINARY /d "840300000000000000000000030000001400000001000000c0d4010001000000e09304000000000000000000" /f >nul
 
     :: WindowsUpdate\AU
