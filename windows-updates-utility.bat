@@ -59,6 +59,9 @@ set gray=[90m
 set brown=[38;5;94m
 set white=[37m
 
+:: add spaces so that service names are in columns
+set "spaces=                                       "
+
 :: # #
 ::  define services
 ::      uhssvc              Microsoft Update Health Service
@@ -68,6 +71,12 @@ set white=[37m
 :: # #
 
 set lstServices=uhssvc UsoSvc WaaSMedicSvc wuauserv
+
+:: convert service to name for easier identification
+set x[uhssvc]=Microsoft Update Health Service
+set x[UsoSvc]=Update Orchestrator Service
+set x[WaaSMedicSvc]=WaaSMedicSvc
+set x[wuauserv]=Windows Update
 
 :: # #
 ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
@@ -232,7 +241,13 @@ if /i "%noUpdatesState%" == "0x0" (
         goto :taskFilesErase
     )
 
-    :: option > Quit (Q)
+    :: option > (5) Manage Update Services
+
+    if /I "%q_mnu_main%" EQU "5" (
+        goto :menuServices
+    )
+
+    :: option > (Q) Quit
 
     if /I "%q_mnu_main%" EQU "Q" (
         goto :sessQuit
@@ -242,6 +257,104 @@ if /i "%noUpdatesState%" == "0x0" (
         echo.   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
 
         goto :main
+    )
+
+:: # #
+::  @desc           Menu > Services
+:: # #
+
+:menuServices
+    cls
+    set q_mnu_serv=
+
+    echo.
+
+    echo       %yellow%^(1^)%u%   View Status
+    echo       %yellow%^(2^)%u%   Enable Update Services
+    echo       %yellow%^(3^)%u%   Disable Update Services
+    echo.
+    echo       %crimson%^(R^)%crimson%   Return
+
+    echo.
+    set /p q_mnu_serv="%yellow%    Pick Option » %u%"
+    echo.
+
+    echo.
+
+    :: option > (1) View Service Status
+    if /I "%q_mnu_serv%" EQU "1" (
+
+        echo.   %bluel% Notice  %u%        Getting Service Status%u%
+
+        :: loop services and check status
+        for %%i in (%lstServices%) do (
+            set y=!x[%%i]!
+            for /F "tokens=3 delims=: " %%H in ('sc query "%%i" ^| findstr "        STATE"') do (
+                set "service=!y! %pink%[%%i] !spaces!"
+                set "service=!service:~0,50!"
+                if /I "%%H" NEQ "RUNNING" (
+                    echo.   %bluel%         %gray%          !service! %red%Not Running%u%
+                ) else (
+                    echo.   %bluel%         %gray%          !service! %green%Running%u%
+                )
+            )
+        )
+
+        echo.   %bluel% Notice  %u%        Operation complete. Press any key
+        pause >nul
+
+        goto :menuServices
+    )
+
+    :: option > (2) Enable Update Services
+    if /I "%q_mnu_serv%" EQU "2" (
+        echo.   %bluel% Notice  %u%        Enabling Windows Update Services ...
+
+        for %%i in (%lstServices%) do (
+            set y=!x[%%i]!
+            set "service=!y! %pink%[%%i] !spaces!"
+            set "service=!service:~0,50!"
+
+            echo.   %bluel%         %gray%          !service! %green%enabled%u%
+            sc config %%i start= auto >nul 2>&1
+            net start %%i >nul 2>&1
+        )
+
+        echo.   %bluel% Notice  %u%        Operation complete. Press any key
+        pause >nul
+    
+        goto :menuServices
+    )
+
+    :: option > (3) Disable Update Services
+    if /I "%q_mnu_serv%" EQU "3" (
+        echo.   %bluel% Notice  %u%        Disabling Windows Update Services ...
+
+        for %%i in (%lstServices%) do (
+            set y=!x[%%i]!
+            set "service=!y! %pink%[%%i] !spaces!"
+            set "service=!service:~0,50!"
+
+            echo.   %bluel%         %gray%          !service! %red%disabled%u%
+            net stop %%i >nul 2>&1
+            sc config %%i start= disabled >nul 2>&1
+            sc failure %%i reset= 0 actions= "" >nul 2>&1
+        )
+
+        echo.   %bluel% Notice  %u%        Operation complete. Press any key
+        pause >nul
+    
+        goto :menuServices
+    )
+
+    :: option > (R) Return
+    if /I "%q_mnu_serv%" EQU "R" (
+        goto :main
+    ) else (
+        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
+        pause >nul
+
+        goto :menuServices
     )
 
 :: # #
