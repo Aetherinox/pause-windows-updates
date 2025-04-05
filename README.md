@@ -284,7 +284,7 @@ When the options appear, select option `(2)   Enable Updates`
 
 <div align="center">
 
-![Alt](https://repobeats.axiom.co/api/embed/fec3c11bcd253185c455fdd2bc60c8dc13d3ced8.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/fdab55f1b01c4ee5e359299e94ebb8412add488f.svg "Repobeats analytics image")
 
 </div>
 
