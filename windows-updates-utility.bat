@@ -98,12 +98,12 @@ set x[wuauserv]=Windows Update
     if /i "%noUpdatesState%" == "0x0" (
         set AutoUpdate=true
         set AutoUpdateBool=%green%enabled%u%
-        set AutoUpdateStr=%green%%AutoUpdateBool:~0,-1%%u%
+        set AutoUpdateStr=%green%!AutoUpdateBool:~0,-1!%u%
 
     ) else (
         set AutoUpdate=false
         set AutoUpdateBool=%orange%disabled%u%
-        set AutoUpdateStr=%orange%%AutoUpdateBool:~0,-1%%u%
+        set AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%
     )
 
     chcp 65001 >nul
