@@ -90,8 +90,12 @@ To use, double-click the batch `.bat` file. You will be presented and numerous o
 
 1. Enable Windows Updates
 2. Disable Windows Updates
-3. Disable Windows Telemetry
-4. Clean Updates Folder
+3. Disable Microsoft Telemetry
+4. Remove Cached Update Files
+5. Manage Update Services
+     1. View Services Status
+     2. Enable Services
+     3. Disable Services
 
 <div align="center">
 
@@ -141,7 +145,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 | <sup><sub>Filename</sub></sup> | <sup><sub>Method</sub></sup> | <sup><sub>Description</sub></sup> |
 | --- | --- | --- |
-| `windows-updates-utility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Update Files</sub></sup> |
+| `windows-updates-utility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services</sub></sup> |
 | `windows-updates-pause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Disable Windows Updates until 2051</sub></sup> |
 | `windows-updates-unpause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Enable Windows Updates</sub></sup> |
 
