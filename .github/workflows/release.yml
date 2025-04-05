@@ -84,6 +84,7 @@ on:
 
 env:
     PROJECT_NAME:                   ${{ github.event.inputs.PROJECT_NAME || 'windows-update-utility' }}
+    PROJECT_VERSION:                ${{ github.event.inputs.PLUGIN_VERSION || '1.x.x' }}
     CHANGELOG_MODE_COMMIT:          true
     SHOW_UNCATEGORIZED:             false
     PRERELEASE:                     false
@@ -111,6 +112,8 @@ jobs:
         permissions:
             contents: write
             packages: write
+        outputs:
+            project_tag_prev: ${{ steps.task_upload_tag_previous.outputs.PROJECT_TAG_PREV }}
         steps:
 
             # #
@@ -133,6 +136,19 @@ jobs:
                   fetch-depth: 0
 
             # #
+            #   Upload › Set Env Variables
+            # #
+
+            - name: >-
+                🕛 Get Timestamp
+              id: task_upload_label_set_timestamp
+              run: |
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
             #   Upload › Get Previous Tag
             # #
 
@@ -143,13 +159,14 @@ jobs:
                   fallback: 1.0.0
 
             # #
-            #   Upload › Print Current Version Tag
+            #   Upload › Tags › Print Current Version
             # #
 
             - name: '🔨 Debug: Previous Github Tag'
-              id: task_upload_build_ver_get
+              id: task_upload_tag_current
               run: |
                   echo -e ${{ steps.task_upload_tag_previous.outputs.tag }}
+                  echo "PROJECT_TAG_PREV=${{ steps.task_upload_tag_previous.outputs.tag }}" >> $GITHUB_OUTPUT
 
             # #
             #   Upload › Artifacts › windows-updates-utility.bat
@@ -205,10 +222,21 @@ jobs:
         permissions:
             contents: write
             packages: write
+        env:
+            PROJECT_TAG_PREV: ${{ needs.job-upload.outputs.project_tag_prev }}
         steps:
 
             # #
-            #   Dist Releases > Checkout
+            #   Release › Start
+            # #
+
+            - name: '✅ Start'
+              id: task_release_start
+              run: |
+                  echo 'Starting build'
+
+            # #
+            #   Release > Checkout
             # #
 
             - name: '☑️ Checkout'
@@ -218,7 +246,7 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   Dist Releases › Set Env Variables
+            #   Release › Set Env Variables
             # #
 
             - name: >-
@@ -231,45 +259,45 @@ jobs:
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
-            #   Dist Releases › View passed values
+            #   Release › View passed values
             # #
 
             - name: '⚙️ Debug › Passed Values'
               id: task_release_debug_print_vals_1
               run: |
-                  echo "TAG VERSION (Previous) ........... ${{ env.VERSION_TAG_PREV }}"
-                  echo "TAG VERSION (Next) ............... ${{ inputs.PLUGIN_VERSION }}"
+                  echo "TAG VERSION (Previous) ........... ${{ env.PROJECT_TAG_PREV }}"
+                  echo "TAG VERSION (Next) ............... ${{ env.PROJECT_VERSION }}"
 
             # #
-            #   Dist Releases › Tags › Pre Create
+            #   Release › Tags › Pre Create
             #
             #   in order to use the changelog github action, you must pre-create the tag otherwise
             #   the changelog action will have no idea what tag you are going to be creating and
             #   the list of commits will not be for the correct release.
             # #
 
-            - name: '🔖 Tag › Pre Create ${{ inputs.PLUGIN_VERSION }}'
+            - name: '🔖 Tag › Pre Create ${{ env.PROJECT_VERSION }}'
               id: task_release_tag_create
               uses: rickstaa/action-create-tag@v1
               with:
-                  tag: ${{ inputs.PLUGIN_VERSION }}
+                  tag: ${{ env.PROJECT_VERSION }}
                   tag_exists_error: false
                   message: "Latest release"
                   gpg_private_key: ${{ secrets.ADMINSERV_GPG_KEY_ASC }}
                   gpg_passphrase: ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
 
             # #
-            #   Dist Releases › Tags › Confirm
+            #   Release › Tags › Confirm
             # #
 
-            - name: '🔖 Tag › Confirm ${{ inputs.PLUGIN_VERSION }}'
+            - name: '🔖 Tag › Confirm ${{ env.PROJECT_VERSION }}'
               id: task_release_tag_get
               run: |
                   echo "Tag already present: ${{ env.TAG_EXISTS }}"
                   echo "Tag already present: ${{ steps.task_release_tag_create.outputs.tag_exists }}"
 
             # #
-            #   Dist Releases › Contributor Images
+            #   Release › Contributor Images
             # #
 
             - name: '🥸 Contributors › Generate'
@@ -281,7 +309,7 @@ jobs:
                   avatarSize: 42
 
             # #
-            #   Dist Releases › Generate Changelog
+            #   Release › Generate Changelog
             #
             #   generates a changelog from the github api. requires a PREVIOUS_TAG in order to figure
             #   out the changes made between the two versions.
@@ -293,13 +321,13 @@ jobs:
             - name: '📝 Changelog › Pre Setup (Categorized Commits)'
               id: task_release_changelog_commits_tags_print
               run: |
-                  echo "TAG_LAST=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-                  echo "COMMIT_LAST=$(git rev-parse HEAD)" >> $GITHUB_ENV
+                  echo "PROJECT_TAG_LAST=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+                  echo "PROJECT_COMMIT_LAST=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
             # #
-            #   Dist Releases › Release › Changelog › Build (Categorized)
+            #   Release › Release › Changelog › Build (Categorized)
             #
-            #   generates a changelog from the github api. requires a TAG_LAST in order to figure
+            #   generates a changelog from the github api. requires a PROJECT_TAG_LAST in order to figure
             #   out the changes made between the two versions.
             #
             #   outputs:
@@ -314,7 +342,7 @@ jobs:
                   startsWith( env.SHOW_UNCATEGORIZED, false )
               with:
                   token: ${{ secrets.ADMINSERV_TOKEN }}
-                  #fromTag: "${{ env.TAG_LAST }}"
+                  #fromTag: "${{ env.PROJECT_TAG_LAST }}"
                   #toTag: "${{ github.ref }}"
                   configuration: ".github/changelog-configuration.json"
                   ignorePreReleases: false
@@ -329,9 +357,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
 
             # #
-            #   Dist Releases › Release › Changelog › Build (Uncategorized)
+            #   Release › Release › Changelog › Build (Uncategorized)
             #
-            #   generates a changelog from the github api. requires a TAG_LAST in order to figure
+            #   generates a changelog from the github api. requires a PROJECT_TAG_LAST in order to figure
             #   out the changes made between the two versions.
             #
             #   outputs:
@@ -363,7 +391,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
 
             # #
-            #   Dist Releases › Release › Changelog › Convert step into ENV
+            #   Release › Release › Changelog › Convert step into ENV
             #
             #   This is a requirement in order for the action mikepenz/release-changelog-builder-action@v5 to work properly.
             #   If you use special characters like quotes and tildes in your push comments, bash will have no way of knowing
@@ -400,7 +428,7 @@ jobs:
                   echo "$CHANGELOG_UNCATEGORIZED"
 
             # #
-            #   Dist Releases › Artifacts > Download
+            #   Release › Artifacts › Download
             # #
 
             - name: '📁 Download › Artifacts › windows-updates-utility.bat'
@@ -419,7 +447,7 @@ jobs:
                   name: windows-updates-unpause.reg
 
             # #
-            #   Dist Releases › List Tree
+            #   Release › List Tree
             # #
 
             - name: '⚙️ Debug › Tree Listing'
@@ -428,7 +456,7 @@ jobs:
                   tree
 
             # #
-            #   Dist Releases › Post Release (Stable)
+            #   Release › Post Release (Stable)
             #
             #   outputs:
             #       [RELEASE ID]:
@@ -446,8 +474,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN_CL }}
               with:
                   token: ${{ secrets.ADMINSERV_TOKEN_CL }}
-                  name: v${{ inputs.PLUGIN_VERSION }}
-                  tag_name: ${{ inputs.PLUGIN_VERSION }}
+                  name: v${{ env.PROJECT_VERSION }}
+                  tag_name: ${{ env.PROJECT_VERSION }}
                   target_commitish: ${{ github.event.inputs.branch }}
                   draft: false
                   generate_release_notes: false
@@ -461,7 +489,7 @@ jobs:
                       ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
 
             # #
-            #   Dist Releases › Post Release (Release Candidate)
+            #   Release › Post Release (Release Candidate)
             #
             #   outputs:
             #       [RELEASE ID]:
@@ -479,8 +507,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
               with:
                   token: ${{ secrets.ADMINSERV_TOKEN }}
-                  name: v${{ inputs.PLUGIN_VERSION }}
-                  tag_name: ${{ inputs.PLUGIN_VERSION }}
+                  name: v${{ env.PROJECT_VERSION }}
+                  tag_name: ${{ env.PROJECT_VERSION }}
                   target_commitish: ${{ github.event.inputs.branch }}
                   draft: false
                   generate_release_notes: false
@@ -497,7 +525,7 @@ jobs:
                       ${{ steps.task_release_changelog_uncategorized.outputs.changelog }}
 
             # #
-            #   Dist Releases › Print Status
+            #   Release › Print Status
             #
             #   For every step that you need to print the changelog text, first define the env var
             #   env:
@@ -522,10 +550,10 @@ jobs:
                   echo ""
                   echo ""
                   echo "---- VARIABLES ---------------------------------------------------------------"
-                  echo "Package Version ............ ${{ inputs.PLUGIN_VERSION }}"
-                  echo "Tag: Previous .............. ${{ env.TAG_LAST }}"
+                  echo "Package Version ............ ${{ env.PROJECT_VERSION }}"
+                  echo "Tag: Previous .............. ${{ env.PROJECT_TAG_LAST }}"
                   echo "Tag: Now.... ............... ${{ github.ref }}"
-                  echo "Last Commit ................ ${{ env.COMMIT_LAST }}"
+                  echo "Last Commit ................ ${{ env.PROJECT_COMMIT_LAST }}"
                   echo "ST Output ID ............... ${{ steps.task_release_bundle_st.outputs.id }}"
                   echo "RC Output ID ............... ${{ steps.task_release_bundle_rc.outputs.id }}"
                   echo "---- CHANGELOG ---------------------------------------------------------------"
