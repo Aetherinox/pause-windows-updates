@@ -27,6 +27,7 @@ if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
 set dir_home=%~dp0
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
+set repo_version=1.2.0
 set "folder_distrb=c:\windows\softwaredistribution"
 set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
 set cnt_files=0
@@ -110,7 +111,9 @@ set x[wuauserv]=Windows Update
     echo.
     echo.
     echo.
-    echo.                  
+    echo.
+    echo.     %bluel%v%repo_version%%u%
+    echo.
     echo  %crimson%    ██╗    ██╗██╗███╗   ██╗██████╗  ██████╗ ██╗    ██╗███████╗    ██╗   ██╗██████╗ ██████╗  █████╗ ████████╗███████╗
     echo      ██║    ██║██║████╗  ██║██╔══██╗██╔═══██╗██║    ██║██╔════╝    ██║   ██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝
     echo      ██║ █╗ ██║██║██╔██╗ ██║██║  ██║██║   ██║██║ █╗ ██║███████╗    ██║   ██║██████╔╝██║  ██║███████║   ██║   █████╗  %u%
