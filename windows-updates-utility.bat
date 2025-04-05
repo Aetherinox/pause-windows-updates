@@ -79,26 +79,32 @@ set x[WaaSMedicSvc]=WaaSMedicSvc
 set x[wuauserv]=Windows Update
 
 :: # #
-::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
-::                  registry will return the following for auto update status
-::                      0x0         updates are enabled
-:                       0x1         updates are disabled
+::  @desc           Main
 :: # #
 
-FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) DO (
-    set noUpdatesState=%%A
-)
+:main
 
-if /i "%noUpdatesState%" == "0x0" (
-    set AutoUpdate=true
-    set AutoUpdateBool=%green%enabled%u%
-    set AutoUpdateStr=%green%%AutoUpdateBool:~0,-1%%u%
+    :: # #
+    ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
+    ::                  registry will return the following for auto update status
+    ::                      0x0         updates are enabled
+    :                       0x1         updates are disabled
+    :: # #
 
-) else (
-    set AutoUpdate=false
-    set AutoUpdateBool=%orange%disabled%u%
-    set AutoUpdateStr=%orange%%AutoUpdateBool:~0,-1%%u%
-)
+    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) DO (
+        set noUpdatesState=%%A
+    )
+
+    if /i "%noUpdatesState%" == "0x0" (
+        set AutoUpdate=true
+        set AutoUpdateBool=%green%enabled%u%
+        set AutoUpdateStr=%green%%AutoUpdateBool:~0,-1%%u%
+
+    ) else (
+        set AutoUpdate=false
+        set AutoUpdateBool=%orange%disabled%u%
+        set AutoUpdateStr=%orange%%AutoUpdateBool:~0,-1%%u%
+    )
 
 :: # #
 ::  @desc           Main
