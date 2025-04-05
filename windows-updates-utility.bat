@@ -12,8 +12,6 @@ GOTO        comment_end
 
 :comment_end
 
-@echo off
-
 :: # #
 ::  @desc           To perform registry edits, we need admin permissions.
 ::                  Re-launch powershell with admin, and close existing command prompt window
@@ -26,10 +24,11 @@ if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
 :: # #
 
 :variables
+set dir_home=%~dp0
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
-set dir_home=%~dp0
-set folder_distrb=c:\windows\softwaredistribution
+set "folder_distrb=c:\windows\softwaredistribution"
+set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
 set cnt_files=0
 set cnt_dirs=0
 
@@ -106,12 +105,6 @@ set x[wuauserv]=Windows Update
         set AutoUpdateStr=%orange%%AutoUpdateBool:~0,-1%%u%
     )
 
-:: # #
-::  @desc           Main
-:: # #
-
-:main
-
     chcp 65001 >nul
     cls
     echo.
@@ -136,9 +129,9 @@ set x[wuauserv]=Windows Update
 
     echo.
 
-    echo.   %bluel% Notice  %u%         Windows Updates are currently %AutoUpdateBool%%u%
-    echo.   %gray%                  The option to %AutoUpdateStr%%gray% updates again is greyed out, however%u%
-    echo.   %gray%                  it can be selected to re-apply the edits again%u%
+    echo.   %bluel% Notice  %u%        Windows Updates are currently %AutoUpdateBool%%u%
+    echo.   %gray%                 The option to %AutoUpdateStr%%gray% updates again is greyed out, however%u%
+    echo.   %gray%                 it can be selected to re-apply the edits again%u%
     echo.
 
     if /I "%AutoUpdate%" EQU "true" (
@@ -149,14 +142,17 @@ set x[wuauserv]=Windows Update
         echo       %yellow%^(2^)%u%   Enable Updates
     )
 
-    echo       %yellow%^(3^)%u%   Disable Telemetry
+    echo.
+
+    echo       %yellow%^(3^)%u%   Disable Microsoft Telemetry
     echo       %yellow%^(4^)%u%   Remove Update Files
+    echo       %yellow%^(5^)%u%   Manage Update Services
     echo.
     echo       %green%^(H^)%green%   Help
     echo       %crimson%^(Q^)%crimson%   Quit
 
     echo.
-    set /p q_mnu_main="%yellow%    What would you like to do? » %u%"
+    set /p q_mnu_main="%yellow%    Pick Option » %u%"
     echo.
 
     :: # #
@@ -176,12 +172,11 @@ set x[wuauserv]=Windows Update
         ) else (
             echo       %gray%^(1^)%gray%   Disable Updates - %orange%Already disabled
         )
-        echo             %gray%Completely disable Windows automatic updates.
-        echo             %gray%Once toggled, updates will be halted until you re-enable them.
+        echo             %gray%Completely disable Windows automatic updates. Once toggled, updates will be
+        echo             %gray%halted until you re-enable them.
         echo.
-        echo             %gray%All pending update files on your device will be deleted to
-        echo             %gray%clean up disk-space. You will have to re-download the files
-        echo             %gray%if you re-enable Windows updates later.
+        echo             %gray%All pending update files on your device will be deleted to clean up disk-space.
+        echo             %gray%You will have to re-download the files if you re-enable Windows updates later.
 
         echo.
 
@@ -190,31 +185,39 @@ set x[wuauserv]=Windows Update
         ) else (
             echo       %yellow%^(2^)%u%   Enable Updates
         )
-        echo             %gray%Enables windows updates on your system. After this point, your system
-        echo             %gray%will begin checking for new updates and they will be installed as normal.
+        echo             %gray%Enables windows updates on your system. After this point, your system will begin
+        echo             %gray%checking for new updates and they will be installed as normal.
 
         echo.
 
-        echo       %yellow%^(3^)%u%   Disable Telemetry
-        echo             %gray%Disables the ability for Microsoft to receive telemetry data from your
-        echo             %gray%device.
+        echo       %yellow%^(3^)%u%   Disable Microsoft Telemetry
+        echo             %gray%Disables the ability for Microsoft to receive telemetry data from your device.
 
         echo.
 
         echo       %yellow%^(4^)%u%   Remove Update Files
-        echo             %gray%All pending update files on your device will be deleted to
-        echo             %gray%clean up disk-space. You will have to re-download the files
-        echo             %gray%if you re-enable Windows updates later.
+        echo             %gray%All pending update files on your device will be deleted to clean up disk-space.
+        echo             %gray%You will have to re-download the files if you re-enable Windows updates later.
+
         echo.
-        echo             %gray%This task is automatically performed if you disable Windows
-        echo             %gray%Updates from this utility using %yellow%Option 1%u%
+        echo             %gray%This task is automatically performed if you disable Windows Updates from this
+        echo             %gray%utility using %yellow%Option 1%u%
+
+        echo.
+
+        echo       %yellow%^(5^)%u%   Manage Update Services
+        echo             %gray%This option allows you to view Windows Update's current status, as well as 
+        echo             %gray%enable or disable Windows Update system services.
+        echo.
+        echo             %gray%This task is automatically performed if you disable Windows Updates from this
+        echo             %gray%utility using %yellow%Option 1%u%
 
         echo.
 
         echo       %crimson%^(R^)%crimson%   Return
     
         echo.
-        set /p q_mnu_main="%yellow%    What would you like to do? » %u%"
+        set /p q_mnu_main="%yellow%    Pick Option » %u%"
         echo.
     )
 
@@ -223,25 +226,25 @@ set x[wuauserv]=Windows Update
         goto :main
     )
 
-    :: option > Disable Updates (1)
+    :: option > (1) Disable Updates
 
     if /I "%q_mnu_main%" EQU "1" (
         goto :taskUpdatesDisable
     )
 
-    :: option > Enable Updates (2)
+    :: option > (2) Enable Updates
 
     if /I "%q_mnu_main%" EQU "2" (
         goto :taskUpdatesEnable
     )
 
-    :: option > Disable Telemetry (3)
+    :: option > (3) Disable Telemetry
 
     if /I "%q_mnu_main%" EQU "3" (
         goto :taskDisableTelemetry
     )
 
-    :: option > Clean windows update dist folder (4)
+    :: option > (4) Clean windows update dist folder
 
     if /I "%q_mnu_main%" EQU "4" (
         goto :taskFilesErase
@@ -258,8 +261,6 @@ set x[wuauserv]=Windows Update
     if /I "%q_mnu_main%" EQU "Q" (
         goto :sessQuit
     ) else (
-        cls
-
         echo.   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
 
         goto :main
@@ -386,14 +387,14 @@ set x[wuauserv]=Windows Update
         echo.   %u%                 %gray% Folders%u%         %yellowl% !cnt_dirs! %u%
 
     ) else (
-        echo.   %bluel% Notice  %u%         Could not find %gray% %folder_distrb%%u%; nothing to do.
+        echo.   %bluel% Notice  %u%        Could not find %gray% %folder_distrb%%u%; nothing to do.
         goto sessFinish
     )
 
     timeout /t 1 >nul
     echo.
 
-    echo.   %gray% Confirm %yellow%         Would you like to delete the Windows Update distribution files?%u%
+    echo.   %gray% Confirm %yellow%        Would you like to delete the Windows Update distribution files?%u%
     echo.   %u%                  Type %green%Yes to continue%u% or %red%No to return%u%
     echo.
     set /p confirm="%u%                     Delete windows update files? » %u%"
@@ -425,16 +426,16 @@ set x[wuauserv]=Windows Update
     if exist %folder_distrb%\ (
         erase /s /f /q %folder_distrb%\*.* && rmdir /s /q %folder_distrb%
     ) else (
-        echo.   %bluel% Notice  %u%         Windows Updates folder already clean, skipping %gray% %folder_distrb%%u%
+        echo.   %bluel% Notice  %u%        Windows Updates folder already clean, skipping %gray% %folder_distrb%%u%
         goto sessFinish
     )
 
     if %errorlevel% NEQ 0 (
-        echo.   %red% Error   %u%         An error has occurred while trying to delete files and folders in %gray%%folder_distrb%%u%
+        echo.   %red% Error   %u%        An error has occurred while trying to delete files and folders in %gray%%folder_distrb%%u%
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%         No errors reported while deleting files, continuing.
+        echo.   %green% Success %u%        No errors reported while deleting files, continuing.
     )
 
     :: windows update dist folder found
@@ -459,15 +460,15 @@ set x[wuauserv]=Windows Update
         )
 
         If NOT "!cnt_dirs!"=="0" (
-            echo.   %red% Error   %u%         Something went wrong, folders still exist in %gray%%folder_distrb%%u%
-            echo.   %yellow%                  Try navigating to the folder and manually deleting all files and folders.
+            echo.   %red% Error   %u%        Something went wrong, folders still exist in %gray%%folder_distrb%%u%
+            echo.   %yellow%                 Try navigating to the folder and manually deleting all files and folders.
             goto sessError
         )
 
         :: just here as a catch-all for issues
         goto sessError
     ) else (
-        echo.   %bluel% Notice  %u%         Validated that all files and folders have been deleted in %gray% %folder_distrb%%u%
+        echo.   %bluel% Notice  %u%        Validated that all files and folders have been deleted in %gray% %folder_distrb%%u%
         goto sessFinish
     )
 
@@ -493,12 +494,13 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :taskUpdatesDisable
-    echo.   %bluel% Motice  %u%         Disabling updates%u%
-
-    :: manage services
-    echo.   %bluel% Notice  %u%         Disabling Windows Update Services ...
+    echo.   %bluel% Notice  %u%        Disabling Windows Update Services ...%u%
     for %%i in (%lstServices%) do (
-        echo.   %bluel%                  %crimson%Disabled %yellowl%%%i%u%
+        set y=!x[%%i]!
+        set "service=!y! %pink%[%%i] !spaces!"
+        set "service=!service:~0,50!"
+
+        echo.   %bluel%         %gray%          !service! %red%disabled%u%
         net stop %%i >nul 2>&1
         sc config %%i start= disabled >nul 2>&1
         sc failure %%i reset= 0 actions= "" >nul 2>&1
@@ -539,7 +541,7 @@ set x[wuauserv]=Windows Update
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%         Registry has been modified, updates are disabled.
+        echo.   %green% Success %u%        Registry has been modified, updates are disabled.
     )
 
     goto taskFilesErase
@@ -549,14 +551,16 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :taskUpdatesEnable
-    echo.   %bluel% Motice  %u%         Enabling updates%u%
+    echo.   %bluel% Notice  %u%        Enabling Windows Update Services ...%u%
 
-    :: manage services
-    echo.   %bluel% Notice  %u%         Enabling Windows Update Services ...
     for %%i in (%lstServices%) do (
-        echo.   %bluel%                  %green%Enabled %yellowl%%%i%u%
-        net start %%i >nul 2>&1
+        set y=!x[%%i]!
+        set "service=!y! %pink%[%%i] !spaces!"
+        set "service=!service:~0,50!"
+
+        echo.   %bluel%         %gray%          !service! %green%enabled%u%
         sc config %%i start= auto >nul 2>&1
+        net start %%i >nul 2>&1
     )
 
     :: Windows Update > Dates
@@ -589,12 +593,12 @@ set x[wuauserv]=Windows Update
     reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "" /f >nul
 
     if %errorlevel% NEQ 0 (
-        echo.   %red% Error   %u%         An error occurred trying to edit your registry%u%
+        echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
         goto sessError
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%         Registry has been modified, updates are enabled.
+        echo.   %green% Success %u%        Registry has been modified, updates are enabled.
     )
 
     goto sessFinish
@@ -604,19 +608,19 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :taskDisableTelemetry
-    echo.   %bluel% Motice  %u%         Disabling telemetry%u%
+    echo.   %bluel% Motice  %u%        Disabling telemetry%u%
     reg add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d "0x00000004" /f >nul
     reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f >nul
     reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f >nul
     reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "MaxTelemetryAllowed" /t REG_DWORD /d "0x00000000" /f >nul
 
     if %errorlevel% NEQ 0 (
-        echo.   %red% Error   %u%         An error occurred trying to edit your registry%u%
+        echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
         goto sessError
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%         Registry has been modified, telemetry has been disabled.
+        echo.   %green% Success %u%        Registry has been modified, telemetry has been disabled.
     )
 
     goto sessFinish
@@ -626,7 +630,7 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :sessQuit
-    echo.   %green% Success %u%         Exiting, Press any key to exit%u%
+    echo.   %green% Success %u%        Exiting, Press any key to exit%u%
     pause >nul
     Exit /B 0
 
@@ -635,7 +639,7 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :sessFinish
-    echo.   %bluel% Notice  %u%         Operation completed, Press any key to return%u%
+    echo.   %bluel% Notice  %u%        Operation completed, Press any key to return%u%
     pause >nul
     goto :main
 
@@ -644,6 +648,6 @@ set x[wuauserv]=Windows Update
 :: # #
 
 :sessError
-    echo.   %red% Error   %u%         This script finished, but with errors. Read the logs above to see the issue.%u%
+    echo.   %red% Error   %u%        This script finished, but with errors. Read the logs above to see the issue.%u%
     pause >nul
     Exit /B 0
