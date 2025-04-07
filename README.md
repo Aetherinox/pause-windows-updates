@@ -28,8 +28,8 @@
 <br />
 
 - [About](#about)
-  - [Registry Scripts](#registry-scripts)
   - [WP Utility](#wp-utility)
+  - [Registry Scripts](#registry-scripts)
 - [Notice](#notice)
 - [Install](#install)
   - [Registry Scripts](#registry-scripts-1)
@@ -50,52 +50,38 @@
 
 ## About
 
-Formerly known as simply a registry tweak to disable Microsoft Windows updates, it has grown into a more complete solution for Windows users which allows you to do the following:
+Formerly known as a simply registry tweak to disable Microsoft Windows updates, this repository has grown into a utility known as **WPU** _(Windows Personalization Utility)_; a more complete solution for Windows users. See a list of the features for each option below:
+
+<br />
+
+If you are here to simply disable Windows Updates; this repository provides two different options you can pick from:
+
+[Option 1: WP Utility](#wp-utility):
 
 - Disable / Enable Windows Updates
 - Delete / clean up lingering Windows Update files to increase disk-space
-- Bacup your registry
+- Backup your entire system registry
 - Remove Windows telemetry and tracking
+- Requires elevated admin permissions to run
+- Available by using the files:
+    - `wputility.bat`
+
 
 <br />
 
-This repository provides two different ways to pause windows updates. 
+[Option 2: Registry Scripts](#registry-scripts)
 
-The [WP Utility method](#wp-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry, and backing up your entire Windows registry. This method can also clean up any existing files on your machine that may be storing old Windows Updates and free up disk-space.
-
-The [Registry Scripts method](#registry-scripts) only allows you to enable or disable windows updates.
-
-<br />
-
-You can pick which one you wish to use from the list below (pick one):
-
-1. [Registry Scripts](#registry-scripts)
-     - `windows-updates-pause.reg`
-     - `windows-updates-unpause.reg`
-2. [WP Utility](#wp-utility)
-     - `windows-updates-utility.bat`
-
-<br />
-
-### Registry Scripts
-
-If you decide to go with the **registry** method, download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
-
-<br />
-
-<div align="center">
-
-<p float="left">
-  <img style="padding-right:15px;" src="docs/img/registry/1.gif" width="640" />
-</p>
-
-</div>
+- Disable / Enable Windows Updates
+- Requires no elevated permissions
+- Available by using the files:
+    - `windows-updates-pause.reg`
+    - `windows-updates-unpause.reg`
 
 <br />
 
 ### WP Utility
 
-To use, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
+To use the WP Utility, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
 
 1. Enable Windows Updates
 2. Disable Windows Updates
@@ -105,6 +91,7 @@ To use, double-click the batch `.bat` file. You will be presented and numerous o
      1. View Services Status
      2. Enable Services
      3. Disable Services
+6. Backup Registry
 
 <div align="center">
 
@@ -121,6 +108,22 @@ To use, double-click the batch `.bat` file. You will be presented and numerous o
 > When launching the `.bat` file, you will be asked to allow the utility to have administrative permissions. Unfortunately, this script requires these permissions in order to change registry settings.
 >
 > If you do not feel comfortable with this, you may opt to use the [Registry Scripts method](#registry-scripts) listed above
+
+<br />
+
+### Registry Scripts
+
+If you decide to go with the **registry** method, download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
+
+<br />
+
+<div align="center">
+
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/registry/1.gif" width="640" />
+</p>
+
+</div>
 
 <br />
 
