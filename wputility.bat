@@ -149,6 +149,44 @@ set schtasksDisable[13]=\Microsoft\Windows\CloudExperienceHost\CreateObjectTask
 set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
 set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
 
+:: Crapware
+set crapware[0]=Microsoft.Getstarted
+set crapware[1]=Microsoft.549981C3F5F10
+set crapware[2]=Microsoft.WindowsFeedback
+set crapware[3]=Microsoft.MicrosoftSolitaireCollection
+set crapware[4]=Microsoft.BingWeather
+set crapware[5]=Microsoft.BingSports
+set crapware[6]=Microsoft.BingNews
+set crapware[7]=Microsoft.BingFinance
+set crapware[8]=Microsoft.XboxApp
+set crapware[9]=Microsoft.Xbox.TCUI
+set crapware[10]=Microsoft.XboxGamingOverlay
+set crapware[11]=Microsoft.XboxGameOverlay
+set crapware[12]=Microsoft.XboxIdentityProvider
+set crapware[13]=Microsoft.XboxSpeechToTextOverlay
+set crapware[14]=microsoft.windowscommunicationsapps
+set crapware[15]=Microsoft.People
+set crapware[16]=Microsoft.Messaging
+set crapware[17]=Microsoft.GamingApp
+set crapware[18]=Microsoft.ZuneMusic
+set crapware[19]=Microsoft.ZuneVideo
+set crapware[20]=Clipchamp.Clipchamp
+set crapware[21]=Microsoft.SkypeApp
+set crapware[22]=Microsoft.Advertising.Xaml
+set crapware[23]=Microsoft.Getstarted
+set crapware[24]=Microsoft.Todos
+set crapware[25]=Microsoft.GetHelp
+set crapware[26]=MicrosoftTeams
+set crapware[27]=Microsoft.BingSearch
+set crapware[28]=Microsoft.BingHealthAndFitness
+set crapware[29]=Microsoft.BingFoodAndDrink
+set crapware[30]=Microsoft.BingTranslator
+set crapware[31]=Microsoft.BingTravel
+set crapware[32]=Microsoft.News
+set crapware[33]=Microsoft.Office.OneNote
+set crapware[34]=MSTeams
+set crapware[35]=Microsoft.Copilot
+
 :: # #
 ::  @desc           define os ver and name
 :: # #
@@ -683,30 +721,10 @@ goto :EOF
 :taskUninstallCrapware
     setlocal
 
-    call :powershellUninstall "Microsoft.Getstarted"
-    call :powershellUninstall "Microsoft.549981C3F5F10"
-    call :powershellUninstall "Microsoft.WindowsFeedback"
-    call :powershellUninstall "Microsoft.MicrosoftSolitaireCollection"
-    call :powershellUninstall "Microsoft.BingWeather"
-    call :powershellUninstall "Microsoft.BingSports"
-    call :powershellUninstall "Microsoft.BingNews"
-    call :powershellUninstall "Microsoft.BingFinance"
-    call :powershellUninstall "Microsoft.XboxApp"
-    call :powershellUninstall "Microsoft.Xbox.TCUI"
-    call :powershellUninstall "Microsoft.XboxGamingOverlay"
-    call :powershellUninstall "Microsoft.XboxGameOverlay"
-    call :powershellUninstall "Microsoft.XboxIdentityProvider"
-    call :powershellUninstall "Microsoft.XboxSpeechToTextOverlay"
-    call :powershellUninstall "microsoft.windowscommunicationsapps"
-    call :powershellUninstall "Microsoft.People"
-    call :powershellUninstall "Microsoft.Messaging"
-    call :powershellUninstall "Microsoft.GamingApp"
-    call :powershellUninstall "Microsoft.ZuneMusic"
-    call :powershellUninstall "Microsoft.ZuneVideo"
-    call :powershellUninstall "Clipchamp.Clipchamp"
-    call :powershellUninstall "Microsoft.SkypeApp"
-    call :powershellUninstall "Microsoft.Advertising.Xaml"
-    call :powershellUninstall "Microsoft.Getstarted"
+    for /l %%n in (0,1,35) do (
+        set app=!crapware[%%n]!
+        call :powershellUninstall "!app!"
+    )
 
     echo.   %cyand% Notice  %u%        Operation complete. Press any key
     pause > nul
