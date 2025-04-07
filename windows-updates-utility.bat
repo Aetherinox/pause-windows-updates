@@ -34,7 +34,7 @@ set dir_home=%~dp0
 set dir_reg=%dir_home%registryBackup
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
-set repo_version=1.2.0
+set repo_version=1.3.0
 set "folder_distrb=c:\windows\softwaredistribution"
 set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
 set cnt_files=0
@@ -57,12 +57,7 @@ set magentad=[35m
 set white=[97m
 
 :: 256 colors
-set bluel=[36m
-set pink=[95m
-set yellowl=[93m
-set orange=[38;5;214m
 set lime=[38;5;154m
-set gray=[90m
 set brown=[38;5;94m
 set greenl=[38;5;46m
 set green=[38;5;40m
@@ -154,6 +149,7 @@ set schtasksDisable[13]=\Microsoft\Windows\CloudExperienceHost\CreateObjectTask
 set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
 set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
 
+
 :: # #
 ::  @desc           define os ver and name
 :: # #
@@ -171,6 +167,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
 :main
 
+    setlocal
+
     :: # #
     ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
     ::                  registry will return the following for auto update status
@@ -184,8 +182,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     if /i "%noUpdatesState%" == "0x0" (
         set AutoUpdate=true
-        set AutoUpdateBool=%green%enabled%u%
-        set AutoUpdateStr=%green%!AutoUpdateBool:~0,-1!%u%
+        set AutoUpdateBool=%greenm%enabled%u%
+        set AutoUpdateStr=%greenm%!AutoUpdateBool:~0,-1!%u%
 
     ) else (
         set AutoUpdate=false
@@ -224,25 +222,27 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     echo.
 
     if /I "%AutoUpdate%" EQU "true" (
-        echo       %yellow%^(1^)%u%   Disable Updates
-        echo       %gray%^(2^)%gray%   Enable Updates
+        echo.     %goldm%^(1^)%u%   Disable Updates
+        echo.     %grayd%^(2^)%grayd%   Enable Updates
     ) else (
-        echo       %gray%^(1^)%gray%   Disable Updates
-        echo       %yellow%^(2^)%u%   Enable Updates
+        echo.     %grayd%^(1^)%grayd%   Disable Updates
+        echo.     %goldm%^(2^)%u%   Enable Updates
     )
 
     echo.
 
-    echo       %yellow%^(3^)%u%   Disable Microsoft Telemetry
-    echo       %yellow%^(4^)%u%   Remove Update Files
-    echo       %yellow%^(5^)%u%   Manage Update Services
+    echo.     %goldm%^(3^)%u%   Disable Microsoft Telemetry
+    echo.     %goldm%^(4^)%u%   Remove Update Files
+    echo.     %goldm%^(5^)%u%   Manage Update Services
     echo.     %goldm%^(6^)%u%   Backup Registry
     echo.
-    echo       %green%^(H^)%green%   Help
+    echo.     %greenm%^(H^)%greenm%   Help
     echo.     %blueb%^(S^)%blueb%   Supporters
+    echo.     %redl%^(Q^)%redl%   Quit
 
     echo.
-    set /p q_mnu_main="%yellow%    Pick Option » %u%"
+    echo.
+    set /p q_mnu_main="%goldm%    Pick Option » %u%"
     echo.
 
     :: # #
@@ -254,44 +254,45 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         cls
 
         echo.
-        echo %u%  This script allows you to do the following tasks:
+        echo.
+        echo %u%    This utility allows you to do the following tasks:
         echo.
 
         if /I "%AutoUpdate%" EQU "true" (
-            echo       %yellow%^(1^)%u%   Disable Updates
+            echo       %goldm%^(1^)%greenm%   Disable Updates%u%
         ) else (
-            echo       %gray%^(1^)%gray%   Disable Updates - %orange%Already disabled
+            echo       %grayd%^(1^)%greend%   Disable Updates%u% %goldd%[Already disabled]%u%
         )
-        echo             %gray%Completely disable Windows automatic updates. Once toggled, updates will be
-        echo             %gray%halted until you re-enable them.
-        echo.
-        echo             %gray%All pending update files on your device will be deleted to clean up disk-space.
-        echo             %gray%You will have to re-download the files if you re-enable Windows updates later.
+        echo             %grayd%Disable Windows automatic updates. Updates will be halted until re-enabled.
+        echo             %grayd%All pending update files on your device will be deleted to clean up disk-space.
+        echo             %grayd%Files will be re-downloaded if you enable Windows updates at a later time.
 
         echo.
 
         if /I "%AutoUpdate%" EQU "true" (
-            echo       %gray%^(2^)%gray%   Enable Updates - %orange%Already enabled
+            echo       %grayd%^(2^)%greend%   Enable Updates%u% %goldd%[Already enabled]%u%
         ) else (
-            echo       %yellow%^(2^)%u%   Enable Updates
+            echo       %goldm%^(2^)%greenm%   Enable Updates%u%
         )
-        echo             %gray%Enables windows updates on your system. After this point, your system will begin
-        echo             %gray%checking for new updates and they will be installed as normal.
+        echo             %grayd%Enable windows updates on your system.
 
         echo.
 
-        echo       %yellow%^(3^)%u%   Disable Microsoft Telemetry
-        echo             %gray%Disables the ability for Microsoft to receive telemetry data from your device.
+        echo       %goldm%^(3^)%greenm%   Disable Microsoft Telemetry%u%
+        echo             %grayd%Disables the ability for Microsoft to receive telemetry data from your device.
 
         echo.
 
-        echo       %yellow%^(4^)%u%   Remove Update Files
-        echo             %gray%All pending update files on your device will be deleted to clean up disk-space.
-        echo             %gray%You will have to re-download the files if you re-enable Windows updates later.
+        echo       %goldm%^(4^)%greenm%   Remove Update Files%u%
+        echo             %grayd%Pending update files on your device will be deleted to clean up disk-space.
+        echo             %grayd%This task is automatically performed if you select option 1%u%
 
         echo.
-        echo             %gray%This task is automatically performed if you disable Windows Updates from this
-        echo             %gray%utility using %yellow%Option 1%u%
+
+        echo       %goldm%^(5^)%greenm%   Manage Update Services%u%
+        echo             %grayd%This option allows you to view Windows Update's current status, as well as 
+        echo             %grayd%enable or disable Windows Update system services.
+        echo             %grayd%This task is automatically performed if you select option 1%u%
 
         echo.
 
@@ -304,10 +305,14 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo             %grayd%A list of people who have donated to this project.
 
         echo.
-        echo             %gray%This task is automatically performed if you disable Windows Updates from this
-        echo             %gray%utility using %yellow%Option 1%u%
 
+        echo       %redl%^(R^)%redl%   Return
+    
         echo.
+        echo.
+        set /p q_mnu_main="%goldm%    Pick Option » %u%"
+        echo.
+    )
 
     :: # #
     ::  @desc           Menu > Sponsors
@@ -390,24 +395,29 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         goto :main
     )
 
+    endlocal
+goto :EOF
+
 :: # #
 ::  @desc           Menu > Services
 :: # #
 
 :menuServices
+    setlocal
     cls
     set q_mnu_serv=
 
     echo.
 
-    echo       %yellow%^(1^)%u%   View Status
-    echo       %yellow%^(2^)%u%   Enable Update Services
-    echo       %yellow%^(3^)%u%   Disable Update Services
+    echo       %yellowd%^(1^)%u%   View Status
+    echo       %yellowd%^(2^)%u%   Enable Update Services
+    echo       %yellowd%^(3^)%u%   Disable Update Services
     echo.
-    echo       %crimson%^(R^)%crimson%   Return
+    echo       %redl%^(R^)%redl%   Return
 
     echo.
-    set /p q_mnu_serv="%yellow%    Pick Option » %u%"
+    echo.
+    set /p q_mnu_serv="%goldm%    Pick Option » %u%"
     echo.
 
     echo.
@@ -415,65 +425,65 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     :: option > (1) View Service Status
     if /I "%q_mnu_serv%" EQU "1" (
 
-        echo.   %bluel% Notice  %u%        Getting Service Status%u%
+        echo.   %cyand% Notice  %u%        Getting Service Status%u%
 
         :: loop services and check status
-        for %%i in (%lstServices%) do (
-            set y=!x[%%i]!
+        for %%i in (%servicesUpdates%) do (
+            set y=!servicesUpdatesNames[%%i]!
             for /F "tokens=3 delims=: " %%H in ('sc query "%%i" ^| findstr "        STATE"') do (
                 set "service=!y! %pink%[%%i] !spaces!"
                 set "service=!service:~0,50!"
                 if /I "%%H" NEQ "RUNNING" (
-                    echo.   %bluel%         %gray%          !service! %red%Not Running%u%
+                    echo.   %cyand%         %grayd%          !service! %red%Not Running%u%
                 ) else (
-                    echo.   %bluel%         %gray%          !service! %green%Running%u%
+                    echo.   %cyand%         %grayd%          !service! %greenl%Running%u%
                 )
             )
         )
 
-        echo.   %bluel% Notice  %u%        Operation complete. Press any key
-        pause >nul
+        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
 
         goto :menuServices
     )
 
     :: option > (2) Enable Update Services
     if /I "%q_mnu_serv%" EQU "2" (
-        echo.   %bluel% Notice  %u%        Enabling Windows Update Services ...
+        echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
-        for %%i in (%lstServices%) do (
-            set y=!x[%%i]!
+        for %%i in (%servicesUpdates%) do (
+            set y=!servicesUpdatesNames[%%i]!
             set "service=!y! %pink%[%%i] !spaces!"
             set "service=!service:~0,50!"
 
-            echo.   %bluel%         %gray%          !service! %green%enabled%u%
-            sc config %%i start= auto >nul 2>&1
-            net start %%i >nul 2>&1
+            echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
+            sc config %%i start= auto > nul 2>&1
+            net start %%i > nul 2>&1
         )
 
-        echo.   %bluel% Notice  %u%        Operation complete. Press any key
-        pause >nul
+        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
     
         goto :menuServices
     )
 
     :: option > (3) Disable Update Services
     if /I "%q_mnu_serv%" EQU "3" (
-        echo.   %bluel% Notice  %u%        Disabling Windows Update Services ...
+        echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
-        for %%i in (%lstServices%) do (
-            set y=!x[%%i]!
+        for %%i in (%servicesUpdates%) do (
+            set y=!servicesUpdatesNames[%%i]!
             set "service=!y! %pink%[%%i] !spaces!"
             set "service=!service:~0,50!"
 
-            echo.   %bluel%         %gray%          !service! %red%disabled%u%
-            net stop %%i >nul 2>&1
-            sc config %%i start= disabled >nul 2>&1
-            sc failure %%i reset= 0 actions= "" >nul 2>&1
+            echo.   %cyand%         %grayd%          !service! %red%disabled%u%
+            net stop %%i > nul 2>&1
+            sc config %%i start= disabled > nul 2>&1
+            sc failure %%i reset= 0 actions= "" > nul 2>&1
         )
 
-        echo.   %bluel% Notice  %u%        Operation complete. Press any key
-        pause >nul
+        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
     
         goto :menuServices
     )
@@ -483,10 +493,13 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         goto :main
     ) else (
         echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
-        pause >nul
+        pause > nul
 
         goto :menuServices
     )
+    endlocal
+goto :EOF
+
 :: # #
 ::  @desc           Backup Registry
 :: # #
@@ -576,8 +589,9 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
 :taskStart
 
+    setlocal
     echo.
-    echo.   %bluel% Notice  %u%        %gray% Scanning        %yellowl% %folder_distrb% %u%
+    echo.   %cyand% Notice  %u%        %grayd% Scanning        %yellowl% %folder_distrb% %u%
 
     if exist %folder_distrb%\ (
 
@@ -589,19 +603,19 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
             set /A cnt_dirs+=1
         )
 
-        echo.   %u%                 %gray% Files%u%           %yellowl% !cnt_files! %u%
-        echo.   %u%                 %gray% Folders%u%         %yellowl% !cnt_dirs! %u%
+        echo.   %u%                 %grayd% Files%u%           %yellowl% !cnt_files! %u%
+        echo.   %u%                 %grayd% Folders%u%         %yellowl% !cnt_dirs! %u%
 
     ) else (
-        echo.   %bluel% Notice  %u%        Could not find %gray% %folder_distrb%%u%; nothing to do.
+        echo.   %cyand% Notice  %u%        Could not find %grayd% %folder_distrb%%u%; nothing to do.
         goto sessFinish
     )
 
-    timeout /t 1 >nul
+    timeout /t 1 > nul
     echo.
 
-    echo.   %gray% Confirm %yellow%        Would you like to delete the Windows Update distribution files?%u%
-    echo.   %u%                  Type %green%Yes to continue%u% or %red%No to return%u%
+    echo.   %grayd% Confirm %yellowd%        Would you like to delete the Windows Update distribution files?%u%
+    echo.   %u%                  Type %greenl%Yes to continue%u% or %red%No to return%u%
     echo.
     set /p confirm="%u%                     Delete windows update files? » %u%"
 
@@ -609,6 +623,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     if /I "%confirm%"=="yes" goto taskStart
     if /I "%confirm%"=="No"   goto sessFinish
     if /I "%confirm%"=="no"  goto sessFinish
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Removes all downloaded windows update files
@@ -632,22 +648,20 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     if exist %folder_distrb%\ (
         erase /s /f /q %folder_distrb%\*.* && rmdir /s /q %folder_distrb%
     ) else (
-        echo.   %bluel% Notice  %u%        Windows Updates folder already clean, skipping %gray% %folder_distrb%%u%
+        echo.   %cyand% Notice  %u%        Windows Updates folder already clean, skipping %grayd% %folder_distrb%%u%
         goto sessFinish
     )
 
     if %errorlevel% NEQ 0 (
-        echo.   %red% Error   %u%        An error has occurred while trying to delete files and folders in %gray%%folder_distrb%%u%
-    )
-
-    if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%        No errors reported while deleting files, continuing.
+        echo.   %red% Error   %u%        An error has occurred while trying to delete files and folders in %grayd%%folder_distrb%%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        No errors reported while deleting files, continuing.
     )
 
     :: windows update dist folder found
 
     if exist %folder_distrb%\ (
-        echo.   %red% Error   %u%         Something went wrong, folder still exists: %gray%%folder_distrb%%u%
+        echo.   %red% Error   %u%         Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
 
         set cnt_files=0
         set cnt_dirs=0
@@ -656,8 +670,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         )
 
         If NOT "!cnt_files!"=="0" (
-            echo.   %red% Error   %u%         Something went wrong, files still exist in %gray%%folder_distrb%%u%
-            echo.   %yellow%                  Try navigating to the folder and manually deleting all files and folders.
+            echo.   %red% Error   %u%         Something went wrong, files still exist in %grayd%%folder_distrb%%u%
+            echo.   %yellowd%                  Try navigating to the folder and manually deleting all files and folders.
             goto sessError
         )
 
@@ -666,15 +680,15 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         )
 
         If NOT "!cnt_dirs!"=="0" (
-            echo.   %red% Error   %u%        Something went wrong, folders still exist in %gray%%folder_distrb%%u%
-            echo.   %yellow%                 Try navigating to the folder and manually deleting all files and folders.
+            echo.   %red% Error   %u%        Something went wrong, folders still exist in %grayd%%folder_distrb%%u%
+            echo.   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
             goto sessError
         )
 
         :: just here as a catch-all for issues
         goto sessError
     ) else (
-        echo.   %bluel% Notice  %u%        Validated that all files and folders have been deleted in %gray% %folder_distrb%%u%
+        echo.   %cyand% Notice  %u%        Validated that all files and folders have been deleted in %grayd% %folder_distrb%%u%
         goto sessFinish
     )
 
@@ -748,7 +762,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%        Registry has been modified, updates are disabled.
+        echo.   %greenl% Success %u%        Registry has been modified, updates are disabled.
     )
 
     goto taskFilesErase
@@ -1029,28 +1043,47 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 :: # #
 
 :sessQuit
-    echo.   %green% Success %u%        Exiting, Press any key to exit%u%
-    pause >nul
-    Exit /B 0
+    setlocal
+    echo.   %greenl% Success %u%        Exiting, Press any key to exit%u%
+    pause > nul
+    endlocal
+exit /B 0
 
 :: # #
 ::  @desc           Finish and Exit
 :: # #
 
 :sessFinish
-    echo.   %bluel% Notice  %u%        Operation completed, Press any key to return%u%
-    pause >nul
-    goto :main
+    setlocal
+    echo.   %cyand% Notice  %u%        Operation completed, Press any key to return%u%
+    pause > nul
+    endlocal
+goto :main
 
 :: # #
 ::  @desc           Finish with error and Exit
 :: # #
 
 :sessError
-    echo.   %red% Error   %u%        This script finished, but with errors. Read the logs above to see the issue.%u%
-    pause >nul
-    Exit /B 0
+    setlocal
+    echo.   %red% Error   %u%        This utility finished, but with errors. Read the logs above to see the issue.%u%
+    pause > nul
+    endlocal
+goto :EOF
 
+:: # #
+::  @desc           Finish with error and Exit
+:: # #
+
+:forceQuit
+	(goto) 2>nul || (
+		type nul>nul
+		exit /B %~1
+	)
+
+:: # #
+::  @desc           Progress bar
+:: # #
 
 :progressUpdate
     setlocal ENABLEDELAYEDEXPANSION
@@ -1063,6 +1096,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     call :helperUnquote progGitle %2
     title Working:  [%progMeter%]  %progPercent%%% - %progGitle%
     endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Removes quotation marks from strings
