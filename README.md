@@ -34,7 +34,7 @@
 - [Install](#install)
   - [Registry Scripts](#registry-scripts-1)
   - [WP Utility](#wp-utility-1)
-  - [Confirm](#confirm)
+  - [Confirm Updates Status](#confirm-updates-status)
 - [Re-enable Updates](#re-enable-updates)
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
   - [Option 2 (manual)](#option-2-manual)
@@ -190,7 +190,9 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 <br />
 
-### Confirm
+### Confirm Updates Status
+
+To see whether or not Windows Updates are currently enabled or disabled:
 
 - In Windows, click `Start` -> `Run` -> type `control update` and press ENTER.
   - You can also access the Windows Update window by clicking your start menu, selecting **Run**, and typing:
@@ -199,6 +201,8 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
    ```
 - Near the `Pause Updates` section, if you see a dropdown box, select how long you want updates to pause for.
 - Keep the scripts somewhere in case you need to reinstall / wipe your machine.
+
+Our `wpUtility.bat` script also tells you if Windows Updates are enabled or disabled when you launch the utility on your system.
 
 <br />
 
