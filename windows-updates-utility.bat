@@ -18,6 +18,11 @@ GOTO        comment_end
 :: # #
 
 if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
+net session > nul 2>&1
+if %errorlevel% NEQ 0 (
+	echo.   %red% Error   %u%         This script requires elevated privileges to run.
+	goto :sessError
+)
 
 :: # #
 ::  @desc           define vars
