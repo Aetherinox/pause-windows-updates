@@ -40,6 +40,9 @@ set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
 set cnt_files=0
 set cnt_dirs=0
 
+:: throws extra prints and information
+set debugMode=false
+
 set noUpdatesState="0x0"
 set AutoUpdate=false
 set AutoUpdateBool=disabled
@@ -73,7 +76,8 @@ set purplel=[38;5;105m
 set purple=[38;5;99m
 set fuchsia1=[38;5;1m
 set fuchsia2=[38;5;162m
-set peach=[38;5;148m
+set peach=[38;5;174m
+set debug=[38;5;91m
 set pinkl=[38;5;13m
 set pink=[38;5;206m
 set pinkd=[38;5;200m
@@ -95,10 +99,6 @@ set redl=[91m
 set red=[38;5;160m
 set redd=[38;5;124m
 set redz=[38;5;88m
-
-:: progress bar
-set PROGRESS_BAR_WIDTH=50
-set PROGRESS_BAR_CHAR=#
 
 :: add spaces so that service names are in columns
 set "spaces=                                       "
@@ -150,42 +150,47 @@ set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
 set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
 
 :: Crapware
+set crapwareIndexMax=39
 set crapware[0]=Microsoft.Getstarted
-set crapware[1]=Microsoft.549981C3F5F10
-set crapware[2]=Microsoft.WindowsFeedback
-set crapware[3]=Microsoft.MicrosoftSolitaireCollection
-set crapware[4]=Microsoft.BingWeather
-set crapware[5]=Microsoft.BingSports
-set crapware[6]=Microsoft.BingNews
-set crapware[7]=Microsoft.BingFinance
-set crapware[8]=Microsoft.XboxApp
-set crapware[9]=Microsoft.Xbox.TCUI
-set crapware[10]=Microsoft.XboxGamingOverlay
-set crapware[11]=Microsoft.XboxGameOverlay
-set crapware[12]=Microsoft.XboxIdentityProvider
-set crapware[13]=Microsoft.XboxSpeechToTextOverlay
-set crapware[14]=microsoft.windowscommunicationsapps
-set crapware[15]=Microsoft.People
-set crapware[16]=Microsoft.Messaging
-set crapware[17]=Microsoft.GamingApp
-set crapware[18]=Microsoft.ZuneMusic
-set crapware[19]=Microsoft.ZuneVideo
-set crapware[20]=Clipchamp.Clipchamp
-set crapware[21]=Microsoft.SkypeApp
-set crapware[22]=Microsoft.Advertising.Xaml
-set crapware[23]=Microsoft.Getstarted
-set crapware[24]=Microsoft.Todos
-set crapware[25]=Microsoft.GetHelp
-set crapware[26]=MicrosoftTeams
-set crapware[27]=Microsoft.BingSearch
-set crapware[28]=Microsoft.BingHealthAndFitness
-set crapware[29]=Microsoft.BingFoodAndDrink
-set crapware[30]=Microsoft.BingTranslator
-set crapware[31]=Microsoft.BingTravel
-set crapware[32]=Microsoft.News
-set crapware[33]=Microsoft.Office.OneNote
-set crapware[34]=MSTeams
-set crapware[35]=Microsoft.Copilot
+set crapware[1]=Microsoft.XboxGamingOverlay
+set crapware[2]=Microsoft.XboxGameOverlay
+set crapware[3]=Microsoft.XboxIdentityProvider
+set crapware[4]=Microsoft.XboxSpeechToTextOverlay
+set crapware[5]=microsoft.windowscommunicationsapps
+set crapware[6]=Microsoft.People
+set crapware[7]=Microsoft.Messaging
+set crapware[8]=Microsoft.GamingApp
+set crapware[9]=Microsoft.ZuneMusic
+set crapware[10]=Microsoft.ZuneVideo
+set crapware[11]=Microsoft.549981C3F5F10
+set crapware[12]=Clipchamp.Clipchamp
+set crapware[13]=Microsoft.SkypeApp
+set crapware[14]=Microsoft.Advertising.Xaml
+set crapware[15]=Microsoft.Getstarted
+set crapware[16]=Microsoft.Todos
+set crapware[17]=Microsoft.GetHelp
+set crapware[18]=MicrosoftTeams
+set crapware[19]=Microsoft.BingSearch
+set crapware[20]=Microsoft.BingHealthAndFitness
+set crapware[21]=Microsoft.BingFoodAndDrink
+set crapware[22]=Microsoft.WindowsFeedback
+set crapware[23]=Microsoft.BingTranslator
+set crapware[24]=Microsoft.BingTravel
+set crapware[25]=Microsoft.News
+set crapware[26]=Microsoft.Office.OneNote
+set crapware[27]=MSTeams
+set crapware[28]=Microsoft.Copilot
+set crapware[29]=Microsoft.Microsoft3DViewer
+set crapware[30]=Microsoft.Print3D
+set crapware[31]=MicrosoftCorporationII.QuickAssist
+set crapware[32]=Microsoft.Edge
+set crapware[33]=Microsoft.MicrosoftSolitaireCollection
+set crapware[34]=Microsoft.BingWeather
+set crapware[35]=Microsoft.BingSports
+set crapware[36]=Microsoft.BingNews
+set crapware[37]=Microsoft.BingFinance
+set crapware[38]=Microsoft.XboxApp
+set crapware[39]=Microsoft.Xbox.TCUI
 
 :: # #
 ::  @desc           define os ver and name
@@ -677,91 +682,130 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Toggle > Powershell > Install App
-::                  This func directly installs an app, should not be called directly, call using prompt func powershellInstall
+::  @desc           Toggle > App > Install
+::                  This func directly installs a package, should not be called directly, call using prompt func installAppPrompt
+::
+::  @arg string manager         powershell || winget
+::  @arg string package         Microsoft.Package.Example
 :: # #
 
-:powershellInstallApp
+:installApp
     setlocal
-    call :helperUnquote app %1
-    powershell -command "Get-AppXPackage -AllUsers -Name *%app%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
+
+    call :helperUnquote manager %1
+    call :helperUnquote package %2
+
+    if /i "%manager%" == "powershell" (
+        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo.
+        powershell -command "Get-AppXPackage -AllUsers -Name *%package%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
+    ) else if /i "%manager%" == "winget" (
+        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
+        powershell winget install *%package%* --accept-source-agreements --accept-package-agreements --silent
+    )
+
     endlocal
 goto :EOF
 
 :: # #
-::  @desc           Toggle > Powershell > Uninstall App
-::                  This func directly uninstalls an app, should not be called directly, call using prompt func powershellUninstallApp
+::  @desc           Toggle > App > Uninstall
+::                  This func directly uninstalls a package, should not be called directly, call using prompt func uninstallApp
+::
+::  @arg string manager         powershell || winget
+::  @arg string package         Microsoft.Package.Example
 :: # #
 
-:powershellUninstallApp
+:uninstallApp
     setlocal
-    call :helperUnquote app %1
-    powershell -command "Get-AppxPackage *%app%* | Remove-AppxPackage"
+
+    call :helperUnquote manager %1
+    call :helperUnquote package %2
+
+    if /i "%manager%" == "powershell" (
+        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo.
+        powershell -command "Get-AppxPackage *%package%* | Remove-AppxPackage"
+    ) else if /i "%manager%" == "winget" (
+        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
+        powershell winget uninstall *%package%* --accept-source-agreements --accept-package-agreements --silent
+    )
+
     endlocal
 goto :EOF
 
 :: # #
-::  @desc           Toggle > Powershell > Install Prompt
-::                  provides the prompt for installing a new app, does not actually install unless user presses Y
+::  @desc           Toggle > App > Install Prompt
+::                  provides the prompt for installing a new package, does not actually install unless user presses Y
+::
+::  @arg string manager         powershell || winget
+::  @arg string package         Microsoft.Package.Example
 :: # #
 
-:powershellInstall
+:installAppPrompt
     setlocal
-    call :helperUnquote app %1
+
+    call :helperUnquote manager %1
+    call :helperUnquote package %2
+
+    echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
 
     echo.
-
-    echo       %green%^(y^)%green%   Yes      %graym%Install %app%%u%
-    echo       %orange%^(n^)%orange%   No       %graym%Do not install %app%%u%
-    echo       %redl%^(A^)%redl%   Abort    %graym%Cancel and return to main menu%u%
-
+    echo       %green%^(y^)%green%   Yes     %graym%Install %package%%u%
+    echo       %orange%^(n^)%orange%   No      %graym%Do not install %package%%u%
+    echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
     echo.
 
-    set /p confirm="%goldm%    Install %app%? %graym%(y/n)%goldm% » %u%"
+    set /p confirm="%goldm%    Install %package%? %graym%(y/n)%goldm% » %u%"
+    echo.
 
-    If "%confirm%"=="Y" call :powershellInstallApp %app%
-    If "%Confirm%"=="y" call :powershellInstallApp %app%
-    If "%Confirm%"=="Yes" call :powershellInstallApp %app%
-    If "%Confirm%"=="yes" call :powershellInstallApp %app%
+    If "%confirm%"=="Y"         call :installApp %manager% %package%
+    If "%Confirm%"=="y"         call :installApp %manager% %package%
+    If "%Confirm%"=="Yes"       call :installApp %manager% %package%
+    If "%Confirm%"=="yes"       call :installApp %manager% %package%
 
-    If "%Confirm%"=="A" goto :main
-    If "%Confirm%"=="a" goto :main
-    If "%Confirm%"=="abort" goto :main
-    If "%Confirm%"=="Abort" goto :main
+    If "%Confirm%"=="A"         goto :main
+    If "%Confirm%"=="a"         goto :main
+    If "%Confirm%"=="abort"     goto :main
+    If "%Confirm%"=="Abort"     goto :main
     endlocal
 goto :EOF
 
 :: # #
-::  @desc           Toggle > Powershell > Uninstall Prompt
-::                  provides the prompt for uninstalling an app, does not actually uninstall unless user presses Y
+::  @desc           Toggle > App > Uninstall Prompt
+::                  provides the prompt for uninstalling a package, does not actually uninstall unless user presses Y
+::
+::  @arg string manager         powershell || winget
+::  @arg string package         Microsoft.Package.Example
 :: # #
 
-:powershellUninstall
+:uninstallAppPrompt
     setlocal
-    call :helperUnquote app %1
+
+    call :helperUnquote manager %1
+    call :helperUnquote package %2
+
+    echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
 
     echo.
-
-    echo       %green%^(y^)%green%   Yes      %graym%Uninstall %app%%u%
-    echo       %orange%^(n^)%orange%   No       %graym%Keep %app%%u%
-    echo       %redl%^(A^)%redl%   Abort    %graym%Cancel and return to main menu%u%
-
+    echo       %green%^(y^)%green%   Yes     %graym%Uninstall %package%%u%
+    echo       %orange%^(n^)%orange%   No      %graym%Keep %package%%u%
+    echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
     echo.
 
-    set /p confirm="%goldm%    Uninstall %app%? %graym%(y/n)%goldm% » %u%"
+    set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n)%goldm% » %u%"
+    echo.
 
-    If "%confirm%"=="Y" call :powershellUninstallApp %app%
-    If "%Confirm%"=="y" call :powershellUninstallApp %app%
-    If "%Confirm%"=="Yes" call :powershellUninstallApp %app%
-    If "%Confirm%"=="yes" call :powershellUninstallApp %app%
+    If "%confirm%"=="Y"         call :uninstallApp %manager% %package%
+    If "%Confirm%"=="y"         call :uninstallApp %manager% %package%
+    If "%Confirm%"=="Yes"       call :uninstallApp %manager% %package%
+    If "%Confirm%"=="yes"       call :uninstallApp %manager% %package%
 
-    If "%Confirm%"=="A" goto :main
-    If "%Confirm%"=="a" goto :main
-    If "%Confirm%"=="abort" goto :main
-    If "%Confirm%"=="Abort" goto :main
+    If "%Confirm%"=="A"         goto :main
+    If "%Confirm%"=="a"         goto :main
+    If "%Confirm%"=="abort"     goto :main
+    If "%Confirm%"=="Abort"     goto :main
 
     endlocal
 goto :EOF
+
 
 :: # #
 ::  @desc           Toggle > Uninstall Crapware
@@ -770,11 +814,27 @@ goto :EOF
 :taskUninstallCrapware
     setlocal
 
-    for /l %%n in (0,1,35) do (
-        set app=!crapware[%%n]!
-        call :powershellUninstall "!app!"
+    set crapwareProg=0
+    set crapwareNow=1
+
+    set /A crapwareTotal=%crapwareIndexMax%+1
+    call :progressUpdate 0 "Uninstall Crapware [1/!crapwareTotal!]"
+
+    for /l %%n in (0,1,!crapwareIndexMax!) do (
+        set package=!crapware[%%n]!
+        set /a crapwareNow+=1
+        call :uninstallAppPrompt "powershell" "!package!"
+        call :progressUpdate !crapwareProg! "Uninstall Crapware [!crapwareNow!/!crapwareTotal!]"
+
+        :: stupid workaround for batch not supporting floating points
+        If !crapwareNow! gtr 30 (
+            set /a crapwareProg+=4
+        ) else (
+            set /a crapwareProg+=2
+        )
     )
 
+    call :progressUpdate 100 "Crapware Uninstall Complete"
     echo.   %cyand% Notice  %u%        Operation complete. Press any key
     pause > nul
     endlocal
