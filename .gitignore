@@ -1,0 +1,63 @@
+# #
+#   registryBackup
+# #
+
+registryBackup
+
+# #
+#   Binaries
+# #
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# #
+#   Test binary
+#   build with `go test -c`
+# #
+
+*.test
+
+# #
+#   Output for go coverage tool, specifically when used with LiteIDE
+# #
+
+*.out
+
+# #
+#   Dependency directories (remove the comment below to include it)
+#   vendor/
+# #
+
+# #
+#   Go workspace file
+# #
+
+go.work
+
+# #
+#   Mac
+# #
+
+.DS_STORE
+
+# #
+#   Visual Studio Code
+# #
+
+.vscode/
+
+# #
+#   Python Cache
+# #
+
+__pycache__/
+
+# #
+#   logs
+# #
+
+.log
