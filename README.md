@@ -1,5 +1,5 @@
 <div align="center">
-<h6>No updates until 12-31-2051</h6>
+<h6>No updates until 12-31-2051; take back your device</h6>
 <h1>♾️ Windows Personalization Utility ♾️</h1>
 
 <br />
