@@ -162,35 +162,34 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         set AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%
     )
 
-    chcp 65001 >nul
-    cls
-    echo.
-    echo.
-    echo.
-    echo.
-    echo.     %bluel%v%repo_version%%u%
-    echo.
-    echo  %crimson%    ██╗    ██╗██╗███╗   ██╗██████╗  ██████╗ ██╗    ██╗███████╗    ██╗   ██╗██████╗ ██████╗  █████╗ ████████╗███████╗
-    echo      ██║    ██║██║████╗  ██║██╔══██╗██╔═══██╗██║    ██║██╔════╝    ██║   ██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝
-    echo      ██║ █╗ ██║██║██╔██╗ ██║██║  ██║██║   ██║██║ █╗ ██║███████╗    ██║   ██║██████╔╝██║  ██║███████║   ██║   █████╗  %u%
-    echo  %crimson%    ██║███╗██║██║██║╚██╗██║██║  ██║██║   ██║██║███╗██║╚════██║    ██║   ██║██╔═══╝ ██║  ██║██╔══██║   ██║   ██╔══╝
-    echo      ╚███╔███╔╝██║██║ ╚████║██████╔╝╚██████╔╝╚███╔███╔╝███████║    ╚██████╔╝██║     ██████╔╝██║  ██║   ██║   ███████╗
-    echo       ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚══════╝     ╚═════╝ ╚═╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ %u%
-    echo.
-    echo %u%                                                Developed by %repo_author%
-    echo %u%                                  %gray%%repo_url%
-    echo.
-    echo %gray%   ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-    echo.
+    title WSPU (Windows Security and Privacy Utility )
 
     set q_mnu_main=
     set q_mnu_adv=
 
+    chcp 65001 > nul
+    cls
     echo.
+    echo.
+    echo.     %goldm%v%repo_version%%u%                                      %grayd%Windows Security and Privacy Utility%u%
+    echo.
+    echo  %fuchsia2%    ██╗    ██╗███████╗██████╗     ██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
+    echo      ██║    ██║██╔════╝██╔══██╗    ██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
+    echo      ██║ █╗ ██║███████╗██████╔╝    ██║   ██║   ██║   ██║██║     ██║   ██║    ╚████╔╝ 
+    echo      ██║███╗██║╚════██║██╔═══╝     ██║   ██║   ██║   ██║██║     ██║   ██║     ╚██╔╝  
+    echo      ╚███╔███╔╝███████║██║         ╚██████╔╝   ██║   ██║███████╗██║   ██║      ██║   
+    echo       ╚══╝╚══╝ ╚══════╝╚═╝          ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝  
+    echo.
+    echo.
+    echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
 
-    echo.   %bluel% Notice  %u%        Windows Updates are currently %AutoUpdateBool%%u%
-    echo.   %gray%                 The option to %AutoUpdateStr%%gray% updates again is greyed out, however%u%
-    echo.   %gray%                 it can be selected to re-apply the edits again%u%
+    echo.    %cyand% Author  %grayb%       %repo_author%%u%
+    echo.    %cyand% Repo    %grayb%       %repo_url%
+    echo.    %cyand% OS      %grayb%       %version% %graym%(%name% %osarchitecture%)%u%
+    echo.    %cyand% Uptime  %grayb%       %d% %graym%days%u% %h% %graym%hours%u% %n% %graym%minutes%u% %s% %graym%seconds
+    echo.    %cyand% Status  %grayb%       Windows Updates %AutoUpdateBool%%u%
+
+    echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo.
 
     if /I "%AutoUpdate%" EQU "true" (
