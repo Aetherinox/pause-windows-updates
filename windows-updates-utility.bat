@@ -110,19 +110,50 @@ set "spaces=                                       "
 
 :: # #
 ::  define services
-::      uhssvc              Microsoft Update Health Service
-::      UsoSvc              Update Orchestrator Service
-::      WaaSMedicSvc        Windows Update Medic Service
-::      wuauserv            Windows Update Service
+::      uhssvc                                      Microsoft Update Health Service
+::      UsoSvc                                      Update Orchestrator Service
+::      WaaSMedicSvc                                Windows Update Medic Service
+::      wuauserv                                    Windows Update Service
+::      
+::      DiagTrack                                   Connected User Experiences and Telemetry
+::      dmwappushservice                            Device Management Wireless Application Protocol (WAP) Push message Routing Service
+::      diagsvc                                     Diagnostic Execution Service
+::      diagnosticshub.standardcollector.service    Microsoft (R) Diagnostics Hub Standard Collector Service
 :: # #
 
-set lstServices=uhssvc UsoSvc WaaSMedicSvc wuauserv
+set servicesUpdates=uhssvc UsoSvc WaaSMedicSvc wuauserv
+set servicesTelemetry=DiagTrack dmwappushservice diagsvc diagnosticshub.standardcollector.service
 
-:: convert service to name for easier identification
-set x[uhssvc]=Microsoft Update Health Service
-set x[UsoSvc]=Update Orchestrator Service
-set x[WaaSMedicSvc]=WaaSMedicSvc
-set x[wuauserv]=Windows Update
+:: Update Service IDs to Names
+set servicesUpdatesNames[uhssvc]=Microsoft Update Health Service
+set servicesUpdatesNames[UsoSvc]=Update Orchestrator Service
+set servicesUpdatesNames[WaaSMedicSvc]=WaaSMedicSvc
+set servicesUpdatesNames[wuauserv]=Windows Update
+
+:: Telemetry Service IDs to Names
+set servicesTelemetryNames[DiagTrack]=Connected User Experiences and Telemetry
+set servicesTelemetryNames[dmwappushservice]=Device Management Wireless Application
+set servicesTelemetryNames[diagsvc]=Diagnostic Execution Service
+set servicesTelemetryNames[diagnosticshub.standardcollector.service]=Microsoft (R) Diagnostics Hub
+
+:: Disable tasks
+set schtasksDisable[0]=\Microsoft\Windows\Application Experience\AITAgent
+set schtasksDisable[1]=\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser
+set schtasksDisable[2]=\Microsoft\Windows\Application Experience\ProgramDataUpdater
+set schtasksDisable[3]=\Microsoft\Windows\Customer Experience Improvement Program\Consolidator
+set schtasksDisable[4]=\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask
+set schtasksDisable[5]=\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip
+set schtasksDisable[6]=\Microsoft\Office\OfficeTelemetryAgentFallBack
+set schtasksDisable[7]=\Microsoft\Office\OfficeTelemetryAgentLogOn
+set schtasksDisable[8]=\Microsoft\Office\OfficeTelemetryAgentFallBack2016
+set schtasksDisable[9]=\Microsoft\Office\OfficeTelemetryAgentLogOn2016
+set schtasksDisable[10]=\Microsoft\Office\Office 15 Subscription Heartbeat
+set schtasksDisable[11]=\Microsoft\Office\Office 16 Subscription Heartbeat
+set schtasksDisable[12]=\Microsoft\Windows\Maintenance\WinSAT
+set schtasksDisable[13]=\Microsoft\Windows\CloudExperienceHost\CreateObjectTask
+set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
+set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
+
 :: # #
 ::  @desc           define os ver and name
 :: # #
@@ -726,46 +757,46 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 :: # #
 
 :taskUpdatesEnable
-    echo.   %bluel% Notice  %u%        Enabling Windows Update Services ...%u%
+    echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
 
-    for %%i in (%lstServices%) do (
-        set y=!x[%%i]!
+    for %%i in (%servicesUpdates%) do (
+        set y=!servicesUpdatesNames[%%i]!
         set "service=!y! %pink%[%%i] !spaces!"
         set "service=!service:~0,50!"
 
-        echo.   %bluel%         %gray%          !service! %green%enabled%u%
-        sc config %%i start= auto >nul 2>&1
-        net start %%i >nul 2>&1
+        echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
+        sc config %%i start= auto > nul 2>&1
+        net start %%i > nul 2>&1
     )
 
     :: Windows Update > Dates
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesStartTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesEndTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesStartTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesExpiryTime" /t REG_SZ /d "" /f >nul
-    reg add "HKLM\Software\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursStart" /t REG_DWORD /d "0x0000000d" /f >nul
-    reg add "HKLM\Software\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursEnd" /t REG_DWORD /d "0x00000007" /f >nul
-    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /t REG_DWORD /d "0x00002727" /f >nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesStartTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesEndTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesStartTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesExpiryTime" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursStart" /t REG_DWORD /d "0x0000000d" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "ActiveHoursEnd" /t REG_DWORD /d "0x00000007" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /t REG_DWORD /d "0x00002727" /f > nul
 
     :: Services\WaaSMedicSvc / enables windows update service
     ::      0 = Boot  '1 = System  '2 = Automatic  3 = Manual  4 = Disabled
-    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d "00000003" /f >nul
-    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "FailureActions" /t REG_BINARY /d "840300000000000000000000030000001400000001000000c0d4010001000000e09304000000000000000000" /f >nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d "00000003" /f > nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "FailureActions" /t REG_BINARY /d "840300000000000000000000030000001400000001000000c0d4010001000000e09304000000000000000000" /f > nul
 
     :: WindowsUpdate\AU
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAUShutdownOption" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AlwaysAutoRebootAtScheduledTime" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoRebootWithLoggedOnUsers" /t REG_DWORD /d "0x00000001" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AutoInstallMinorUpdates" /t REG_DWORD /d "0x00000001" /f >nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAUShutdownOption" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AlwaysAutoRebootAtScheduledTime" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoRebootWithLoggedOnUsers" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AutoInstallMinorUpdates" /t REG_DWORD /d "0x00000001" /f > nul
 
     :: UpdatePolicy\Settings
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureStatus" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityStatus" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityDate" /t REG_SZ /d "" /f >nul
-    reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "" /f >nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureStatus" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityStatus" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityDate" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "" /f > nul
 
     if %errorlevel% NEQ 0 (
         echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
@@ -773,7 +804,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     )
 
     if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%        Registry has been modified, updates are enabled.
+        echo.   %greenl% Success %u%        Registry has been modified
     )
 
     goto sessFinish
@@ -783,19 +814,211 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 :: # #
 
 :taskDisableTelemetry
-    echo.   %bluel% Motice  %u%        Disabling telemetry%u%
-    reg add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d "0x00000004" /f >nul
-    reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f >nul
-    reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "MaxTelemetryAllowed" /t REG_DWORD /d "0x00000000" /f >nul
+    echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
+
+	reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKLM\SOFTWARE\Microsoft\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "DontRetryOnError" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "IsCensusDisabled" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "TaskEnableRun" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableUAR" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableInventory" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKLM\SYSTEM\CurrentControlSet\Control\WMI\AutoLogger\SQMLogger" /v "Start" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Strings" /v "DiagnosticErrorText" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Strings" /v "DiagnosticLinkText" /t REG_SZ /d "" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility" /v "DiagnosticErrorText" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d "0x00000004" /f > nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\WMI\AutoLogger\AutoLogger-Diagtrack-Listener" /v "Start" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushservice" /v "Start" /t REG_DWORD /d "0x00000004" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v "DisableThirdPartySuggestions" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\Software\Policies\Microsoft\Windows\System" /v "UploadUserActivities" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity" /v "Value" /t REG_SZ /d "Deny" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData" /v "Value" /t REG_SZ /d "Deny" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput" /v "Value" /t REG_SZ /d "Deny" /f > nul
+    reg add "HKLM\SYSTEM\DriverDatabase\Policies\Settings" /v "DisableSendGenericDriverNotFoundToWER" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\IE" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "DisableOptinExperience" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f
+	reg add "HKLM\SOFTWARE\Policies\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Assistance\Client\1.0" /v "NoActiveHelp" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Assistance\Client\1.0" /v "NoExplicitFeedback" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "MicrosoftEdgeDataOptIn" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "LimitEnhancedDiagnosticDataWindowsAnalytics" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowCommercialDataPipeline" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowDeviceNameInTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DoNotShowFeedbackNotifications" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "DoReport" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableTailoredExperiencesWithDiagnosticData" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\Experience\AllowTailoredExperiencesWithDiagnosticData" /v "value" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\LimitDiagnosticLogCollection" /v "value" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\LimitDumpCollection" /v "value" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\LimitEnhancedDiagnosticDataWindowsAnalytics" /v "value" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\DisableDiagnosticDataViewer" /v "value" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\ScriptedDiagnosticsProvider\Policy" /v "EnableDiagnostics" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Software Protection Platform" /v "NoGenTicket" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Software Protection Platform" /v "AllowWindowsEntitlementReactivation" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\StorageSense" /v "AllowStorageSenseGlobal" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\CrashControl\StorageTelemetry" /v "DeviceDumpEnabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Tracing\SCM\Regular" /v "TracingDisabled" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\MSDeploy\3" /v "EnableTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowDesktopAnalyticsProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowUpdateComplianceProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowWUfBCloudProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "LimitDumpCollection" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "MaxTelemetryAllowed" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "EnableExtendedBooksTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "LimitDiagnosticLogCollection" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowDesktopAnalyticsProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowUpdateComplianceProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowWUfBCloudProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "LimitDumpCollection" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "MaxTelemetryAllowed" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "EnableExtendedBooksTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "LimitDiagnosticLogCollection" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowDesktopAnalyticsProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowUpdateComplianceProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowWUfBCloudProcessing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "LimitDumpCollection" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "MaxTelemetryAllowed" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "EnableExtendedBooksTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "LimitDiagnosticLogCollection" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\AllowTelemetry" /v "value" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Steps-Recorder" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Telemetry" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Inventory" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Compatibility-Troubleshooter" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Compatibility-Assistant/Trace" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Compatibility-Assistant/Compatibility-Infrastructure-Debug" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Compatibility-Assistant/Analytic" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-Application-Experience/Program-Compatibility-Assistant" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype\ETW" /v "TraceLevelThreshold" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype" /v "EnableTracing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype\ETW" /v "EnableTracing" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype" /v "WPPFilePath" /t REG_SZ /d "%%SYSTEMDRIVE%%\TEMP\Tracing\WPPMedia" /f > nul
+    reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype\ETW" /v "WPPFilePath" /t REG_SZ /d "%%SYSTEMDRIVE%%\TEMP\WPPMedia" /f > nul
 
     if %errorlevel% NEQ 0 (
-        echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
+        echo.   %red% Error   %u%        Error occurred trying to edit your registry%u%
         goto sessError
     )
 
-    if %errorlevel% EQU 0 (
-        echo.   %green% Success %u%        Registry has been modified, telemetry has been disabled.
+    echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Office%u% telemetry settings%u%
+
+	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common" /v "QMEnable" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common\Feedback" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Outlook\Options\Calendar" /v "EnableCalendarLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Outlook\Options\Mail" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Word\Options" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common" /v "QMEnable" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common\ClientTelemetry" /v "DisableTelemetry" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common\ClientTelemetry" /v "VerboseLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Common\Feedback" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Outlook\Options\Calendar" /v "EnableCalendarLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Outlook\Options\Mail" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Options" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\Common\ClientTelemetry" /v "DisableTelemetry" /t REG_DWORD /d "0x00000001" /f > nul
+	reg add "HKCU\SOFTWARE\Microsoft\Office\Common\ClientTelemetry" /v "VerboseLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\15.0\OSM" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\15.0\OSM" /v "EnableUpload" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
+	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableUpload" /t REG_DWORD /d "0x00000000" /f > nul
+
+    echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl" > nul 2>&1
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+    )
+
+    echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl" > nul 2>&1
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+    )
+
+	echo "" > "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\AutoLogger-Diagtrack-Listener.etl"
+
+    :: # #
+    ::  Windows Media Player Usage Telemetry
+    :: # #
+
+    echo.   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
+	reg add "HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences" /v "UsageTracking" /t REG_DWORD /d "0x00000000" /f > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred trying to edit your registry%blue%UsageTracking%u%
+        goto sessError
+    )
+
+    :: # #
+    ::  disable diagnostics and telemetry apps
+    ::  
+    ::  schtasks parameter List:
+    ::      /Create                 Creates a new scheduled task.
+    ::      /Delete                 Deletes the scheduled task(s).
+    ::      /Query                  Displays all scheduled tasks.
+    ::      /Change                 Changes the properties of scheduled task.
+    ::      /Run                    Runs the scheduled task on demand.
+    ::      /End                    Stops the currently running scheduled task.
+    ::      /ShowSid                Shows the security identifier corresponding to a scheduled task name.
+    ::
+    ::      /TN         taskname    Specifies the path\name of the task to change.
+    ::      /ENABLE                 Enables the scheduled task.
+    ::      
+    ::      /DISABLE                Disables the scheduled task.
+    ::  
+    ::      /Z                      Marks the task for deletion after its final run.
+    :: # #
+
+    for /l %%n in (0,1,11) do (
+        set task=!schtasksDisable[%%n]!
+        echo.   %purplel% Status  %u%        Disable task %blue%!task! %u%
+	    schtasks /Change /TN "!task!" /DISABLE > nul 2>&1
+    )
+
+    :: # #
+    ::  disable compat telemetry runner
+    ::  This app connects to Microsoft's servers to share diagnostics and feedback about how you use Microsoft Windows
+    :: # #
+
+    echo.   %purplel% Status  %u%        Disable process %blue%%windir%\System32\CompatTelRunner.exe %u%
+	takeown /F %windir%\System32\CompatTelRunner.exe > nul 2>&1
+	icacls %windir%\System32\CompatTelRunner.exe /grant %username%:F > nul 2>&1
+	del %windir%\System32\CompatTelRunner.exe /f > nul 2>&1
+
+    :: # #
+    ::  Disable Telemetry Services
+    :: 
+    ::  DiagTrack (Connected User Experiences and Telemetry)
+    ::      The Connected User Experiences and Telemetry service enables features that support in-application and connected user experiences.
+    ::      Additionally, this service manages the event driven collection and transmission of diagnostic and usage information 
+    ::      (used to improve the experience and quality of the Windows Platform) when the diagnostics and usage privacy option settings are
+    ::      enabled under Feedback and Diagnostics.
+    ::  
+    ::  dmwappushservice
+    ::      Routes Wireless Application Protocol (WAP) Push messages received by the device and synchronizes Device Management sessions
+    :: # #
+
+    for %%i in (%servicesTelemetry%) do (
+        set y=!servicesTelemetryNames[%%i]!
+        set "service=!y! %pink%[%%i] !spaces!"
+        set "service=!service:~0,80!"
+
+        echo.   %cyand%         %grayd%          !service! %red%disabled%u%
+        net stop %%i > nul 2>&1
+        sc config %%i start= disabled > nul 2>&1
+        sc failure %%i reset= 0 actions= "" > nul 2>&1
     )
 
     goto sessFinish
