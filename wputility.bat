@@ -235,6 +235,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     echo.     %goldm%^(5^)%u%   Manage Update Services
     echo.     %goldm%^(6^)%u%   Backup Registry
     echo.
+    echo.     %goldm%^(A^)%u%   Advanced
+    echo.
     echo.     %greenm%^(H^)%greenm%   Help
     echo.     %blueb%^(S^)%blueb%   Supporters
     echo.     %redl%^(Q^)%redl%   Quit
@@ -343,55 +345,111 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         pause > nul
     )
 
-    if /I "!q_mnu_main!" EQU "R" (
+    if /I "!q_mnu_main!" equ "R" (
         cls
         goto :main
     )
 
     :: option > (1) Disable Updates
-
-    if /I "%q_mnu_main%" EQU "1" (
+    if /I "%q_mnu_main%" equ "1" (
         goto :taskUpdatesDisable
     )
 
     :: option > (2) Enable Updates
-
-    if /I "%q_mnu_main%" EQU "2" (
+    if /I "%q_mnu_main%" equ "2" (
         goto :taskUpdatesEnable
     )
 
     :: option > (3) Disable Telemetry
-
-    if /I "%q_mnu_main%" EQU "3" (
+    if /I "%q_mnu_main%" equ "3" (
         goto :taskDisableTelemetry
     )
 
     :: option > (4) Clean windows update dist folder
-
-    if /I "%q_mnu_main%" EQU "4" (
-        goto :taskFilesErase
+    if /I "%q_mnu_main%" equ "4" (
+        goto :taskStartErase
     )
 
     :: option > (5) Manage Update Services
-
-    if /I "%q_mnu_main%" EQU "5" (
+    if /I "%q_mnu_main%" equ "5" (
         goto :menuServices
     )
 
     :: option > (6) Backup Registry
-
-    if /I "%q_mnu_main%" EQU "6" (
+    if /I "%q_mnu_main%" equ "6" (
         goto :taskBackupRegistry
     )
 
-    :: option > (Q) Quit
+    :: option > (A) Advanced
+    if /I "!q_mnu_main!" equ "A" (
+        goto :menuAdvanced
+    )
 
-    if /I "%q_mnu_main%" EQU "Q" (
+    :: option > (Q) Quit
+    if /I "%q_mnu_main%" equ "Q" (
         goto :sessQuit
     ) else (
         echo.   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
 
         goto :main
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Menu > Advanced
+:: # #
+
+:menuAdvanced
+    setlocal
+    cls
+
+    :: set states
+    set stateCortanaDword=0x0
+    set stateCortanaOpp=Disable
+    for /F "usebackq tokens=3*" %%A in (`reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" 2^>nul`) do (
+        set stateCortanaDword=%%A
+    )
+    if /I "%stateCortanaDword%"=="0x0" set stateCortanaOpp=Enable
+
+    set q_mnu_adv=
+
+    echo.
+    echo.
+
+    echo      %yellowd%^(1^)%u%   %stateCortanaOpp% Cortana
+    echo      %yellowd%^(2^)%u%   Uninstall Crapware
+    echo.
+    echo      %redl%^(R^)%redl%   Return
+
+    echo.
+    echo.
+    set /p q_mnu_adv="%goldm%    Pick Option » %u%"
+    echo.
+
+    echo.
+
+    :: option > (1) Disable Cortana
+    if /I "%q_mnu_adv%" equ "1" (
+        call :taskToggleCortana %stateCortanaOpp%
+        goto :menuAdvanced
+    )
+
+    :: option > (2) Uninstall Crapware
+    if /I "%q_mnu_adv%" equ "2" (
+        call :taskUninstallCrapware
+        goto :menuAdvanced
+    )
+
+    :: option > (R) Return
+    if /I "%q_mnu_adv%" equ "R" (
+        goto :main
+    ) else (
+        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_adv%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuAdvanced
     )
 
     endlocal
