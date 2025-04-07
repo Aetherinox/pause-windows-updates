@@ -264,6 +264,11 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
         echo.
 
+        echo       %goldm%^(6^)%greenm%   Backup Registry%u%
+        echo             %grayd%Create a backup of your registry
+
+        echo.
+
         echo       %goldm%^(S^)%greenm%   Supporters%u%
         echo             %grayd%A list of people who have donated to this project.
 
@@ -336,6 +341,12 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     if /I "%q_mnu_main%" EQU "5" (
         goto :menuServices
+    )
+
+    :: option > (6) Backup Registry
+
+    if /I "%q_mnu_main%" EQU "6" (
+        goto :taskBackupRegistry
     )
 
     :: option > (Q) Quit
