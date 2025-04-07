@@ -123,6 +123,16 @@ set x[uhssvc]=Microsoft Update Health Service
 set x[UsoSvc]=Update Orchestrator Service
 set x[WaaSMedicSvc]=WaaSMedicSvc
 set x[wuauserv]=Windows Update
+:: # #
+::  @desc           define os ver and name
+:: # #
+
+for /f "usebackq tokens=1,2 delims==|" %%I in (`wmic os get osarchitecture^,name^,version /format:list`) do 2> nul set "%%I=%%J"
+for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSystem;$UP=(Get-Date)-"^
+    "($OS.ConvertToDateTime($OS.LastBootUpTime));$DO='d='+$UP.Days+"^
+    "' h='+$UP.Hours+' n='+$UP.Minutes+' s='+$UP.Seconds;Echo $DO"`) do (
+        set "%%A"&set "%%B"&set "%%C"&set "%%D"
+)
 
 :: # #
 ::  @desc           Main
