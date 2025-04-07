@@ -454,6 +454,7 @@ goto :EOF
     echo.
 
     echo      %yellowd%^(1^)%u%   Install Powershell v7.x
+    echo      %yellowd%^(2^)%u%   Install PowerToys
     echo.
     echo      %redl%^(R^)%redl%   Return
 
@@ -466,7 +467,13 @@ goto :EOF
 
     :: option > (1) Install Powershell 7
     if /I "%q_mnu_install%" equ "1" (
-        winget install --id Microsoft.PowerShell --source winget
+        call :installAppPrompt "winget" "Microsoft.PowerShell"
+        goto :menuAdvanced
+    )
+
+    :: option > (2) Install Powertoys
+    if /I "%q_mnu_install%" equ "2" (
+        call :installAppPrompt "winget" "Microsoft.PowerToys"
         goto :menuAdvanced
     )
 
@@ -700,7 +707,22 @@ goto :EOF
         powershell -command "Get-AppXPackage -AllUsers -Name *%package%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
     ) else if /i "%manager%" == "winget" (
         if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
-        powershell winget install *%package%* --accept-source-agreements --accept-package-agreements --silent
+
+        winget list | findstr /i %package% >nul
+        if errorlevel 1 (
+            echo.   %cyand% Notice  %u%        Package %yellowl%%package%%u% not installed, now installing%u%
+            winget install --id %package% --accept-source-agreements --accept-package-agreements --silent
+            if errorlevel 1 (
+                echo.   %red% Error   %u%         Failed to install %yellowl%%package%%u%, you will need to install it manually.
+                pause > nul
+            ) else (
+                echo.   %greenl% Success %u%        Installed package %grayd%%package%%u%
+                timeout /t 3 > nul
+            )
+        ) else (
+            echo.   %cyand% Notice  %u%        Package %yellowl%%package%%u% already installed, skipping
+            timeout /t 3 > nul
+        )
     )
 
     endlocal
@@ -725,7 +747,23 @@ goto :EOF
         powershell -command "Get-AppxPackage *%package%* | Remove-AppxPackage"
     ) else if /i "%manager%" == "winget" (
         if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
-        powershell winget uninstall *%package%* --accept-source-agreements --accept-package-agreements --silent
+
+        winget list | findstr /i %package% >nul
+        if errorlevel 1 (
+            echo.   %cyand% Notice  %u%        No package %yellowl%%package%%u% found, skipping%u%
+            timeout /t 3 > nul
+        ) else (
+            echo.   %cyand% Notice  %u%        Found package %yellowl%%package%%u%, uninstallling ...
+            winget uninstall --id %package%
+
+            if %errorlevel% neq 0 (
+                echo.   %red% Error   %u%        There was an issue uninstalling %grayd%%package%%u%. Press any key to continue.
+                pause > nul
+            ) else if %errorlevel% equ 0 (
+                echo.   %greenl% Success %u%        Uninstalled package %grayd%%package%%u%
+                timeout /t 1 > nul
+            )
+        )
     )
 
     endlocal

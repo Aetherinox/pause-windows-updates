@@ -62,6 +62,8 @@ If you are here to simply disable Windows Updates; this repository provides two 
 - Delete / clean up lingering Windows Update files to increase disk-space
 - Backup your entire system registry
 - Remove Windows telemetry and tracking
+- Uninstall Windows "crapware / bloatware" applications
+- Install apps such as `Powershell 7`, `Cortana`, etc.
 - Requires elevated admin permissions to run
 - Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `wputility.bat`
