@@ -18,6 +18,7 @@ GOTO        comment_end
 :: # #
 
 if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
+
 net session > nul 2>&1
 if %errorlevel% NEQ 0 (
 	echo.   %red% Error   %u%         This script requires elevated privileges to run.
@@ -64,6 +65,10 @@ set lime=[38;5;154m
 set gray=[90m
 set brown=[38;5;94m
 set white=[37m
+
+:: progress bar
+set PROGRESS_BAR_WIDTH=50
+set PROGRESS_BAR_CHAR=#
 
 :: add spaces so that service names are in columns
 set "spaces=                                       "
@@ -743,3 +748,16 @@ set x[wuauserv]=Windows Update
     echo.   %red% Error   %u%        This script finished, but with errors. Read the logs above to see the issue.%u%
     pause >nul
     Exit /B 0
+
+
+:progressUpdate
+    setlocal ENABLEDELAYEDEXPANSION
+    set progPercent=%1
+    set /A progNumBars=%progPercent%/2
+    set /A progNumSpaces=50-%progNumBars%
+    set progMeter=
+    for /L %%A IN (%progNumBars%,-1,1) do set progMeter=!progMeter!I
+    for /L %%A IN (%progNumSpaces%,-1,1) do set progMeter=!progMeter! 
+    call :helperUnquote progGitle %2
+    title Working:  [%progMeter%]  %progPercent%%% - %progGitle%
+    endlocal
