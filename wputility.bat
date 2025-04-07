@@ -558,6 +558,36 @@ goto :EOF
 goto :EOF
 
 :: # #
+::  @desc           Toggle > Cortana
+:: # #
+
+:taskToggleCortana
+    setlocal
+    set state=%1
+    set setToIng=!state:~0,-1!ing
+
+    echo.   %cyand% Notice  %u%        !setToIng! Cortana
+
+    If "!state!"=="Enable" (
+        powershell -command "Get-AppXPackage -AllUsers -Name Microsoft.549981C3F5F10 | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000001" /f> nul
+    ) else (
+        powershell -command "Get-AppxPackage *Microsoft.549981C3F5F10* | Remove-AppxPackage"
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000000" /f> nul
+    )
+
+    echo.   %cyand% Notice  %u%        Operation complete. Press any key
+    pause > nul
+    endlocal
+goto :EOF
 ::  @desc           Backup Registry
 :: # #
 
