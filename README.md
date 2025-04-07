@@ -80,6 +80,7 @@ If you are here to simply disable Windows Updates; this repository provides two 
     - `windows-updates-unpause.reg`
 
 <br />
+<br />
 
 ### WP Utility
 
@@ -94,6 +95,24 @@ To use the WP Utility, double-click the batch `.bat` file. You will be presented
      2. Enable Services
      3. Disable Services
 6. Backup Registry
+7. Advanced
+   - Enable/Disable Cortana
+   - Uninstall Crapware
+     - Microsoft.Teams
+     - Microsoft.BingSearch
+     - Microsoft.BingHealthAndFitness
+     - Microsoft.BingFoodAndDrink
+     - Microsoft.WindowsFeedback
+     - Microsoft.BingTranslator
+     - Microsoft.BingTravel
+     - Microsoft.Copilot
+     - Microsoft.Edge
+     - **Many more**
+   - Install Apps
+     - Install Powershell 7.x
+     - Install PowerToys
+
+<br />
 
 <div align="center">
 
