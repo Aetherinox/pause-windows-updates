@@ -641,45 +641,55 @@ goto :EOF
     goto :sessFinish
 
 :: # #
-::  @desc           Start
+::  @desc           Start Erase Task
 :: # #
 
-:taskStart
+:taskStartErase
 
     setlocal
+
     echo.
-    echo.   %cyand% Notice  %u%        %grayd% Scanning        %yellowl% %folder_distrb% %u%
+    echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
+    echo.
+
+    echo.
+    echo.   %cyand% Notice  %u%        %grayl%Scanning %blue%%folder_distrb% %u%
 
     if exist %folder_distrb%\ (
 
-        for /f %%a in ('dir /s /B /a-d "%folder_distrb%"')  DO (
+        for /f %%a in ('dir /s /B /a-d "%folder_distrb%" 2^>nul') do (
             set /A cnt_files+=1
         )
 
-        for /f %%a in ('dir /s /B /ad "%folder_distrb%"')  DO (
+        for /f %%a in ('dir /s /B /ad "%folder_distrb%" 2^>nul') do (
             set /A cnt_dirs+=1
         )
 
-        echo.   %u%                 %grayd% Files%u%           %yellowl% !cnt_files! %u%
-        echo.   %u%                 %grayd% Folders%u%         %yellowl% !cnt_dirs! %u%
-
+        echo.   %u%                 %graym%Files%u%           %yellowl%!cnt_files!%u%
+        echo.   %u%                 %graym%Folders%u%         %yellowl%!cnt_dirs!%u%
     ) else (
-        echo.   %cyand% Notice  %u%        Could not find %grayd% %folder_distrb%%u%; nothing to do.
+        echo.   %cyand% Notice  %u%        Could not find %grayd%%folder_distrb%%u%; nothing to do.
         goto sessFinish
     )
 
     timeout /t 1 > nul
     echo.
 
-    echo.   %grayd% Confirm %yellowd%        Would you like to delete the Windows Update distribution files?%u%
-    echo.   %u%                  Type %greenl%Yes to continue%u% or %red%No to return%u%
+    echo.   %goldm% Confirm         %goldm%Would you like to delete the Windows Update distribution files?%u%
+    echo.   %u%                 Type %greenm%Yes to delete files%u% or %redl%No to return%u%
     echo.
-    set /p confirm="%u%                     Delete windows update files? » %u%"
 
-    if /I "%confirm%"=="Yes"   goto taskStart
-    if /I "%confirm%"=="yes" goto taskStart
-    if /I "%confirm%"=="No"   goto sessFinish
-    if /I "%confirm%"=="no"  goto sessFinish
+    set /p confirm="%goldm%    Delete files? %graym%(y/n)%goldm% » %u%"
+
+    If "%confirm%"=="Y" goto taskFilesErase
+    If "%Confirm%"=="y" goto taskFilesErase
+    If "%Confirm%"=="Yes" goto taskFilesErase
+    If "%Confirm%"=="yes" goto taskFilesErase
+    If "%Confirm%"=="N" goto main
+    If "%Confirm%"=="n" goto main
+    If "%Confirm%"=="No" goto main
+    If "%Confirm%"=="no" goto main
+
     endlocal
 goto :EOF
 
