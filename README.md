@@ -63,7 +63,7 @@ If you are here to simply disable Windows Updates; this repository provides two 
 - Backup your entire system registry
 - Remove Windows telemetry and tracking
 - Requires elevated admin permissions to run
-- Available by using the files:
+- Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `wputility.bat`
 
 
@@ -73,7 +73,7 @@ If you are here to simply disable Windows Updates; this repository provides two 
 
 - Disable / Enable Windows Updates
 - Requires no elevated permissions
-- Available by using the files:
+- Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `windows-updates-pause.reg`
     - `windows-updates-unpause.reg`
 
@@ -165,7 +165,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 ### Registry Scripts
 
-- Download the `.reg` file to your computer.
+- Download the `.reg` file to your computer from the bottom of our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page.
 - Right click on the file and select `Open With`
   ![](docs/img/registry/1.gif)
 
@@ -183,7 +183,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 ### WP Utility
 
-- Download the `.bat` file to your system.
+- Download the `.bat` file to your computer from the bottom of our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page.
 - Double-click the file and Command Prompt or Powershell will launch.
 - You will be prompted to give the script permission so that it can modify your registry, select **Yes**.
 - Read the options in the menu, and select the option you want.
