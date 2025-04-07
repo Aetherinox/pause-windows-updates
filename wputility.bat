@@ -588,6 +588,132 @@ goto :EOF
     pause > nul
     endlocal
 goto :EOF
+
+:: # #
+::  @desc           Toggle > Powershell > Install App
+::                  This func directly installs an app, should not be called directly, call using prompt func powershellInstall
+:: # #
+
+:powershellInstallApp
+    setlocal
+    call :helperUnquote app %1
+    powershell -command "Get-AppXPackage -AllUsers -Name *%app%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Toggle > Powershell > Uninstall App
+::                  This func directly uninstalls an app, should not be called directly, call using prompt func powershellUninstallApp
+:: # #
+
+:powershellUninstallApp
+    setlocal
+    call :helperUnquote app %1
+    powershell -command "Get-AppxPackage *%app%* | Remove-AppxPackage"
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Toggle > Powershell > Install Prompt
+::                  provides the prompt for installing a new app, does not actually install unless user presses Y
+:: # #
+
+:powershellInstall
+    setlocal
+    call :helperUnquote app %1
+
+    echo.
+
+    echo       %green%^(y^)%green%   Yes      %graym%Install %app%%u%
+    echo       %orange%^(n^)%orange%   No       %graym%Do not install %app%%u%
+    echo       %redl%^(A^)%redl%   Abort    %graym%Cancel and return to main menu%u%
+
+    echo.
+
+    set /p confirm="%goldm%    Install %app%? %graym%(y/n)%goldm% » %u%"
+
+    If "%confirm%"=="Y" call :powershellInstallApp %app%
+    If "%Confirm%"=="y" call :powershellInstallApp %app%
+    If "%Confirm%"=="Yes" call :powershellInstallApp %app%
+    If "%Confirm%"=="yes" call :powershellInstallApp %app%
+
+    If "%Confirm%"=="A" goto :main
+    If "%Confirm%"=="a" goto :main
+    If "%Confirm%"=="abort" goto :main
+    If "%Confirm%"=="Abort" goto :main
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Toggle > Powershell > Uninstall Prompt
+::                  provides the prompt for uninstalling an app, does not actually uninstall unless user presses Y
+:: # #
+
+:powershellUninstall
+    setlocal
+    call :helperUnquote app %1
+
+    echo.
+
+    echo       %green%^(y^)%green%   Yes      %graym%Uninstall %app%%u%
+    echo       %orange%^(n^)%orange%   No       %graym%Keep %app%%u%
+    echo       %redl%^(A^)%redl%   Abort    %graym%Cancel and return to main menu%u%
+
+    echo.
+
+    set /p confirm="%goldm%    Uninstall %app%? %graym%(y/n)%goldm% » %u%"
+
+    If "%confirm%"=="Y" call :powershellUninstallApp %app%
+    If "%Confirm%"=="y" call :powershellUninstallApp %app%
+    If "%Confirm%"=="Yes" call :powershellUninstallApp %app%
+    If "%Confirm%"=="yes" call :powershellUninstallApp %app%
+
+    If "%Confirm%"=="A" goto :main
+    If "%Confirm%"=="a" goto :main
+    If "%Confirm%"=="abort" goto :main
+    If "%Confirm%"=="Abort" goto :main
+
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Toggle > Uninstall Crapware
+:: # #
+
+:taskUninstallCrapware
+    setlocal
+
+    call :powershellUninstall "Microsoft.Getstarted"
+    call :powershellUninstall "Microsoft.549981C3F5F10"
+    call :powershellUninstall "Microsoft.WindowsFeedback"
+    call :powershellUninstall "Microsoft.MicrosoftSolitaireCollection"
+    call :powershellUninstall "Microsoft.BingWeather"
+    call :powershellUninstall "Microsoft.BingSports"
+    call :powershellUninstall "Microsoft.BingNews"
+    call :powershellUninstall "Microsoft.BingFinance"
+    call :powershellUninstall "Microsoft.XboxApp"
+    call :powershellUninstall "Microsoft.Xbox.TCUI"
+    call :powershellUninstall "Microsoft.XboxGamingOverlay"
+    call :powershellUninstall "Microsoft.XboxGameOverlay"
+    call :powershellUninstall "Microsoft.XboxIdentityProvider"
+    call :powershellUninstall "Microsoft.XboxSpeechToTextOverlay"
+    call :powershellUninstall "microsoft.windowscommunicationsapps"
+    call :powershellUninstall "Microsoft.People"
+    call :powershellUninstall "Microsoft.Messaging"
+    call :powershellUninstall "Microsoft.GamingApp"
+    call :powershellUninstall "Microsoft.ZuneMusic"
+    call :powershellUninstall "Microsoft.ZuneVideo"
+    call :powershellUninstall "Clipchamp.Clipchamp"
+    call :powershellUninstall "Microsoft.SkypeApp"
+    call :powershellUninstall "Microsoft.Advertising.Xaml"
+    call :powershellUninstall "Microsoft.Getstarted"
+
+    echo.   %cyand% Notice  %u%        Operation complete. Press any key
+    pause > nul
+    endlocal
+goto :EOF
+
+:: # #
 ::  @desc           Backup Registry
 :: # #
 
