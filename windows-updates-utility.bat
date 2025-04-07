@@ -199,7 +199,7 @@ set x[wuauserv]=Windows Update
     echo.     %goldm%^(6^)%u%   Backup Registry
     echo.
     echo       %green%^(H^)%green%   Help
-    echo       %crimson%^(Q^)%crimson%   Quit
+    echo.     %blueb%^(S^)%blueb%   Supporters
 
     echo.
     set /p q_mnu_main="%yellow%    Pick Option » %u%"
@@ -255,20 +255,43 @@ set x[wuauserv]=Windows Update
 
         echo.
 
-        echo       %yellow%^(5^)%u%   Manage Update Services
-        echo             %gray%This option allows you to view Windows Update's current status, as well as 
-        echo             %gray%enable or disable Windows Update system services.
+        echo       %goldm%^(S^)%greenm%   Supporters%u%
+        echo             %grayd%A list of people who have donated to this project.
+
         echo.
         echo             %gray%This task is automatically performed if you disable Windows Updates from this
         echo             %gray%utility using %yellow%Option 1%u%
 
         echo.
 
-        echo       %crimson%^(R^)%crimson%   Return
-    
+    :: # #
+    ::  @desc           Menu > Sponsors
+    :: # #
+
+    if /I "!q_mnu_main!" EQU "S" (
+
+        cls
+
         echo.
-        set /p q_mnu_main="%yellow%    Pick Option » %u%"
         echo.
+
+        echo %u%    If you wish to support this project, you may drop a donation at %goldd%https://buymeacoffee.com/aetherinox.
+        echo %u%    To have your name added, donate and leave a comment which gives us your Github username.
+        echo.
+        echo %u%    A special thanks to the following for donating:
+
+        echo.
+        echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
+        echo.
+
+        echo       %greenm%   Chad May%u%
+
+        echo.
+        echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
+        echo.
+
+        echo.   %cyand% Notice  %u%        Press any key to return
+        pause > nul
     )
 
     if /I "!q_mnu_main!" EQU "R" (
