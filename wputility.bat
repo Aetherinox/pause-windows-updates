@@ -1,5 +1,5 @@
 @ECHO       OFF
-TITLE       Windows Updates Utility
+TITLE       WPU (Windows Personalization Utility)
 SETLOCAL    ENABLEDELAYEDEXPANSION
 MODE        con:cols=125 lines=40
 MODE        125,40
@@ -149,7 +149,6 @@ set schtasksDisable[13]=\Microsoft\Windows\CloudExperienceHost\CreateObjectTask
 set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
 set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
 
-
 :: # #
 ::  @desc           define os ver and name
 :: # #
@@ -191,7 +190,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         set AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%
     )
 
-    title WSPU (Windows Security and Privacy Utility )
+    title WPU (Windows Personalization Utility)
 
     set q_mnu_main=
     set q_mnu_adv=
@@ -200,14 +199,14 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     cls
     echo.
     echo.
-    echo.     %goldm%v%repo_version%%u%                                      %grayd%Windows Security and Privacy Utility%u%
+    echo.     %goldm%v%repo_version%%u%                               %grayd%Windows Personalization Utility%u%
     echo.
-    echo  %fuchsia2%    ██╗    ██╗███████╗██████╗     ██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
-    echo      ██║    ██║██╔════╝██╔══██╗    ██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
-    echo      ██║ █╗ ██║███████╗██████╔╝    ██║   ██║   ██║   ██║██║     ██║   ██║    ╚████╔╝ 
-    echo      ██║███╗██║╚════██║██╔═══╝     ██║   ██║   ██║   ██║██║     ██║   ██║     ╚██╔╝  
-    echo      ╚███╔███╔╝███████║██║         ╚██████╔╝   ██║   ██║███████╗██║   ██║      ██║   
-    echo       ╚══╝╚══╝ ╚══════╝╚═╝          ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝  
+    echo  %fuchsia2%    ██╗    ██╗██████╗ ██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
+    echo      ██║    ██║██╔══██╗██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
+    echo      ██║ █╗ ██║██████╔╝██║   ██║   ██║   ██║██║     ██║   ██║    ╚████╔╝ 
+    echo      ██║███╗██║██╔═══╝ ██║   ██║   ██║   ██║██║     ██║   ██║     ╚██╔╝  
+    echo      ╚███╔███╔╝██║     ╚██████╔╝   ██║   ██║███████╗██║   ██║      ██║   
+    echo       ╚══╝╚══╝ ╚═╝      ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝   
     echo.
     echo.
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
