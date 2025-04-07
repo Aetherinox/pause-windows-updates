@@ -169,17 +169,17 @@ jobs:
                   echo "PROJECT_TAG_PREV=${{ steps.task_upload_tag_previous.outputs.tag }}" >> $GITHUB_OUTPUT
 
             # #
-            #   Upload › Artifacts › windows-updates-utility.bat
+            #   Upload › Artifacts › wputility.bat
             # #
 
             - name: >-
-                  📋 Upload Artifacts › windows-updates-utility.bat
+                  📋 Upload Artifacts › wputility.bat
               id: task_upload_artifact_reg_bat
               uses: actions/upload-artifact@v4
               if: always()
               with:
-                  name: windows-updates-utility.bat
-                  path: windows-updates-utility.bat
+                  name: wputility.bat
+                  path: wputility.bat
                   retention-days: 30
 
             # #
@@ -431,10 +431,10 @@ jobs:
             #   Release › Artifacts › Download
             # #
 
-            - name: '📁 Download › Artifacts › windows-updates-utility.bat'
+            - name: '📁 Download › Artifacts › wputility.bat'
               uses: actions/download-artifact@v4
               with:
-                  name: windows-updates-utility.bat
+                  name: wputility.bat
 
             - name: '📁 Download › Artifacts › windows-updates-pause.reg'
               uses: actions/download-artifact@v4
@@ -480,7 +480,7 @@ jobs:
                   draft: false
                   generate_release_notes: false
                   files: |
-                      windows-updates-utility.bat
+                      wputility.bat
                       windows-updates-pause.reg
                       windows-updates-unpause.reg
                   prerelease: false
@@ -513,7 +513,7 @@ jobs:
                   draft: false
                   generate_release_notes: false
                   files: |
-                      windows-updates-utility.bat
+                      wputility.bat
                       windows-updates-pause.reg
                       windows-updates-unpause.reg
                   prerelease: false
