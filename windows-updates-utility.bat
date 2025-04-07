@@ -1062,4 +1062,12 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     for /L %%A IN (%progNumSpaces%,-1,1) do set progMeter=!progMeter! 
     call :helperUnquote progGitle %2
     title Working:  [%progMeter%]  %progPercent%%% - %progGitle%
-    endlocal
+    endlocal
+
+:: # #
+::  @desc           Removes quotation marks from strings
+:: # #
+
+:helperUnquote
+    set %1=%~2
+goto :EOF
