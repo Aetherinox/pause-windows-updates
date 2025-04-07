@@ -1,10 +1,10 @@
 <div align="center">
 <h6>No updates until 12-31-2051</h6>
-<h1>♾️ Pause Windows Update ♾️</h1>
+<h1>♾️ Windows Personalization Utility ♾️</h1>
 
 <br />
 
-<p>A registry tweak and batch utility which allows you to pause Windows updates up until 12-31-2051.</p>
+<p>Windows Personalization Utility (WPU) - A registry tweak and batch utility which allows you to pause Windows updates up until 12-31-2051 and take back the privacy on your system.</p>
 
 <br />
 
@@ -29,11 +29,11 @@
 
 - [About](#about)
   - [Registry Scripts](#registry-scripts)
-  - [All-in-one Batch Utility](#all-in-one-batch-utility)
+  - [WP Utility](#wp-utility)
 - [Notice](#notice)
 - [Install](#install)
   - [Registry Scripts](#registry-scripts-1)
-  - [All-in-one Batch Utility](#all-in-one-batch-utility-1)
+  - [WP Utility](#wp-utility-1)
   - [Confirm](#confirm)
 - [Re-enable Updates](#re-enable-updates)
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
@@ -50,9 +50,18 @@
 
 ## About
 
+Formerly known as simply a registry tweak to disable Microsoft Windows updates, it has grown into a more complete solution for Windows users which allows you to do the following:
+
+- Disable / Enable Windows Updates
+- Delete / clean up lingering Windows Update files to increase disk-space
+- Bacup your registry
+- Remove Windows telemetry and tracking
+
+<br />
+
 This repository provides two different ways to pause windows updates. 
 
-The [All-In-One Batch method](#all-in-one-batch-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry. This method can also clean up any existing files on your machine that may be storing old Windows Updates and free up disk-space.
+The [WP Utility method](#wp-utility) gives you a few more features that you can pick from in order to disable Windows Updates, as well as disabling Microsoft Telemetry, and backing up your entire Windows registry. This method can also clean up any existing files on your machine that may be storing old Windows Updates and free up disk-space.
 
 The [Registry Scripts method](#registry-scripts) only allows you to enable or disable windows updates.
 
@@ -63,7 +72,7 @@ You can pick which one you wish to use from the list below (pick one):
 1. [Registry Scripts](#registry-scripts)
      - `windows-updates-pause.reg`
      - `windows-updates-unpause.reg`
-2. [All-in-One Batch Utility](#all-in-one-batch-utility)
+2. [WP Utility](#wp-utility)
      - `windows-updates-utility.bat`
 
 <br />
@@ -84,7 +93,7 @@ If you decide to go with the **registry** method, download the `.reg` file, and 
 
 <br />
 
-### All-in-one Batch Utility
+### WP Utility
 
 To use, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
 
@@ -137,7 +146,7 @@ This repo contains two different ways you can disable Windows Updates:
 
 
 1. [Registry Scripts](#registry-scripts)
-2. [All-in-One Batch Utility](#all-in-one-batch-utility)
+2. [WPUtility](#wp-utility)
 
 <br />
 
@@ -145,7 +154,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 | <sup><sub>Filename</sub></sup> | <sup><sub>Method</sub></sup> | <sup><sub>Description</sub></sup> |
 | --- | --- | --- |
-| `windows-updates-utility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services</sub></sup> |
+| `wputility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services</sub></sup> |
 | `windows-updates-pause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Disable Windows Updates until 2051</sub></sup> |
 | `windows-updates-unpause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Enable Windows Updates</sub></sup> |
 
@@ -169,7 +178,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 <br />
 
-### All-in-one Batch Utility
+### WP Utility
 
 - Download the `.bat` file to your system.
 - Double-click the file and Command Prompt or Powershell will launch.
