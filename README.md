@@ -157,9 +157,9 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 
 | <sup><sub>Filename</sub></sup> | <sup><sub>Method</sub></sup> | <sup><sub>Description</sub></sup> |
 | --- | --- | --- |
-| `wputility.bat` | <sup><sub>Batch Utility | <sup><sub>Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services</sub></sup> |
-| `windows-updates-pause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Disable Windows Updates until 2051</sub></sup> |
-| `windows-updates-unpause.reg` | <sup><sub>Registry Script</sub></sup> | <sup><sub>Enable Windows Updates</sub></sup> |
+| `wputility.bat` | Batch Utility | Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services<br/>Backup system registry |
+| `windows-updates-pause.reg` | Registry Script | Disable Windows Updates until 2051 |
+| `windows-updates-unpause.reg` | Registry Script | Enable Windows Updates |
 
 <br />
 
