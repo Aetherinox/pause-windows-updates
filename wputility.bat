@@ -436,6 +436,49 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 goto :EOF
 
 :: # #
+::  @desc           Menu > Install Apps
+:: # #
+
+:menuInstall
+    setlocal
+    cls
+    
+    set q_mnu_install=
+
+    echo.
+    echo.
+
+    echo      %yellowd%^(1^)%u%   Install Powershell v7.x
+    echo.
+    echo      %redl%^(R^)%redl%   Return
+
+    echo.
+    echo.
+    set /p q_mnu_install="%goldm%    Pick Option » %u%"
+    echo.
+
+    echo.
+
+    :: option > (1) Install Powershell 7
+    if /I "%q_mnu_install%" equ "1" (
+        winget install --id Microsoft.PowerShell --source winget
+        goto :menuAdvanced
+    )
+
+    :: option > (R) Return
+    if /I "%q_mnu_install%" equ "R" (
+        goto :main
+    ) else (
+        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_install%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuAdvanced
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
 ::  @desc           Menu > Advanced
 :: # #
 
@@ -456,8 +499,9 @@ goto :EOF
     echo.
     echo.
 
-    echo      %yellowd%^(1^)%u%   %stateCortanaOpp% Cortana
-    echo      %yellowd%^(2^)%u%   Uninstall Crapware
+    echo      %goldm%^(1^)%u%   %stateCortanaOpp% Cortana
+    echo      %goldm%^(2^)%u%   Uninstall Crapware
+    echo      %goldm%^(3^)%u%   Install Apps
     echo.
     echo      %redl%^(R^)%redl%   Return
 
@@ -478,6 +522,11 @@ goto :EOF
     if /I "%q_mnu_adv%" equ "2" (
         call :taskUninstallCrapware
         goto :menuAdvanced
+    )
+
+    :: option > (3) Install
+    if /I "%q_mnu_adv%" equ "3" (
+        goto :menuInstall
     )
 
     :: option > (R) Return
@@ -1245,7 +1294,7 @@ goto :EOF
 
     :: # #
     ::  disable compat telemetry runner
-    ::  This app connects to Microsoft's servers to share diagnostics and feedback about how you use Microsoft Windows
+    ::  This process connects to Microsoft's servers to share diagnostics and feedback about how you use Microsoft Windows
     :: # #
 
     echo.   %purplel% Status  %u%        Disable process %blue%%windir%\System32\CompatTelRunner.exe %u%
