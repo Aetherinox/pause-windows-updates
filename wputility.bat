@@ -20,7 +20,7 @@ GOTO        comment_end
 if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
 
 net session > nul 2>&1
-if %errorlevel% NEQ 0 (
+if %errorlevel% neq 0 (
 	echo.   %red% Error   %u%         This script requires elevated privileges to run.
 	goto :sessError
 )
@@ -175,7 +175,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     :                       0x1         updates are disabled
     :: # #
 
-    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) DO (
+    for /F "usebackq tokens=3*" %%A in (`REG QUERY "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) do (
         set noUpdatesState=%%A
     )
 
@@ -220,7 +220,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo.
 
-    if /I "%AutoUpdate%" EQU "true" (
+    if /I "%AutoUpdate%" equ "true" (
         echo.     %goldm%^(1^)%u%   Disable Updates
         echo.     %grayd%^(2^)%grayd%   Enable Updates
     ) else (
@@ -250,7 +250,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     ::  @desc           Menu > Help
     :: # #
 
-    if /I "!q_mnu_main!" EQU "H" (
+    if /I "!q_mnu_main!" equ "H" (
 
         cls
 
@@ -259,7 +259,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo %u%    This utility allows you to do the following tasks:
         echo.
 
-        if /I "%AutoUpdate%" EQU "true" (
+        if /I "%AutoUpdate%" equ "true" (
             echo       %goldm%^(1^)%greenm%   Disable Updates%u%
         ) else (
             echo       %grayd%^(1^)%greend%   Disable Updates%u% %goldd%[Already disabled]%u%
@@ -270,7 +270,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
         echo.
 
-        if /I "%AutoUpdate%" EQU "true" (
+        if /I "%AutoUpdate%" equ "true" (
             echo       %grayd%^(2^)%greend%   Enable Updates%u% %goldd%[Already enabled]%u%
         ) else (
             echo       %goldm%^(2^)%greenm%   Enable Updates%u%
@@ -319,7 +319,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     ::  @desc           Menu > Sponsors
     :: # #
 
-    if /I "!q_mnu_main!" EQU "S" (
+    if /I "!q_mnu_main!" equ "S" (
 
         cls
 
@@ -480,7 +480,7 @@ goto :EOF
     echo.
 
     :: option > (1) View Service Status
-    if /I "%q_mnu_serv%" EQU "1" (
+    if /I "%q_mnu_serv%" equ "1" (
 
         echo.   %cyand% Notice  %u%        Getting Service Status%u%
 
@@ -490,7 +490,7 @@ goto :EOF
             for /F "tokens=3 delims=: " %%H in ('sc query "%%i" ^| findstr "        STATE"') do (
                 set "service=!y! %pink%[%%i] !spaces!"
                 set "service=!service:~0,50!"
-                if /I "%%H" NEQ "RUNNING" (
+                if /I "%%H" neq "RUNNING" (
                     echo.   %cyand%         %grayd%          !service! %red%Not Running%u%
                 ) else (
                     echo.   %cyand%         %grayd%          !service! %greenl%Running%u%
@@ -505,7 +505,7 @@ goto :EOF
     )
 
     :: option > (2) Enable Update Services
-    if /I "%q_mnu_serv%" EQU "2" (
+    if /I "%q_mnu_serv%" equ "2" (
         echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
         for %%i in (%servicesUpdates%) do (
@@ -525,7 +525,7 @@ goto :EOF
     )
 
     :: option > (3) Disable Update Services
-    if /I "%q_mnu_serv%" EQU "3" (
+    if /I "%q_mnu_serv%" equ "3" (
         echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
         for %%i in (%servicesUpdates%) do (
@@ -546,7 +546,7 @@ goto :EOF
     )
 
     :: option > (R) Return
-    if /I "%q_mnu_serv%" EQU "R" (
+    if /I "%q_mnu_serv%" equ "R" (
         goto :main
     ) else (
         echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
@@ -735,9 +735,9 @@ goto :EOF
     call :progressUpdate 20 "Export HKLM from registry to file HKLM.reg"
     reg export HKLM "%dir_reg%\HKLM.reg" > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKLM.reg%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKLM.reg%u%
     )
 
@@ -747,9 +747,9 @@ goto :EOF
     call :progressUpdate 40 "Export HKCU from registry to file HKCU.reg"
     reg export HKCU "%dir_reg%\HKCU.reg" > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCU.reg%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCU.reg%u%
     )
 
@@ -759,9 +759,9 @@ goto :EOF
     call :progressUpdate 60 "Export HKCR from registry to file HKCR.reg"
     reg export HKCR "%dir_reg%\HKCR.reg" > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCR.reg%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCR.reg%u%
     )
 
@@ -771,9 +771,9 @@ goto :EOF
     call :progressUpdate 80 "Export HKU from registry to file HKU.reg"
     reg export HKU "%dir_reg%\HKU.reg" > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKU.reg%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKU.reg%u%
     )
 
@@ -783,9 +783,9 @@ goto :EOF
     call :progressUpdate 100 "Export HKCC from registry to file HKCC.reg"
     reg export HKCC "%dir_reg%\HKCC.reg" > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCC.reg%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCC.reg%u%
     )
 
@@ -875,9 +875,9 @@ goto :EOF
         goto sessFinish
     )
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        An error has occurred while trying to delete files and folders in %grayd%%folder_distrb%%u%
-    ) else if %errorlevel% EQU 0 (
+    ) else if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        No errors reported while deleting files, continuing.
     )
 
@@ -888,7 +888,7 @@ goto :EOF
 
         set cnt_files=0
         set cnt_dirs=0
-        for /f %%a in ('dir /s /B /a-d "%folder_distrb%"')  DO (
+        for /f %%a in ('dir /s /B /a-d "%folder_distrb%"') do (
             set /A cnt_files+=1
         )
 
@@ -898,7 +898,7 @@ goto :EOF
             goto sessError
         )
 
-        for /f %%a in ('dir /s /B /ad "%folder_distrb%"')  DO (
+        for /f %%a in ('dir /s /B /ad "%folder_distrb%"') do (
             set /A cnt_dirs+=1
         )
 
@@ -979,12 +979,12 @@ goto :EOF
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityDate" /t REG_SZ /d "2025-01-01T00:00:00Z" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "2025-01-01T00:00:00Z" /f > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%         An error occurred trying to edit your registry%u%
         goto sessError
     )
 
-    if %errorlevel% EQU 0 (
+    if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Registry has been modified, updates are disabled.
     )
 
@@ -1036,12 +1036,12 @@ goto :EOF
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedQualityDate" /t REG_SZ /d "" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "" /f > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
         goto sessError
     )
 
-    if %errorlevel% EQU 0 (
+    if %errorlevel% equ 0 (
         echo.   %greenl% Success %u%        Registry has been modified
     )
 
@@ -1054,17 +1054,17 @@ goto :EOF
 :taskDisableTelemetry
     echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
 
-	reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
-	reg add "HKLM\SOFTWARE\Microsoft\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
-	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "DontRetryOnError" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "IsCensusDisabled" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "TaskEnableRun" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d "0x00000000" /f > nul
-	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableUAR" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableInventory" /t REG_DWORD /d "0x00000001" /f > nul
-	reg add "HKLM\SYSTEM\CurrentControlSet\Control\WMI\AutoLogger\SQMLogger" /v "Start" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "DontRetryOnError" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "IsCensusDisabled" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\ClientTelemetry" /v "TaskEnableRun" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableUAR" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableInventory" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\WMI\AutoLogger\SQMLogger" /v "Start" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Strings" /v "DiagnosticErrorText" /t REG_SZ /d "" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Strings" /v "DiagnosticLinkText" /t REG_SZ /d "" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility" /v "DiagnosticErrorText" /t REG_DWORD /d "0x00000000" /f > nul
@@ -1145,7 +1145,7 @@ goto :EOF
     reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype" /v "WPPFilePath" /t REG_SZ /d "%%SYSTEMDRIVE%%\TEMP\Tracing\WPPMedia" /f > nul
     reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype\ETW" /v "WPPFilePath" /t REG_SZ /d "%%SYSTEMDRIVE%%\TEMP\WPPMedia" /f > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred trying to edit your registry%u%
         goto sessError
     )
@@ -1174,14 +1174,14 @@ goto :EOF
     echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl" > nul 2>&1
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
     )
 
     echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl" > nul 2>&1
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
     )
 
@@ -1194,7 +1194,7 @@ goto :EOF
     echo.   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
 	reg add "HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences" /v "UsageTracking" /t REG_DWORD /d "0x00000000" /f > nul
 
-    if %errorlevel% NEQ 0 (
+    if %errorlevel% neq 0 (
         echo.   %red% Error   %u%        Error occurred trying to edit your registry%blue%UsageTracking%u%
         goto sessError
     )
