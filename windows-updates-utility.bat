@@ -30,6 +30,7 @@ if %errorlevel% NEQ 0 (
 
 :variables
 set dir_home=%~dp0
+set dir_reg=%dir_home%registryBackup
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
 set repo_version=1.2.0
@@ -155,6 +156,7 @@ set x[wuauserv]=Windows Update
     echo       %yellow%^(3^)%u%   Disable Microsoft Telemetry
     echo       %yellow%^(4^)%u%   Remove Update Files
     echo       %yellow%^(5^)%u%   Manage Update Services
+    echo.     %goldm%^(6^)%u%   Backup Registry
     echo.
     echo       %green%^(H^)%green%   Help
     echo       %crimson%^(Q^)%crimson%   Quit
@@ -371,6 +373,88 @@ set x[wuauserv]=Windows Update
 
         goto :menuServices
     )
+:: # #
+::  @desc           Backup Registry
+:: # #
+
+:taskBackupRegistry
+
+    setlocal
+
+    echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
+
+    call :progressUpdate 10 "Creating new file %dir_reg%"
+
+    if NOT exist "%dir_reg%" (
+        md "%dir_reg%"
+    )
+
+    if exist "%dir_reg%\HKLM.reg" (
+        erase "%dir_reg%\HKLM.reg"
+    )
+    call :progressUpdate 20 "Export HKLM from registry to file HKLM.reg"
+    reg export HKLM "%dir_reg%\HKLM.reg" > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKLM.reg%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKLM.reg%u%
+    )
+
+    if exist "%dir_reg%\HKCU.reg" (
+        erase "%dir_reg%\HKCU.reg"
+    )
+    call :progressUpdate 40 "Export HKCU from registry to file HKCU.reg"
+    reg export HKCU "%dir_reg%\HKCU.reg" > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCU.reg%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCU.reg%u%
+    )
+
+    if exist "%dir_reg%\HKCR.reg" (
+        erase "%dir_reg%\HKCR.reg"
+    )
+    call :progressUpdate 60 "Export HKCR from registry to file HKCR.reg"
+    reg export HKCR "%dir_reg%\HKCR.reg" > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCR.reg%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCR.reg%u%
+    )
+
+    if exist "%dir_reg%\HKU.reg" (
+        erase "%dir_reg%\HKU.reg"
+    )
+    call :progressUpdate 80 "Export HKU from registry to file HKU.reg"
+    reg export HKU "%dir_reg%\HKU.reg" > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKU.reg%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKU.reg%u%
+    )
+
+    if exist "%dir_reg%\HKCC.reg" (
+        erase "%dir_reg%\HKCC.reg"
+    )
+    call :progressUpdate 100 "Export HKCC from registry to file HKCC.reg"
+    reg export HKCC "%dir_reg%\HKCC.reg" > nul
+
+    if %errorlevel% NEQ 0 (
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCC.reg%u%
+    ) else if %errorlevel% EQU 0 (
+        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCC.reg%u%
+    )
+
+    call :progressUpdate 100 "Export Complete"
+    echo.   %greenl% Success %u%        Registry backuped up to %goldm%%dir_reg%%u%
+
+    endlocal
+
+    goto :sessFinish
 
 :: # #
 ::  @desc           Start
