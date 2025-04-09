@@ -1,6 +1,5 @@
 @ECHO       OFF
 TITLE       WPU (Windows Personalization Utility)
-SETLOCAL    ENABLEDELAYEDEXPANSION
 MODE        con:cols=125 lines=40
 MODE        125,40
 GOTO        comment_end
@@ -34,7 +33,7 @@ set dir_home=%~dp0
 set dir_reg=%dir_home%registryBackup
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
-set repo_version=1.3.0
+set repo_version=1.3.1
 set "folder_distrb=c:\windows\softwaredistribution"
 set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
 set cnt_files=0
@@ -208,8 +207,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 :: # #
 
 :main
-
-    setlocal
+    setlocal enabledelayedexpansion
 
     :: # #
     ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
@@ -445,7 +443,7 @@ goto :EOF
 :: # #
 
 :menuInstall
-    setlocal
+    setlocal enabledelayedexpansion
     cls
     
     set q_mnu_install=
@@ -495,7 +493,7 @@ goto :EOF
 :: # #
 
 :menuAdvanced
-    setlocal
+    setlocal enabledelayedexpansion
     cls
 
     :: set states
@@ -559,7 +557,7 @@ goto :EOF
 :: # #
 
 :menuServices
-    setlocal
+    setlocal enabledelayedexpansion
     cls
     set q_mnu_serv=
 
@@ -883,7 +881,6 @@ goto :EOF
 :: # #
 
 :taskBackupRegistry
-
     setlocal
 
     echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
@@ -966,7 +963,6 @@ goto :EOF
 :: # #
 
 :taskStartErase
-
     setlocal
 
     echo.
@@ -1033,6 +1029,8 @@ goto :EOF
 :: # #
 
 :taskFilesErase
+    setlocal
+
     if exist %folder_distrb%\ (
         erase /s /f /q %folder_distrb%\*.* && rmdir /s /q %folder_distrb%
     ) else (
@@ -1079,6 +1077,9 @@ goto :EOF
         echo.   %cyand% Notice  %u%        Validated that all files and folders have been deleted in %grayd% %folder_distrb%%u%
         goto sessFinish
     )
+
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Disables Windows Updates
@@ -1154,12 +1155,15 @@ goto :EOF
     )
 
     goto taskFilesErase
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Enables Windows Updates
 :: # #
 
 :taskUpdatesEnable
+    setlocal
     echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
 
     for %%i in (%servicesUpdates%) do (
@@ -1211,12 +1215,16 @@ goto :EOF
     )
 
     goto sessFinish
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Disables Windows Telemetry Reporting
 :: # #
 
 :taskDisableTelemetry
+    setlocal
+
     echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
 
     reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1244,11 +1252,11 @@ goto :EOF
     reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput" /v "Value" /t REG_SZ /d "Deny" /f > nul
     reg add "HKLM\SYSTEM\DriverDatabase\Policies\Settings" /v "DisableSendGenericDriverNotFoundToWER" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\SQMClient\IE" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f > nul
-    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "DisableOptinExperience" /t REG_DWORD /d "0x00000001" /f > nul
-    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f
-    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "SqmLoggerRunning" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKLM\SOFTWARE\Microsoft\SQMClient\Reliability" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Assistance\Client\1.0" /v "NoActiveHelp" /t REG_DWORD /d "0x00000001" /f > nul
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Assistance\Client\1.0" /v "NoExplicitFeedback" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1425,6 +1433,8 @@ goto :EOF
     )
 
     goto sessFinish
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Quit
@@ -1474,7 +1484,8 @@ goto :EOF
 :: # #
 
 :progressUpdate
-    setlocal ENABLEDELAYEDEXPANSION
+    setlocal enabledelayedexpansion
+
     set progPercent=%1
     set /A progNumBars=%progPercent%/2
     set /A progNumSpaces=50-%progNumBars%
@@ -1483,6 +1494,7 @@ goto :EOF
     for /L %%A IN (%progNumSpaces%,-1,1) do set progMeter=!progMeter! 
     call :helperUnquote progGitle %2
     title Working:  [%progMeter%]  %progPercent%%% - %progGitle%
+
     endlocal
 goto :EOF
 
