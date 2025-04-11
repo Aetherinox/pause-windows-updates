@@ -881,7 +881,8 @@ goto :EOF
 :: # #
 
 :taskBackupRegistry
-    setlocal
+
+setlocal disabledelayedexpansion
 
     echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
 
@@ -898,9 +899,9 @@ goto :EOF
     reg export HKLM "%dir_reg%\HKLM.reg" > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKLM.reg%u%
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKLM.reg"%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKLM.reg%u%
+        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKLM.reg"%u%
     )
 
     if exist "%dir_reg%\HKCU.reg" (
@@ -910,9 +911,9 @@ goto :EOF
     reg export HKCU "%dir_reg%\HKCU.reg" > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCU.reg%u%
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCU.reg"%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCU.reg%u%
+        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCU.reg"%u%
     )
 
     if exist "%dir_reg%\HKCR.reg" (
@@ -922,9 +923,9 @@ goto :EOF
     reg export HKCR "%dir_reg%\HKCR.reg" > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCR.reg%u%
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCR.reg"%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCR.reg%u%
+        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCR.reg"%u%
     )
 
     if exist "%dir_reg%\HKU.reg" (
@@ -934,9 +935,9 @@ goto :EOF
     reg export HKU "%dir_reg%\HKU.reg" > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKU.reg%u%
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKU.reg"%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKU.reg%u%
+        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKU.reg"%u%
     )
 
     if exist "%dir_reg%\HKCC.reg" (
@@ -946,13 +947,13 @@ goto :EOF
     reg export HKCC "%dir_reg%\HKCC.reg" > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%%dir_reg%\HKCC.reg%u%
+        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCC.reg"%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%%dir_reg%\HKCC.reg%u%
+        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCC.reg"%u%
     )
 
     call :progressUpdate 100 "Export Complete"
-    echo.   %greenl% Success %u%        Registry backuped up to %goldm%%dir_reg%%u%
+    echo.   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
 
     endlocal
 
