@@ -1,14 +1,45 @@
 # #
 #   @type               github workflow
-#   @desc               adds a label to a PR when the command "/accept" is typed in the issue comments
-#                           do not attempt to use env variables in if condition.
-#                           do not accept to change GITHUB_TOKEN.
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
+#   @usage              adds a label to a PR when the command "/accept" is typed in the issue comments
+#                           do not attempt to use env variables in if condition.
+#                           do not accept to change GITHUB_TOKEN.
+#
+#   @notes              requires the following labels to be created in your repo:
+#                           - bug
+#                           - feature
+#                           - urgent
+#                           - roadmap
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/issues-accept.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/issues-accept.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: "🎫 Issue › Accept"
-run-name: "🎫 Issue › Accept"
+name: '🎫 Issue › Accept'
+run-name: '🎫 Issue › Accept'
 
 # #
 #   triggers
@@ -23,12 +54,12 @@ on:
 # #
 
 env:
-    LABEL_ACCEPT:         "Status 𐄂 Accepted"
-
-    BOT_NAME_1:           AdminServ
-    BOT_NAME_2:           AdminServX
-    BOT_NAME_3:           EuropaServ
-    BOT_NAME_DEPENDABOT:  dependabot[bot]
+    LABEL_ACCEPT:               'Status › Accepted'
+    DEPLOYMENT_ENV:             ${{ github.event.inputs.DEPLOYMENT_ENV || 'orion' }}
+    BOT_NAME_1:                 EuropaServ
+    BOT_NAME_2:                 BinaryServ
+    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    BOT_NAME_RENOVATE:          renovate[bot]
 
 # #
 #   jobs
@@ -37,36 +68,57 @@ env:
 jobs:
 
     # #
-    #   Job [ Deploy ]
+    #   Issues › Accept
     # #
 
-    deploy:
-        if: contains(github.event.comment.body, '/accept') && github.event.comment.user.login == 'Aetherinox'
+    issues-accept:
+        name: >-
+            🎫 Issue › Accept
+        if: |
+            contains(github.event.comment.body, '/accept') && github.event.comment.user.login == 'Aetherinox'
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         steps:
 
             # #
-            #   Add Label to accepted PR
+            #   Issues › Accept › Set TImestamps
+            # #
+
+            - name: >-
+                  🕛 Get Timestamp
+              id: task_issues_accept_set_timestamp
+              run: |
+                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
+            #   Issues › Accept › Add Label to accepted PR
             # #
 
             - name: >-
                   🏷️ Assign Label › ${{ env.LABEL_ACCEPT }}
-              run: gh issue edit "$NUMBER" --add-label "$LABELS"
+              run: |
+                  gh issue edit "$NUMBER" --add-label "$LABELS"
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
                   GH_REPO: ${{ github.repository }}
                   NUMBER: ${{ github.event.issue.number }}
                   LABELS: ${{ env.LABEL_ACCEPT }}
 
             # #
-            #   Add assignee to accepted PR
+            #   Issues › Accept › Add assignee to accepted PR
             # #
 
             - name: >-
                   🏷️ Assign Assignee › ${{ github.repository_owner }}
-              run: gh issue edit "$NUMBER" --add-assignee "$ASSIGNEE"
+              run: |
+                  gh issue edit "$NUMBER" --add-assignee "$ASSIGNEE"
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
                   GH_REPO: ${{ github.repository }}
                   NUMBER: ${{ github.event.issue.number }}
                   ASSIGNEE: ${{ github.repository_owner }}

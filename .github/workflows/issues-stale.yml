@@ -1,31 +1,54 @@
 # #
 #   @type               github workflow
-#   @desc               creates repository labels if they are not yet installed
-#                         issues marked as stale after 30 days, given tag Status 𐄂 Stale
-#                         inactive issues closed after 180 days, given tag Status 𐄂 Locked
-#                         inactive pr closed after 365 days, given tag Status 𐄂 Locked
-#                         issues marked stale after 30 days, given tag Status 𐄂 Stale
-#                         issues marked closed 7 days after being marked stale, given tag Status 𐄂 Autoclosed
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
+#   @usage              creates repository labels if they are not yet installed
+#                           issues marked as stale after 30 days, given tag Status › Stale
+#                           inactive issues closed after 180 days, given tag Status › Locked
+#                           inactive pr closed after 365 days, given tag Status › Locked
+#                           issues marked stale after 30 days, given tag Status › Stale
+#                           issues marked closed 7 days after being marked stale, given tag Status › Autoclosed
 #
-#   This Github action must be activated manually.  This workflow script will do the
-#   following:
+#   @notes              This Github action must be activated manually.  This workflow script will do the following:
+#                           - Scan issues / pull requests and make sure they have properly assigned labels:
+#                               - `Bug`
+#                               - `Feature`
+#                               - `Urgent`
+#                               - `Roadmap`
 #
-#       - Scan issues / pull requests and make sure they have properly assigned labels:
-#           - `Bug`
-#           - `Feature`
-#           - `Urgent`
-#           - `Roadmap`
+#                           - Workflow script will then scan each pr or issue and mark them as `Stale`
+#                               if they haven't had any replies in 30 days.
 #
-#       - Workflow script will then scan each pr or issue and mark them as `Stale`
-#         if they haven't had any replies in 30 days.
+#                           - Workflow will `autoclose` pr or issues which haven't had action in `365 days`.
 #
-#       - Workflow will `autoclose` pr or issues which haven't had action in `365 days`.
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/issues-stale.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/issues-stale.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: "🎫 Issues › Stale"
-run-name: "🎫 Issues › Stale"
+name: '🎫 Issues › Stale'
+run-name: '🎫 Issues › Stale'
 
 # #
 #   triggers
@@ -41,64 +64,75 @@ on:
 # #
 
 env:
-    PREFIX_BUG:           "Bug"
-    PREFIX_DEPENDENCY:    "Dependency"
-    PREFIX_DOCS:          "Docs"
-    PREFIX_FEATURE:       "Feature"
-    PREFIX_GIT:           "Git Action"
-    PREFIX_PR:            "PR"
-    PREFIX_ROADMAP:       "Roadmap"
-    PREFIX_INTERNAL:      "Internal"
-    PREFIX_URGENT:        "Urgent"
+    PREFIX_BUG:                 "🐛 Bug"
+    PREFIX_DEPENDENCY:          "Dependency"
+    PREFIX_DOCS:                "Docs"
+    PREFIX_FEATURE:             "💡 Feature"
+    PREFIX_GIT:                 "Git Action"
+    PREFIX_PR:                  "PR"
+    PREFIX_ROADMAP:             "🗺️ Roadmap"
+    PREFIX_INTERNAL:            "Internal"
+    PREFIX_URGENT:              "⚠ Urgent"
 
-    LABEL_BUG:            "Type ◦ Bug"
-    LABEL_DEPENDENCY:     "Type ◦ Dependency"
-    LABEL_DOCS:           "Type ◦ Docs"
-    LABEL_FEATURE:        "Type ◦ Feature"
-    LABEL_GIT:            "Type ◦ Git Action"
-    LABEL_PR:             "Type ◦ Pull Request"
-    LABEL_ROADMAP:        "Type ◦ Roadmap"
-    LABEL_INTERNAL:       "Type ◦ Internal"
-    LABEL_URGENT:         "⚠ Urgent"
+    LABEL_BUG:                  "Type › Bug"
+    LABEL_DEPENDENCY:           "Type › Dependency"
+    LABEL_DOCS:                 "Type › Docs"
+    LABEL_FEATURE:              "Type › Feature"
+    LABEL_GIT:                  "Type › Git Action"
+    LABEL_PR:                   "Type › Pull Request"
+    LABEL_ROADMAP:              "Type › Roadmap"
+    LABEL_INTERNAL:             "Type › Internal"
+    LABEL_LOCKED:               "Status › Locked"
+    LABEL_STALE:                "Status › Stale"
+    LABEL_AUTOCLOSE:            "Status › Autoclosed"
+    LABEL_ACCEPTED:             "Status › Accepted"
+    LABEL_REVIEW:               "Status › Review"
+    LABEL_PENDING:              "Status › Pending"
+    LABEL_AC_REVIEW:            "AC › Review Required"
+    LABEL_URGENT:               "⚠ Urgent"
 
-    BOT_NAME_1:           EuropaServ
-    BOT_NAME_DEPENDABOT:  dependabot[bot]
+    ASSIGN_USER:                Aetherinox
+    BOT_NAME_1:                 EuropaServ
+    BOT_NAME_2:                 BinaryServ
+    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    BOT_NAME_RENOVATE:          renovate[bot]
+
     LABELS_JSON: |
       [
-          { "name": "AC › Changes Made",           "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
-          { "name": "AC › Changes Required",       "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
-          { "name": "AC › Failed",                 "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
-          { "name": "AC › Needs Rebase",           "color": "8F1784", "description": "Due to the permissions on the requesting repo, this pull request must be rebased by the author" },
-          { "name": "AC › Passed",                 "color": "146b4a", "description": "Ready to be reviewed" },
-          { "name": "AC › Review Required",        "color": "8F1784", "description": "PR needs to be reviewed by another person, after the requested changes have been made" },
-          { "name": "AC › Security Warning",       "color": "761620", "description": "Does not conform to developer policies, or includes potentially dangerous code" },
-          { "name": "AC › Skipped Scan",           "color": "8F1784", "description": "Author has skipped code scan" },
-          { "name": "Status 𐄂 Duplicate",          "color": "75536b", "description": "Issue or pull request already exists" },
-          { "name": "Status 𐄂 Accepted",            "color": "2e7539", "description": "This pull request has been accepted" },
-          { "name": "Status 𐄂 Autoclosed",          "color": "3E0915", "description": "Originally stale and was autoclosed for no activity" },
-          { "name": "Status 𐄂 Denied",              "color": "ba4058", "description": "Pull request has been denied" },
-          { "name": "Status 𐄂 Locked",              "color": "550F45", "description": "Automatically locked by AdminServ for a prolonged period of inactivity" },
-          { "name": "Status 𐄂 Need Info",           "color": "2E3C4C", "description": "Not enough information to resolve" },
-          { "name": "Status 𐄂 No Action",           "color": "030406", "description": "Closed without any action being taken" },
-          { "name": "Status 𐄂 Pending",             "color": "984b12", "description": "Pending pull request" },
-          { "name": "Status 𐄂 Released",            "color": "1b6626", "description": "Issues or PR has been implemented and is now live" },
-          { "name": "Status 𐄂 Reopened",            "color": "8a6f14", "description": "A previously closed PR which has been re-opened" },
-          { "name": "Status 𐄂 Review",              "color": "9e1451", "description": "Currently pending review" },
-          { "name": "Status 𐄂 Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
-          { "name": "Type ◦ Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
-          { "name": "Type ◦ Dependency",            "color": "243759", "description": "Item is associated to dependency" },
-          { "name": "Type ◦ Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
-          { "name": "Type ◦ Feature",               "color": "3c4e93", "description": "Feature request" },
-          { "name": "Type ◦ Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
-          { "name": "Type ◦ Pull Request",          "color": "8F1784", "description": "Normal pull request" },
-          { "name": "Type ◦ Roadmap",               "color": "8F1784", "description": "Feature or bug currently planned for implementation" },
-          { "name": "Type ◦ Internal",              "color": "A51994", "description": "Assigned items are for internal developer use" },
-          { "name": "Build ◦ Desktop",              "color": "c7ca4a", "description": "Specific to desktop" },
-          { "name": "Build ◦ Linux",                "color": "c7ca4a", "description": "Specific to Linux" },
-          { "name": "Build ◦ MacOS",                "color": "c7ca4a", "description": "Specific to MacOS" },
-          { "name": "Build ◦ Mobile",               "color": "c7ca4a", "description": "Specific to mobile" },
-          { "name": "Build ◦ Web",                  "color": "c7ca4a", "description": "Specific to web" },
-          { "name": "Build ◦ Windows",              "color": "c7ca4a", "description": "Specific to Windows" },
+          { "name": "AC › Changes Made",            "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
+          { "name": "AC › Changes Required",        "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
+          { "name": "AC › Failed",                  "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
+          { "name": "AC › Needs Rebase",            "color": "8F1784", "description": "Due to the permissions on the requesting repo, this pull request must be rebased by the author" },
+          { "name": "AC › Passed",                  "color": "146b4a", "description": "Ready to be reviewed" },
+          { "name": "AC › Review Required",         "color": "8F1784", "description": "PR needs to be reviewed by another person, after the requested changes have been made" },
+          { "name": "AC › Security Warning",        "color": "761620", "description": "Does not conform to developer policies, or includes potentially dangerous code" },
+          { "name": "AC › Skipped Scan",            "color": "8F1784", "description": "Author has skipped code scan" },
+          { "name": "Status › Duplicate",           "color": "75536b", "description": "Issue or pull request already exists" },
+          { "name": "Status › Accepted",            "color": "2e7539", "description": "This pull request has been accepted" },
+          { "name": "Status › Autoclosed",          "color": "3E0915", "description": "Originally stale and was autoclosed for no activity" },
+          { "name": "Status › Denied",              "color": "ba4058", "description": "Pull request has been denied" },
+          { "name": "Status › Locked",              "color": "550F45", "description": "Automatically locked by AdminServ for a prolonged period of inactivity" },
+          { "name": "Status › Need Info",           "color": "2E3C4C", "description": "Not enough information to resolve" },
+          { "name": "Status › No Action",           "color": "030406", "description": "Closed without any action being taken" },
+          { "name": "Status › Pending",             "color": "984b12", "description": "Pending pull request" },
+          { "name": "Status › Released",            "color": "1b6626", "description": "Issues or PR has been implemented and is now live" },
+          { "name": "Status › Reopened",            "color": "8a6f14", "description": "A previously closed PR which has been re-opened" },
+          { "name": "Status › Review",              "color": "9e1451", "description": "Currently pending review" },
+          { "name": "Status › Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
+          { "name": "Type › Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
+          { "name": "Type › Dependency",            "color": "243759", "description": "Item is associated to dependency" },
+          { "name": "Type › Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
+          { "name": "Type › Feature",               "color": "3c4e93", "description": "Feature request" },
+          { "name": "Type › Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
+          { "name": "Type › Pull Request",          "color": "8F1784", "description": "Normal pull request" },
+          { "name": "Type › Roadmap",               "color": "8F1784", "description": "Feature or bug currently planned for implementation" },
+          { "name": "Type › Internal",              "color": "A51994", "description": "Assigned items are for internal developer use" },
+          { "name": "Build › Desktop",              "color": "c7ca4a", "description": "Specific to desktop" },
+          { "name": "Build › Linux",                "color": "c7ca4a", "description": "Specific to Linux" },
+          { "name": "Build › MacOS",                "color": "c7ca4a", "description": "Specific to MacOS" },
+          { "name": "Build › Mobile",               "color": "c7ca4a", "description": "Specific to mobile" },
+          { "name": "Build › Web",                  "color": "c7ca4a", "description": "Specific to web" },
+          { "name": "Build › Windows",              "color": "c7ca4a", "description": "Specific to Windows" },
           { "name": "› API",                        "color": "F99B50", "description": "Plugin API, CLI, browser JS API" },
           { "name": "› Auto-type",                  "color": "9141E0", "description": "Auto-type functionality in desktop apps" },
           { "name": "› Browser",                    "color": "9141E0", "description": "Browser plugins and passing data to <=> from app" },
@@ -142,39 +176,61 @@ jobs:
         name: >-
             🎫 Labels › Verify Existing
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         steps:
 
             # #
-            #   [ Create Labels ] Start
+            #   Issues (Stale) › Labels › Create › Start
             # #
 
             - name: >-
                   ✅ Start
-              id: task_label_create_start
+              id: task_labels_create_start
               run: |
                   echo "Assigning labels and assignees"
 
             # #
-            #   [ Create Labels ] Checkout
+            #   Issues (Stale) › Labels › Create › Set Env Variables
+            # #
+
+            - name: >-
+                  🕛 Get Timestamp
+              id: task_labels_create_set_timestamp
+              run: |
+                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
+            #   Issues (Stale) › Labels › Create › Checkout
             # #
 
             - name: >-
                   ☑️ Checkout
-              id: task_label_create_checkout
+              id: task_labels_create_checkout
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
-            #   [ Create Labels ] Verify Existing Labels
+            #   Issues (Stale) › Labels › Create › Verify Existing
+            #   
+            #   check if repo has all of the needed issue / pr labels; create label if not exists
+            #   
+            #   action needed if using 'pull_request' and 'issue_comment'
+            #   to get the pull request, you would normally use ${{ github.event.number }}
+            #   however this isnt available for 'issue_comment'
             # #
 
             - name: >-
-                  🏷️ Verify Existing Labels
-              id: task_label_create_verify
+                  🎫 Labels › Verify Existing
+              id: task_labels_create_verify
               uses: actions/github-script@v7
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       const labels = JSON.parse( process.env.LABELS_JSON );
                       for ( const label of labels )
@@ -186,7 +242,7 @@ jobs:
                                   owner:        context.repo.owner,
                                   repo:         context.repo.repo,
                                   name:         label.name,
-                                  description:  label.description || '',
+                                  description:  label.description || 'No Description',
                                   color:        label.color
                               });
                           }
@@ -204,7 +260,7 @@ jobs:
                       }
 
     # #
-    #   Job [ Check Labels ]
+    #   Issues (Stale) › Labels › Assign Missing
     #
     #   Runs through all submissions to check for ones that have not been properly labeled
     #       - Bug
@@ -217,29 +273,34 @@ jobs:
         name: >-
             🎫 Labels › Assign Missing
         runs-on: ubuntu-latest
+        timeout-minutes: 4
         needs: job-labels-create
         steps:
 
             # #
-            #   [ Check Labels ] Checkout
+            #   Issues (Stale) › Labels › Assign Missing › Checkout
             # #
 
-            - name: "☑️ Prepare"
+
+            - name: >-
+                  ☑️ Checkout
               id: task_issues_nolabel_prepare
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
-            #   [ Check Labels ] Check
-            #   Check if repo has labels currently added to issues
+            #   Issues (Stale) › Labels › Assign Missing › Check
+            #   
+            #   Check if repo has labels to use
             # #
 
-            - name: 🏷️ Checking Issues
+            - name: >-
+                  🎫 Labels › Check
               id: task_issues_nolabel_run
               uses: actions/github-script@v7
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
 
                     /*
@@ -248,19 +309,18 @@ jobs:
 
                     const dateTimeformat = ( date ) =>
                     {
-                        let month           = date.getMonth( ) + 1;
-                        month               = month.toString( ).padStart( 2, '0' );
-                        let day             = date.getDate( ).toString( ).padStart( 2, '0' );
-                        let year            = date.getFullYear( ).toString( ).padStart( 2, '0' );
+                        let month               = date.getMonth( ) + 1;
+                        month                   = month.toString( ).padStart( 2, '0' );
+                        let day                 = date.getDate( ).toString( ).padStart( 2, '0' );
+                        let year                = date.getFullYear( ).toString( ).padStart( 2, '0' );
 
-                        let hours           = date.getHours();
-                        let minutes         = date.getMinutes();
-                        let x               = hours >= 12 ? 'PM' : 'AM';
-                        hours               = hours % 12;
-                        hours               = hours ? hours : 12;
-                        minutes             = minutes.toString( ).padStart( 2, '0' );
-
-                        let mergeTime   = month + '.' + day + '.' + year + ' ' + hours + ':' + minutes + ' ' + x;
+                        let hours               = date.getHours();
+                        let minutes             = date.getMinutes();
+                        let x                   = hours >= 12 ? 'PM' : 'AM';
+                        hours                   = hours % 12;
+                        hours                   = hours ? hours : 12;
+                        minutes                 = minutes.toString( ).padStart( 2, '0' );
+                        let mergeTime           = month + '.' + day + '.' + year + ' ' + hours + ':' + minutes + ' ' + x;
 
                         return mergeTime;
                     }
@@ -285,7 +345,7 @@ jobs:
                         let date_UpdateHuman    = dateTimeformat( date_UpdateDate ) + " UTC";                       // 03.26.2024 4:40 PM UTC
                         const time_UpdateMs     = new Date( issue.updated_at ).getTime( );                          // 1711471241000
 
-                        //if ( curtime < time_UpdateMs + expireAfterMs ) continue;
+                        // if ( curtime < time_UpdateMs + expireAfterMs ) continue;
 
                         /*
                             Anything past this point is stale / to be closed
@@ -306,8 +366,8 @@ jobs:
                         let iss_body            = `${ issue.body }`;
                         const iss_body_lc       = iss_body.toLowerCase( );
 
-                        console.log( `      └── 📁 ` + iss_title );
-                        console.log( `         └── 📄 Issue #${ issue.number } last updated on ${ date_UpdateHuman }` );
+                        console.log( `      └── 📁 ` + iss_title + ` #${ issue.number }`);
+                        console.log( `         └── 📄 last updated on ${ date_UpdateHuman }` );
                         console.log( `         └── 📄 ${add_labels}` );
                         console.log( `\n\n` )
 
@@ -315,8 +375,8 @@ jobs:
                             Keywords
                         */
 
-                        const bug_words           = [ "bug", "broke", "issue", "fail" ];
-                        const feat_words          = [ "feature", "request", "add support" ];
+                        const bug_words           = [ "bug", "broke", "issue", "fail", "wont work" ];
+                        const feat_words          = [ "feature", "request", "add", "addition", "enhance", "create" ];
                         const urgn_words          = [ "urgent", "urgency", "emergency", "important", "critical" ];
                         const road_words          = [ "roadmap", "road map", "planned" ];
 
@@ -335,17 +395,14 @@ jobs:
 
                         /*
                             Label > Bugs
-                        */
 
-                        const bug_bIncWordT             = bug_words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
-
-                        /*
                             Find regex based phrases
 
                             Regex:
                                 https://regex101.com/r/Z99Gnq/2
                         */
 
+                        const bug_bIncWordT             = bug_words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
                         const bug_findWordList 	        = /^\b(?:I?\s*have\s*(?:a|an)\s*(?:issue|problem|bug))|(?:will\s*not\s*work)|(?:it\s*is\s*(?:broken|broke|stuck))|(?:found\s*(?:an?|the)\s*(?:bug|issue))|(?:can\s*I\s*fix\s*the\s*(?:bug|issue))|(?:(?:does not|doesn'?t|don'?t|won'?t|can'?t|can\s?not|will\s*not)\s*(?:work|load|function))|(?:it\s*(?:will\s?not|won'?t|can\s?not|can'?t))\s*(?:get|find)\s*the\s*(?:website|site|webpage|page)|(?:the\s*(?:window|frame)\s*is\s*(?:blank|white|empty|missing))\b$/igm;
                         const bug_bFoundMatchTitle      = Boolean( bug_findWordList.test( iss_title ) );
                         const bug_bFoundMatchBody       = Boolean( bug_findWordList.test( iss_body ) );
@@ -371,6 +428,9 @@ jobs:
                             add_labels.push( `${ bug_lbl }` );
 
                             if ( author === `${{ env.BOT_NAME_DEPENDABOT }}` )
+                                core.info( `Skipping: Detected ${ author }` )
+
+                            if ( author === `${{ env.BOT_NAME_RENOVATE }}` )
                                 core.info( `Skipping: Detected ${ author }` )
 
                             // Rename title to contain Bug:
@@ -403,7 +463,7 @@ jobs:
                                 https://regex101.com/r/fR1Hm6/1
                         */
 
-                        const feat_findWordList 	      = /^(?:(?:request|include|see)\s*(?:an?|the?)\s*(?:feature|addon|addition|plugin))|(?:(?:add|see|get)\s*support\s*(?:for|with|of))|(?:can\s*we\s*get\s*(?:the|a)\s*(?:ability|feature))|(?:💡 Feature:)$/igm;
+                        const feat_findWordList 	    = /(?:(?:add|enjoy|would|like|can|request|include|see|could|have)\s*?(?:the|liked?|i|we|an?|the|you?)\s*?(?:to|have|an|get|ability|request|add|feature|functionality|addon|addition|plugin|create))|(?:(?:add|see|get)\s*?support\s*?(?:for|with|of))|(?:can\s*we\s*get\s*?(?:the|a)\s*?(?:ability|feature))|(?:💡 Feature:)$/igm;
                         const feat_bFoundMatchTitle     = Boolean( feat_findWordList.test( iss_title ) );
                         const feat_bFoundMatchBody      = Boolean( feat_findWordList.test( iss_body ) );
 
@@ -430,6 +490,9 @@ jobs:
                             if ( author === `${{ env.BOT_NAME_DEPENDABOT }}` )
                                 core.info( `Skipping: Detected ${ author }` )
 
+                            if ( author === `${{ env.BOT_NAME_RENOVATE }}` )
+                                core.info( `Skipping: Detected ${ author }` )
+
                             // Rename title to contain Feature:
                             if ( author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !feat_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                             {
@@ -440,6 +503,8 @@ jobs:
                                 title_new               = title.replace( /^\s?add(.*?)\s?support\s*(.*?)\b/gi, '' );
                                 iss_title               = `${ feat_tag } ${ title_new }`;
                             }
+
+                            console.log( `New Title: ...................... ${ iss_title }` )
 
                             await github.rest.issues.update(
                             {
@@ -488,6 +553,9 @@ jobs:
                             if ( author === `${{ env.BOT_NAME_DEPENDABOT }}` )
                                 core.info( `Skipping: Detected ${ author }` )
 
+                            if ( author === `${{ env.BOT_NAME_RENOVATE }}` )
+                                core.info( `Skipping: Detected ${ author }` )
+
                             // Rename title to contain Urgent:
                             if ( author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !urgn_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                             {
@@ -522,8 +590,8 @@ jobs:
                         */
 
                         const road_findWordList 	        = /#\s*Summary[\S\s]+#\s*(?:Proposal|Objective)[^\]]+/igm;
-                        const road_bFoundMatchTitle       = Boolean( road_findWordList.test( iss_title ) );
-                        const road_bFoundMatchBody        = Boolean( road_findWordList.test( iss_body ) );
+                        const road_bFoundMatchTitle         = Boolean( road_findWordList.test( iss_title ) );
+                        const road_bFoundMatchBody          = Boolean( road_findWordList.test( iss_body ) );
 
                         /*
                             Do not change a title if the item starts with a PR: #
@@ -532,8 +600,8 @@ jobs:
                                 https://regex101.com/r/JOrqbN/1
                         */
 
-                        const road_findPRTitle            = /^PR\s?#?(?:[0-9]*:)/igm;
-                        const road_bFoundPRTitle          = Boolean( road_findPRTitle.test( iss_title ) );
+                        const road_findPRTitle              = /^PR\s?#?(?:[0-9]*:)/igm;
+                        const road_bFoundPRTitle            = Boolean( road_findPRTitle.test( iss_title ) );
 
                         /*
                             - Check if issue title matches the issue label "Roadmap:"
@@ -548,16 +616,19 @@ jobs:
                             if ( author === `${{ env.BOT_NAME_DEPENDABOT }}` )
                                 core.info( `Skipping: Detected ${ author }` )
 
+                            if ( author === `${{ env.BOT_NAME_RENOVATE }}` )
+                                core.info( `Skipping: Detected ${ author }` )
+
                             // Rename title to contain Roadmap:
                             if ( author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !road_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                             {
-                                const title             = issue.title;
-                                let title_new           = title.replace( /^\s?emergency\s*(.*?)\b/gi, '' );
-                                title_new               = title.replace( /^\s?urgent\s*(.*?)\b/gi, '' );
-                                title_new               = title.replace( /^\s?urgency\s*(.*?)\b/gi, '' );
-                                title_new               = title.replace( /^\s?important\s*(.*?)\b/gi, '' );
-                                title_new               = title.replace( /^\s?critical\s*(.*?)\b/gi, '' );
-                                iss_title               = `${ road_tag } ${ title_new }`;
+                                const title                 = issue.title;
+                                let title_new               = title.replace( /^\s?emergency\s*(.*?)\b/gi, '' );
+                                title_new                   = title.replace( /^\s?urgent\s*(.*?)\b/gi, '' );
+                                title_new                   = title.replace( /^\s?urgency\s*(.*?)\b/gi, '' );
+                                title_new                   = title.replace( /^\s?important\s*(.*?)\b/gi, '' );
+                                title_new                   = title.replace( /^\s?critical\s*(.*?)\b/gi, '' );
+                                iss_title                   = `${ road_tag } ${ title_new }`;
                             }
 
                             await github.rest.issues.update(
@@ -577,13 +648,15 @@ jobs:
                     }
 
     # #
-    #   Job [ Stale Issues ]
+    #   Issues (Stale) › Stale
     # #
 
     job-issues-stale:
         name: >-
-            💤 Check › Stale
+            💤 Scan › Check Stale
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         needs:
             - job-labels-create
             - job-issues-nolabel
@@ -593,57 +666,60 @@ jobs:
             pull-requests: write
         steps:
 
-            # #
-            #   [ Stale Issues ] Check Condition
-            # #
+              # #
+              #   Stale › Check Condition
+              # #
+              
+            - name: >-
+                  💤 Stale › Check Condition
+              id: task_issues_inactive_stale
+              uses: actions/stale@v9
+              with:
+                  repo-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
+                  stale-issue-message: |
+                      ⚠️ It looks like there hasn't been any recent updates on this issue.  If you created this issue and no longer consider it open, then please login to github and close the issue.
 
-          - name: "💤 Stale › Check Condition"
-            uses: actions/stale@v9
-            id: task_issues_stale_run
-            with:
-                repo-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
-                stale-issue-message: |
-                    ⚠️ It looks like there hasn't been any recent updates on this issue.  If you created this issue and no longer consider it
-                    open, then please login to github and close the issue.
+                      If there is no further activity on this issue, it will be automatically closed in the next week.
 
-                    If there is no further activity on this issue, it will be automatically closed in the next week.
+                      ---
 
-                    ---
-
-                    <sub>I am a bot reaching out to you with an automated response.</sub>
-                stale-issue-label: 'Status 𐄂 Stale'
-                close-issue-label: 'Status 𐄂 Autoclosed'
-                exempt-issue-labels: 'Status 𐄂 Accepted,Status 𐄂 Review,Status 𐄂 Pending,Type ◦ Bug,Type ◦ Dependency,Type ◦ Docs,Type ◦ Feature,Type ◦ Git Action,Type ◦ Pull Request,Type ◦ Roadmap'
-                days-before-stale: 14
-                days-before-close: 7
-                days-before-pr-stale: -1
-                days-before-pr-close: -1
+                      <sub>I am a bot reaching out to you with an automated response.</sub>
+                  stale-issue-label: '${{ env.LABEL_STALE }}'
+                  close-issue-label: '${{ env.LABEL_AUTOCLOSE }}'
+                  exempt-issue-labels: '${{ env.LABEL_ACCEPTED }},${{ env.LABEL_REVIEW }},${{ env.LABEL_PENDING }},${{ env.LABEL_BUG }},${{ env.LABEL_DEPENDENCY }},${{ env.LABEL_DOCS }},${{ env.LABEL_FEATURE }},${{ env.LABEL_GIT }},${{ env.LABEL_PR }},${{ env.LABEL_ROADMAP }}'
+                  days-before-stale: 120
+                  days-before-close: 7
+                  days-before-pr-stale: -1
+                  days-before-pr-close: -1
 
     # #
-    #   Job [ Lock Issues ]
+    #   Issues (Stale) › Lock
     # #
 
     job-issues-lock:
         name: >-
-            🔒 Check › Inactive
+            🔒 Scan › Lock Inactive
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         needs:
             - job-labels-create
             - job-issues-nolabel
         steps:
 
             # #
-            #   [ Lock Issues ] Look for inactives
+            #   Inactive › Lock
             # #
 
-            - name: "🔒 Lock › Inactives"
+            - name: >-
+                  🔒 Inactive › Lock
+              id: task_issues_inactive_lock
               uses: dessant/lock-threads@v5
-              id: task_issues_lock_run
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
-                  exclude-any-issue-labels: 'AC › Review Required,Status 𐄂 Accepted,Status 𐄂 Review,Status 𐄂 Pending,Type ◦ Bug,Type ◦ Dependency,Type ◦ Docs,Type ◦ Feature,Type ◦ Git Action,Type ◦ Roadmap,Type ◦ Internal'
-                  add-issue-labels: 'Status 𐄂 Locked'
-                  issue-inactive-days: '60'
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
+                  exclude-any-issue-labels: '${{ env.LABEL_AC_REVIEW }},${{ env.LABEL_ACCEPTED }},${{ env.LABEL_REVIEW }},${{ env.LABEL_PENDING }},${{ env.LABEL_BUG }},${{ env.LABEL_DEPENDENCY }},${{ env.LABEL_DOCS }},${{ env.LABEL_FEATURE }},${{ env.LABEL_GIT }},${{ env.LABEL_ROADMAP }},${{ env.LABEL_INTERNAL }}'
+                  add-issue-labels: '${{ env.LABEL_LOCKED }}'
+                  issue-inactive-days: '120'
                   issue-lock-reason: 'resolved'
                   issue-comment: >
                       ⚠️ This **issue** has been automatically locked since there has not been any recent activity after it was closed.
@@ -653,8 +729,8 @@ jobs:
                       ---
 
                       <sub>I am a bot reaching out to you with an automated response.</sub>
-                  exclude-any-pr-labels: 'AC › Review Required,Status 𐄂 Accepted,Status 𐄂 Review,Status 𐄂 Pending,Type ◦ Bug,Type ◦ Dependency,Type ◦ Docs,Type ◦ Feature,Type ◦ Git Action,Type ◦ Roadmap,Type ◦ Internal'
-                  add-pr-labels: 'Status 𐄂 Locked'
+                  exclude-any-pr-labels: '${{ env.LABEL_AC_REVIEW }},${{ env.LABEL_ACCEPTED }},${{ env.LABEL_REVIEW }},${{ env.LABEL_PENDING }},${{ env.LABEL_BUG }},${{ env.LABEL_DEPENDENCY }},${{ env.LABEL_DOCS }},${{ env.LABEL_FEATURE }},${{ env.LABEL_GIT }},${{ env.LABEL_ROADMAP }},${{ env.LABEL_INTERNAL }}'
+                  add-pr-labels: '${{ env.LABEL_LOCKED }}'
                   pr-inactive-days: '365'
                   pr-lock-reason: 'resolved'
                   pr-comment: >

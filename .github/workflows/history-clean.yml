@@ -1,0 +1,230 @@
+# #
+#   @type               github workflow
+#   @author             Aetherinox
+#   @url                https://github.com/Aetherinox
+#   @usage              cleans all commit history for a repository
+#                       edit the 'environment:' to determine which deployment to keep clean
+#                           - can be ran manually
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/history-clean.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/history-clean.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
+# #
+
+name: '🧹 History › Clean'
+run-name: '🧹 History › Clean'
+
+# #
+#   triggers
+# #
+
+on:
+
+    # #
+    #   Trigger > Workflow Dispatch
+    # #
+
+    workflow_dispatch:
+        inputs:
+
+            # #
+            #   Commit Label
+            #   
+            #   the label to use when repository is cleaned
+            # #
+
+            COMMIT_LABEL:
+                description:    '🏷️ Commit Label'
+                required:       true
+                default:        'cleanup'
+                type:           string
+
+            # #
+            #   Main Branch
+            #
+            #   main branch re-recreate
+            # #
+
+            BRANCH_MAIN:
+                description:    '🌳 Main Branch'
+                required:       true
+                default:        'main'
+                type:           string
+
+            # #
+            #   Deployment Environment Name
+            #
+            #   this is the name of the deployment item
+            # #
+
+            DEPLOYMENT_ENV:
+                description:    '📦 Deployment Environment'
+                required:       true
+                default:        'orion'
+                type:           string
+
+# #
+#   environment variables
+# #
+
+env:
+    COMMIT_LABEL:               ${{ github.event.inputs.COMMIT_LABEL || 'cleanup' }}
+    BRANCH_MAIN:                ${{ github.event.inputs.BRANCH_MAIN || 'main' }}
+    DEPLOYMENT_ENV:             ${{ github.event.inputs.DEPLOYMENT_ENV || 'orion' }}
+    BOT_NAME_1:                 EuropaServ
+    BOT_NAME_2:                 BinaryServ
+    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    BOT_NAME_RENOVATE:          renovate[bot]
+
+# #
+#   jobs
+# #
+
+jobs:
+    history-clean:
+        name: >-
+            🧹 History › Clean
+        runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
+        steps:
+
+            # #
+            #   History › Clean › Set TImestamps
+            # #
+
+            - name: >-
+                  🕛 Get Timestamp
+              id: task_history_clean_set_timestamp
+              run: |
+                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
+            #   History › Clean › Checkout
+            # #
+
+            - name: >-
+                  ✅ Checkout
+              id: task_history_clean_gh_checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
+            #   History › Clean › Git Identify
+            # #
+
+            - name: >-
+                  🪪 Configure Git Identity
+              id: task_history_clean_git_ident
+              run: |
+                    git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                    git config --local user.name "github-actions[bot]"
+
+            # #
+            #   History › Clean › Pre-Commit
+            # #
+
+            - name: >-
+                  📦 Commit › Pre-commit
+              id: task_history_clean_commit_pre
+              run: |
+                  now=$(date -u '+%m/%d/%Y %H:%M')
+                  commit_label="${{ env.COMMIT_LABEL }}" >> $GITHUB_ENV
+                  echo -e "$commit_label"
+                  commit_message="\\\`️️🧹 $commit_label 🧹\\\` \\\`$now UTC\\\`" >> $GITHUB_ENV
+                  echo -e "$commit_message"
+                  echo "COMMIT_MESSAGE=$(echo $commit_message)" >> $GITHUB_ENV
+                  echo "NOW=$(echo $now)" >> $GITHUB_ENV
+
+            # #
+            #   History › Clean › Pre-Commit › Debug
+            # #
+
+            - name: >-
+                  📦 Commit › Pre-commit › Debug
+              id: task_history_clean_commit_debug
+              run: |
+                  echo -e "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " Printing Values"
+                  echo -e "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " env.COMMIT_LABEL .................... ${{ env.COMMIT_LABEL }}"
+                  echo -e " env.COMMIT_MESSAGE .................. ${{ env.COMMIT_MESSAGE }}"
+                  echo -e " env.NOW ............................. ${{ env.NOW }}"
+
+            # #
+            #   History › Clean › Start
+            # #
+
+            - name: >-
+                  🧹 Clean Repo History
+              id: task_history_clean_history
+              run: |
+                    # Create a new orphan branch
+                    git checkout --orphan temp-branch
+
+                    # Add all files to the new branch
+                    git add -A
+
+                    # Commit the files to the new branch
+                    git commit -m "${{ env.COMMIT_MESSAGE }}"
+
+                    # Delete the old main branch
+                    git branch -D ${{ env.BRANCH_MAIN }}
+
+                    # Rename the new orphan branch to main
+                    git branch -m ${{ env.BRANCH_MAIN }}
+
+                    # Force push the new main branch to the remote repository
+                    git push -f origin ${{ env.BRANCH_MAIN }}
+
+            # #
+            #   History › Clean › References
+            # #
+
+            - name: >-
+                  🗑️ Clean References
+              id: task_history_clean_references
+              run: |
+                    # Remove remote-tracking references to deleted branches (optional)
+                    git fetch origin --prune
+
+                    git reflog expire --expire=now --all
+                    git gc --prune=now --aggressive
+
+            # #
+            #   History › Clean › Commit
+            # #
+
+            - name: >-
+                  📦 Commit › Execute
+              id: task_history_clean_commit_execute
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: ${{ env.COMMIT_MESSAGE }}

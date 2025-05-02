@@ -1,19 +1,44 @@
 # #
 #   @type               github workflow
-#   @desc               searches a new issues title and body for certain keywords and assigns a label
-#                           sets the assignee for the issue to the repository owner
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
+#   @usage              searches a new issues title and body for certain keywords and assigns a label
+#                           sets the assignee for the issue to the repository owner
 #
-#   requires the following labels to be created in your repo:
-#     - bug
-#     - feature
-#     - urgent
-#     - roadmap
+#   @notes              requires the following labels to be created in your repo:
+#                           - bug
+#                           - feature
+#                           - urgent
+#                           - roadmap
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/issues-new.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/issues-new.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: "🎫 Issue › New"
-run-name: "🎫 Issue › New › ${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+name: '🎫 Issue › New'
+run-name: '🎫 Issue › New › ${{ github.event.issue.number }}: ${{ github.event.issue.title }}'
 
 # #
 #   triggers
@@ -30,67 +55,68 @@ on:
 # #
 
 env:
-    PREFIX_BUG:           "Bug"
-    PREFIX_DEPENDENCY:    "Dependency"
-    PREFIX_DOCS:          "Docs"
-    PREFIX_FEATURE:       "Feature"
-    PREFIX_GIT:           "Git Action"
-    PREFIX_PR:            "PR"
-    PREFIX_ROADMAP:       "Roadmap"
-    PREFIX_INTERNAL:      "Internal"
-    PREFIX_URGENT:        "Urgent"
+    PREFIX_BUG:                 "🐛 Bug"
+    PREFIX_DEPENDENCY:          "Dependency"
+    PREFIX_DOCS:                "Docs"
+    PREFIX_FEATURE:             "💡 Feature"
+    PREFIX_GIT:                 "Git Action"
+    PREFIX_PR:                  "PR"
+    PREFIX_ROADMAP:             "🗺️ Roadmap"
+    PREFIX_INTERNAL:            "Internal"
+    PREFIX_URGENT:              "⚠ Urgent"
 
-    LABEL_BUG:            "Type ◦ Bug"
-    LABEL_DEPENDENCY:     "Type ◦ Dependency"
-    LABEL_DOCS:           "Type ◦ Docs"
-    LABEL_FEATURE:        "Type ◦ Feature"
-    LABEL_GIT:            "Type ◦ Git Action"
-    LABEL_PR:             "Type ◦ Pull Request"
-    LABEL_ROADMAP:        "Type ◦ Roadmap"
-    LABEL_INTERNAL:       "Type ◦ Git Action"
-    LABEL_URGENT:         "⚠ Urgent"
+    LABEL_BUG:                  "Type › Bug"
+    LABEL_DEPENDENCY:           "Type › Dependency"
+    LABEL_DOCS:                 "Type › Docs"
+    LABEL_FEATURE:              "Type › Feature"
+    LABEL_GIT:                  "Type › Git Action"
+    LABEL_PR:                   "Type › Pull Request"
+    LABEL_ROADMAP:              "Type › Roadmap"
+    LABEL_INTERNAL:             "Type › Internal"
+    LABEL_URGENT:               "⚠ Urgent"
 
-    BOT_NAME_1:           AdminServ
-    BOT_NAME_2:           AdminServX
-    BOT_NAME_3:           EuropaServ
-    BOT_NAME_DEPENDABOT:  dependabot[bot]
+    ASSIGN_USER:                Aetherinox
+    BOT_NAME_1:                 EuropaServ
+    BOT_NAME_2:                 BinaryServ
+    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    BOT_NAME_RENOVATE:          renovate[bot]
 
     LABELS_JSON: |
       [
-          { "name": "AC › Changes Made",           "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
-          { "name": "AC › Changes Required",       "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
-          { "name": "AC › Failed",                 "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
-          { "name": "AC › Needs Rebase",           "color": "8F1784", "description": "Due to the permissions on the requesting repo, this pull request must be rebased by the author" },
-          { "name": "AC › Passed",                 "color": "146b4a", "description": "Ready to be reviewed" },
-          { "name": "AC › Review Required",        "color": "8F1784", "description": "PR needs to be reviewed by another person, after the requested changes have been made" },
-          { "name": "AC › Security Warning",       "color": "761620", "description": "Does not conform to developer policies, or includes potentially dangerous code" },
-          { "name": "AC › Skipped Scan",           "color": "8F1784", "description": "Author has skipped code scan" },
-          { "name": "Status 𐄂 Duplicate",          "color": "75536b", "description": "Issue or pull request already exists" },
-          { "name": "Status 𐄂 Accepted",            "color": "2e7539", "description": "This pull request has been accepted" },
-          { "name": "Status 𐄂 Autoclosed",          "color": "3E0915", "description": "Originally stale and was autoclosed for no activity" },
-          { "name": "Status 𐄂 Denied",              "color": "ba4058", "description": "Pull request has been denied" },
-          { "name": "Status 𐄂 Locked",              "color": "550F45", "description": "Automatically locked by AdminServ for a prolonged period of inactivity" },
-          { "name": "Status 𐄂 Need Info",           "color": "2E3C4C", "description": "Not enough information to resolve" },
-          { "name": "Status 𐄂 No Action",           "color": "030406", "description": "Closed without any action being taken" },
-          { "name": "Status 𐄂 Pending",             "color": "984b12", "description": "Pending pull request" },
-          { "name": "Status 𐄂 Released",            "color": "1b6626", "description": "Issues or PR has been implemented and is now live" },
-          { "name": "Status 𐄂 Reopened",            "color": "8a6f14", "description": "A previously closed PR which has been re-opened" },
-          { "name": "Status 𐄂 Review",              "color": "9e1451", "description": "Currently pending review" },
-          { "name": "Status 𐄂 Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
-          { "name": "Type ◦ Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
-          { "name": "Type ◦ Dependency",            "color": "243759", "description": "Item is associated to dependency" },
-          { "name": "Type ◦ Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
-          { "name": "Type ◦ Feature",               "color": "3c4e93", "description": "Feature request" },
-          { "name": "Type ◦ Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
-          { "name": "Type ◦ Pull Request",          "color": "8F1784", "description": "Normal pull request" },
-          { "name": "Type ◦ Roadmap",               "color": "8F1784", "description": "Feature or bug currently planned for implementation" },
-          { "name": "Type ◦ Internal",              "color": "A51994", "description": "Assigned items are for internal developer use" },
-          { "name": "Build ◦ Desktop",              "color": "c7ca4a", "description": "Specific to desktop" },
-          { "name": "Build ◦ Linux",                "color": "c7ca4a", "description": "Specific to Linux" },
-          { "name": "Build ◦ MacOS",                "color": "c7ca4a", "description": "Specific to MacOS" },
-          { "name": "Build ◦ Mobile",               "color": "c7ca4a", "description": "Specific to mobile" },
-          { "name": "Build ◦ Web",                  "color": "c7ca4a", "description": "Specific to web" },
-          { "name": "Build ◦ Windows",              "color": "c7ca4a", "description": "Specific to Windows" },
+          { "name": "AC › Changes Made",            "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
+          { "name": "AC › Changes Required",        "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
+          { "name": "AC › Failed",                  "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
+          { "name": "AC › Needs Rebase",            "color": "8F1784", "description": "Due to the permissions on the requesting repo, this pull request must be rebased by the author" },
+          { "name": "AC › Passed",                  "color": "146b4a", "description": "Ready to be reviewed" },
+          { "name": "AC › Review Required",         "color": "8F1784", "description": "PR needs to be reviewed by another person, after the requested changes have been made" },
+          { "name": "AC › Security Warning",        "color": "761620", "description": "Does not conform to developer policies, or includes potentially dangerous code" },
+          { "name": "AC › Skipped Scan",            "color": "8F1784", "description": "Author has skipped code scan" },
+          { "name": "Status › Duplicate",           "color": "75536b", "description": "Issue or pull request already exists" },
+          { "name": "Status › Accepted",            "color": "2e7539", "description": "This pull request has been accepted" },
+          { "name": "Status › Autoclosed",          "color": "3E0915", "description": "Originally stale and was autoclosed for no activity" },
+          { "name": "Status › Denied",              "color": "ba4058", "description": "Pull request has been denied" },
+          { "name": "Status › Locked",              "color": "550F45", "description": "Automatically locked by AdminServ for a prolonged period of inactivity" },
+          { "name": "Status › Need Info",           "color": "2E3C4C", "description": "Not enough information to resolve" },
+          { "name": "Status › No Action",           "color": "030406", "description": "Closed without any action being taken" },
+          { "name": "Status › Pending",             "color": "984b12", "description": "Pending pull request" },
+          { "name": "Status › Released",            "color": "1b6626", "description": "Issues or PR has been implemented and is now live" },
+          { "name": "Status › Reopened",            "color": "8a6f14", "description": "A previously closed PR which has been re-opened" },
+          { "name": "Status › Review",              "color": "9e1451", "description": "Currently pending review" },
+          { "name": "Status › Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
+          { "name": "Type › Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
+          { "name": "Type › Dependency",            "color": "243759", "description": "Item is associated to dependency" },
+          { "name": "Type › Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
+          { "name": "Type › Feature",               "color": "3c4e93", "description": "Feature request" },
+          { "name": "Type › Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
+          { "name": "Type › Pull Request",          "color": "8F1784", "description": "Normal pull request" },
+          { "name": "Type › Roadmap",               "color": "8F1784", "description": "Feature or bug currently planned for implementation" },
+          { "name": "Type › Internal",              "color": "A51994", "description": "Assigned items are for internal developer use" },
+          { "name": "Build › Desktop",              "color": "c7ca4a", "description": "Specific to desktop" },
+          { "name": "Build › Linux",                "color": "c7ca4a", "description": "Specific to Linux" },
+          { "name": "Build › MacOS",                "color": "c7ca4a", "description": "Specific to MacOS" },
+          { "name": "Build › Mobile",               "color": "c7ca4a", "description": "Specific to mobile" },
+          { "name": "Build › Web",                  "color": "c7ca4a", "description": "Specific to web" },
+          { "name": "Build › Windows",              "color": "c7ca4a", "description": "Specific to Windows" },
           { "name": "› API",                        "color": "F99B50", "description": "Plugin API, CLI, browser JS API" },
           { "name": "› Auto-type",                  "color": "9141E0", "description": "Auto-type functionality in desktop apps" },
           { "name": "› Browser",                    "color": "9141E0", "description": "Browser plugins and passing data to <=> from app" },
@@ -134,7 +160,23 @@ jobs:
         name: >-
             🎫 Labels › Verify Existing
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         steps:
+
+            # #
+            #   Ping › Developer › Set TImestamps
+            # #
+
+            - name: >-
+                  🕛 Get Timestamp
+              id: task_label_set_timestamp
+              run: |
+                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
             #   [ Create Labels ] Start
@@ -166,7 +208,7 @@ jobs:
               id: task_label_create_verify
               uses: actions/github-script@v7
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       const labels = JSON.parse( process.env.LABELS_JSON );
                       for ( const label of labels )
@@ -178,7 +220,7 @@ jobs:
                                   owner:        context.repo.owner,
                                   repo:         context.repo.repo,
                                   name:         label.name,
-                                  description:  label.description || '',
+                                  description:  label.description || 'No Description',
                                   color:        label.color
                               });
                           }
@@ -205,6 +247,8 @@ jobs:
         needs:
             - job-labels-create
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         permissions:
             contents: 'read'
             id-token: 'write'
@@ -213,6 +257,8 @@ jobs:
 
             # #
             #   Assign > Get Issue Title
+            #   
+            #   this step simply gets the title set for a new issue created by a user and sets it as an env
             # #
 
             - name: >-
@@ -220,7 +266,7 @@ jobs:
               uses: actions/github-script@v7
               id: task_get_title
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       let iss_title   = `${ context.payload.issue.title }`;
 
@@ -231,8 +277,23 @@ jobs:
 
             # #
             #   Labels > Bugs
-            #
-            #   Title of issue is carried over from the previous step.
+            #   
+            #   this step scans the title and body of a new submitted issue for certain keywords.
+            #   this step will then re-name the issue with a title which contains the type of issue at the front
+            #   with whatever label is set for PREFIX_BUG; title change will look like the following:
+            #       - EuropaServ changed the title 
+            #           [-] test issue found bug here
+            #           [+] 🐛 Bug: test issue found bug here
+            #       - EuropaServ added [ Type › Bug ]
+            #   
+            #   There are four main types of tickets:
+            #       1. 🐛 Bug
+            #       2. 💡 Feature
+            #       3. 🗺️ Roadmap
+            #       4. ⚠ Urgent
+            #   
+            #   If the ticket is classified as a "Bug", the title of the ticket will be re-named to include `🐛 Bug` at the beginning
+            #   of the issue name, but then that title will be carried over to the next type of ticket to check the title again.
             # #
 
             - name: >-
@@ -240,9 +301,8 @@ jobs:
               uses: actions/github-script@v7
               id: task_issues_bugs
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
-
                       const issueLabels = await github.rest.issues.listLabelsOnIssue(
                       {
                           owner:            context.repo.owner,
@@ -277,19 +337,17 @@ jobs:
 
                       /*
                           Bugs
-                      */
 
-                      const words                   = [ "bug", "broke", "issue", "fail" ];
-                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
-
-                      /*
                           Find regex based phrases
 
                           Regex:
                               https://regex101.com/r/Z99Gnq/2
                       */
 
-                      const findWordList 	        = /^\b(?:I?\s*have\s*(?:a|an)\s*(?:issue|problem|bug))|(?:will\s*not\s*work)|(?:it\s*is\s*(?:broken|broke|stuck))|(?:found\s*(?:an?|the)\s*(?:bug|issue))|(?:can\s*I\s*fix\s*the\s*(?:bug|issue))|(?:(?:does not|doesn'?t|don'?t|won'?t|can'?t|can\s?not|will\s*not)\s*(?:work|load|function))|(?:it\s*(?:will\s?not|won'?t|can\s?not|can'?t))\s*(?:get|find)\s*the\s*(?:website|site|webpage|page)|(?:the\s*(?:window|frame)\s*is\s*(?:blank|white|empty|missing))\b$/igm;
+                      const words                   = [ "bug", "broke", "issue", "fail", "wont work" ];
+                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
+
+                      const findWordList 	        = /^\b(?:I?\s*have\s*(?:a|an)\s*(?:issue|problem|bug))|(?:problem\swith)|(?:will\s*not\s*work)|(?:it\s*is\s*(?:broken|broke|stuck))|(?:found\s*(?:an?|the)\s*(?:bug|issue))|(?:can\s*I\s*fix\s*the\s*(?:bug|issue))|(?:(?:does not|doesn'?t|don'?t|won'?t|can'?t|can\s?not|will\s*not)\s*(?:work|load|function))|(?:it\s*(?:will\s?not|won'?t|can\s?not|can'?t))\s*(?:get|find)\s*the\s*(?:website|site|webpage|page)|(?:the\s*(?:window|frame)\s*is\s*(?:blank|white|empty|missing))\b$/igm;
                       const bFoundMatchTitle        = Boolean( findWordList.test( iss_title ) );
                       const bFoundMatchBody         = Boolean( findWordList.test( iss_body ) );
 
@@ -324,12 +382,16 @@ jobs:
                           console.log( "Already starts with " + urgn_tag + " ...... " + iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) )
                           console.log( "Already starts with " + road_tag + " ..... " + iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
 
+                          // change LBL per category
                           add_labels.push( `${ bug_lbl }` );
 
                           console.log( `Adding Tag ....................... ${ bug_lbl }` )
                           console.log( "\n" )
 
                           if ( iss_author === `${{ env.BOT_NAME_DEPENDABOT }}` )
+                              core.info( `Skipping: Detected ${ iss_author }` )
+
+                          if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
                           // Rename title to contain Bug:
@@ -361,8 +423,23 @@ jobs:
 
             # #
             #   Labels > Features
-            #
-            #   Title of issue is carried over from the previous step.
+            #   
+            #   this step scans the title and body of a new submitted issue for certain keywords.
+            #   this step will then re-name the issue with a title which contains the type of issue at the front
+            #   with whatever label is set for PREFIX_FEATURE; title change will look like the following:
+            #       - EuropaServ changed the title 
+            #           [-] Add ability to create X
+            #           [+] 💡 Feature: Add ability to create X
+            #       - EuropaServ added [ Type › Feature ]
+            #   
+            #   There are four main types of tickets:
+            #       1. 🐛 Bug
+            #       2. 💡 Feature
+            #       3. 🗺️ Roadmap
+            #       4. ⚠ Urgent
+            #   
+            #   If the ticket is classified as a "Feature", the title of the ticket will be re-named to include `💡 Feature` at the beginning
+            #   of the issue name, but then that title will be carried over to the next type of ticket to check the title again.
             # #
 
             - name: >-
@@ -370,9 +447,8 @@ jobs:
               uses: actions/github-script@v7
               id: task_issues_features
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
-
                       const issueLabels = await github.rest.issues.listLabelsOnIssue(
                       {
                           owner:            context.repo.owner,
@@ -384,6 +460,7 @@ jobs:
 
                       let iss_title                 = `${{ steps.task_issues_bugs.outputs.issue_title }}` || `${ context.payload.issue.title }`;
                       let iss_body                  = `${ context.payload.issue.body }`;
+                      let iss_author                = `${ context.payload.issue.user.login }`;
 
                       const iss_title_lc            = iss_title.toLowerCase( );
 
@@ -406,19 +483,16 @@ jobs:
 
                       /*
                           Features
-                      */
 
-                      const words                   = [ "feature", "request", "add support" ];
-                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
-
-                      /*
                           Find regex based phrases
 
                           Regex:
-                              https://regex101.com/r/fR1Hm6/1
+                              https://regex101.com/r/fR1Hm6/3
                       */
 
-                      const findWordList 	        = /^(?:(?:request|include|see)\s*(?:an?|the?)\s*(?:feature|addon|addition|plugin))|(?:(?:add|see|get)\s*support\s*(?:for|with|of))|(?:can\s*we\s*get\s*(?:the|a)\s*(?:ability|feature))|(?:💡 Feature:)$/igm;
+                      const words                   = [ "feature", "request", "add", "addition", "enhance", "create" ];
+                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
+                      const findWordList 	          = /(?:(?:add|enjoy|would|like|can|request|include|see|could|have)\s*?(?:the|liked?|i|we|an?|the|you?)\s*?(?:to|have|an|get|ability|request|add|feature|functionality|addon|addition|plugin|create))|(?:(?:add|see|get)\s*?support\s*?(?:for|with|of))|(?:can\s*we\s*get\s*?(?:the|a)\s*?(?:ability|feature))|(?:💡 Feature:)$/igm;
                       const bFoundMatchTitle        = Boolean( findWordList.test( iss_title ) );
                       const bFoundMatchBody         = Boolean( findWordList.test( iss_body ) );
 
@@ -429,8 +503,8 @@ jobs:
                               https://regex101.com/r/JOrqbN/1
                       */
 
-                      const feat_findPRTitle      = /^PR\s?#?(?:[0-9]*:)/igm;
-                      const feat_bFoundPRTitle    = Boolean( feat_findPRTitle.test( iss_title ) );
+                      const feat_findPRTitle        = /^PR\s?#?(?:[0-9]*:)/igm;
+                      const feat_bFoundPRTitle      = Boolean( feat_findPRTitle.test( iss_title ) );
 
                       console.log( "Title Lowercase ............... " + iss_title_lc  )
                       console.log( "Startswith " + feat_tag.toLowerCase( ) + "............ " + iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) )
@@ -463,6 +537,9 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_DEPENDABOT }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
+                          if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
+                              core.info( `Skipping: Detected ${ iss_author }` )
+
                           // Rename title to contain Feature:
                           // Make sure issue / pr title doesnt already contain a beginning title tag
 
@@ -492,17 +569,32 @@ jobs:
                       console.log( "\n\n" )
 
             # #
-            #   Labels > Urgent
-            #
-            #   Title of issue is carried over from the previous step.
+            #   Labels > Roadmap
+            #   
+            #   this step scans the title and body of a new submitted issue for certain keywords.
+            #   this step will then re-name the issue with a title which contains the type of issue at the front
+            #   with whatever label is set for PREFIX_ROADMAP; title change will look like the following:
+            #       - EuropaServ changed the title 
+            #           [-] roadmap new feature
+            #           [+] 🗺️ Roadmap: new feature
+            #       - EuropaServ added [ Type › Roadmap ]
+            #   
+            #   There are four main types of tickets:
+            #       1. 🐛 Bug
+            #       2. 💡 Feature
+            #       3. 🗺️ Roadmap
+            #       4. ⚠ Urgent
+            #   
+            #   If the ticket is classified as a "Roadmap", the title of the ticket will be re-named to include `🗺️ Roadmap` at the beginning
+            #   of the issue name, but then that title will be carried over to the next type of ticket to check the title again.
             # #
 
             - name: >-
-                  🏷️ ${{ env.PREFIX_URGENT }} › Assignment
+                  🏷️ ${{ env.PREFIX_ROADMAP }} › Assignment
               uses: actions/github-script@v7
-              id: task_issues_urgent
+              id: task_issues_roadmap
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       const issueLabels = await github.rest.issues.listLabelsOnIssue(
                       {
@@ -515,11 +607,165 @@ jobs:
 
                       let iss_title                 = `${{ steps.task_issues_features.outputs.issue_title }}` || `${ context.payload.issue.title }`;
                       let iss_body                  = `${ context.payload.issue.body }`;
+                      let iss_author                = `${ context.payload.issue.user.login }`;
+
+                      const iss_title_lc            = iss_title.toLowerCase( );
+
+                      console.log( "Road Title .................... " + iss_title )
+                      console.log( "Road Output ................... " + `${{ steps.task_issues_features.outputs.issue_title }}` )
+                      console.log( "Road Payload .................. " + `${ context.payload.issue.title }` )
+
+                      /*
+                          Tags
+                      */
+
+                      const bug_tag                 = `${{ env.PREFIX_BUG }}:`;
+                      const bug_lbl                 = `${{ env.LABEL_BUG }}`;
+                      const feat_tag                = `${{ env.PREFIX_FEATURE }}:`;
+                      const feat_lbl                = `${{ env.LABEL_FEATURE }}`;
+                      const urgn_tag                = `${{ env.PREFIX_URGENT }}:`;
+                      const urgn_lbl                = `${{ env.LABEL_URGENT }}`;
+                      const road_tag                = `${{ env.PREFIX_ROADMAP }}:`;
+                      const road_lbl                = `${{ env.LABEL_ROADMAP }}`;
+
+                      /*
+                          Roadmap
+
+                          Find regex based phrases
+                          Roadmap requires headers #Summary and #Proposal | #Objective
+
+                          Regex:
+                              https://regex101.com/r/ucajBZ/1
+                      */
+
+                      const words                   = [ "roadmap", "road map", "planned" ];
+                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
+                      const findWordList 	          = /#\s*Summary[\S\s]+#\s*(?:Proposal|Objective)[^\]]+/igm;
+                      const bFoundMatchTitle        = Boolean( findWordList.test( iss_title ) );
+                      const bFoundMatchBody         = Boolean( findWordList.test( iss_body ) );
+
+                      /*
+                          Do not change a title if the item starts with a PR: #
+
+                          Regex:
+                              https://regex101.com/r/JOrqbN/1
+                      */
+
+                      const road_findPRTitle        = /^PR\s?#?(?:[0-9]*:)/igm;
+                      const road_bFoundPRTitle      = Boolean( road_findPRTitle.test( iss_title ) );
+
+                      console.log( "Title Lowercase ............... " + iss_title_lc  )
+                      console.log( "Startswith " + road_tag.toLowerCase( ) + "............ " + iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
+                      console.log( "Title Includes Keyword ........ " + bTriggerWordInTitle  )
+                      console.log( "Title Includes Regex .......... " + bFoundMatchTitle  )
+                      console.log( "Body Includes Regex ........... " + bFoundMatchBody  )
+                      console.log( "\n" )
+
+                      /*
+                          - Check if issue title matches the issue label "Roadmap:"
+                          - Check if title contains word in words
+                      */
+
+                      // change TAG per category
+                      if ( iss_title_lc.startsWith( road_tag.toLowerCase( ) ) || bTriggerWordInTitle || bFoundMatchTitle || bFoundMatchBody )
+                      {
+
+                          console.log( "⚠️ " + road_tag + " ---------------------------------------" )
+                          console.log( "Already starts with " + bug_tag + " ......... " + iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) )
+                          console.log( "Already starts with " + feat_tag + " ..... " + iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) )
+                          console.log( "Already starts with " + urgn_tag + " ...... " + iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) )
+                          console.log( "Already starts with " + road_tag + " ..... " + iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
+
+                          // change LBL per category
+                          add_labels.push( `${ road_lbl }` );
+
+                          console.log( `Adding Tag ....................... ${ road_lbl }` )
+                          console.log( "\n" )
+
+                          if ( iss_author === `${{ env.BOT_NAME_DEPENDABOT }}` )
+                              core.info( `Skipping: Detected ${ iss_author }` )
+
+                          if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
+                              core.info( `Skipping: Detected ${ iss_author }` )
+
+                          // Rename title to contain Roadmap:
+                          // Make sure issue / pr title doesnt already contain a beginning title tag
+
+                          if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !road_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
+                          {
+                              console.log( "Renaming Title" )
+                              console.log( `Old Title: .................. ${ iss_title }` )
+
+                              const title           = context.payload.issue.title
+                              let title_new         = title.replace( /^\s?broad(.*?)\s?map\s*(.*?)\b/gi, '' );
+                              title_new             = title.replace( /^\s?planned\s*(.*?)\b/gi, '' );
+                              title_new             = title.replace( /^\s?broadmap\s*(.*?)\b/gi, '' );
+                              iss_title             = `${ road_tag } ${ title_new }`; // change TAG per category
+                          }
+
+                          console.log( `New Title: .................... ${ iss_title }` )
+
+                          await github.rest.issues.update(
+                          {
+                              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+                              title: `${ iss_title }`, labels: add_labels
+                          } );
+                      }
+
+                      core.setOutput( 'issue_title', iss_title )
+                      console.log( "\n\n" )
+
+            # #
+            #   Labels > Urgent
+            #   
+            #   this step scans the title and body of a new submitted issue for certain keywords.
+            #   this step will then re-name the issue with a title which contains the type of issue at the front
+            #   with whatever label is set for PREFIX_URGENT; title change will look like the following:
+            #       - EuropaServ changed the title 
+            #           [-] emergency
+            #           [+] ⚠ Urgent: emergency
+            #       - EuropaServ added [ Type › Urgent ]
+            #   
+            #   this tag can be mixed with 🐛 Bug so that a ticket gets both tags
+            #       - EuropaServ changed the title 
+            #           [-] emergency
+            #           [+] 🐛 Bug: urgent issue
+            #       - EuropaServ added [ Type › Bug ], [ Type › Urgent ]
+            #   
+            #   There are four main types of tickets:
+            #       1. 🐛 Bug
+            #       2. 💡 Feature
+            #       3. 🗺️ Roadmap
+            #       4. ⚠ Urgent
+            #   
+            #   If the ticket is classified as a "Urgent", the title of the ticket will be re-named to include `⚠ Urgent` at the beginning
+            #   of the issue name, but then that title will be carried over to the next type of ticket to check the title again.
+            # #
+
+            - name: >-
+                  🏷️ ${{ env.PREFIX_URGENT }} › Assignment
+              uses: actions/github-script@v7
+              id: task_issues_urgent
+              with:
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
+                  script: |
+                      const issueLabels = await github.rest.issues.listLabelsOnIssue(
+                      {
+                          owner:            context.repo.owner,
+                          repo:             context.repo.repo,
+                          issue_number:     context.issue.number
+                      });
+
+                      let add_labels                = issueLabels.data.map( label => label.name );
+
+                      let iss_title                 = `${{ steps.task_issues_urgent.outputs.issue_title }}` || `${ context.payload.issue.title }`;
+                      let iss_body                  = `${ context.payload.issue.body }`;
+                      let iss_author                = `${ context.payload.issue.user.login }`;
 
                       const iss_title_lc            = iss_title.toLowerCase( );
 
                       console.log( "Urgn Title .................... " + iss_title )
-                      console.log( "Urgn Output ................... " + `${{ steps.task_issues_features.outputs.issue_title }}` )
+                      console.log( "Urgn Output ................... " + `${{ steps.task_issues_urgent.outputs.issue_title }}` )
                       console.log( "Urgn Payload .................. " + `${ context.payload.issue.title }` )
 
                       /*
@@ -537,19 +783,16 @@ jobs:
 
                       /*
                           Urgent
-                      */
 
-                      const words                   = [ "urgent", "urgency", "emergency", "important", "critical" ];
-                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
-
-                      /*
                           Find regex based phrases
 
                           Regex:
                               https://regex101.com/r/eE9tJX/2
                       */
 
-                      const findWordList 	        = /(?:(?:this)?is\s*a?n?\s*?(?:emergency|urgent|important|vital|acute|crucial|grave|pressing|serious|top.?priority|high.?priority))|(?:reply|respond|answer|write|address)\s*(?:immediate|quick|asap|urgent|now|fast|(?:as)?\s*(?:soon|quick|immediate|fast))(?:ly)?|(?:need\s*(?:help|support|fixed|answer|reply|response)!)|(?:emergency|critical|urgen(?:t|cy)|high.?priority)/igm;
+                      const words                   = [ "urgent", "urgency", "emergency", "important", "critical" ];
+                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
+                      const findWordList 	          = /(?:(?:this)?is\s*a?n?\s*?(?:emergency|urgent|important|vital|acute|crucial|grave|pressing|serious|top.?priority|high.?priority))|(?:reply|respond|answer|write|address)\s*(?:immediate|quick|asap|urgent|now|fast|(?:as)?\s*(?:soon|quick|immediate|fast))(?:ly)?|(?:need\s*(?:help|support|fixed|answer|reply|response)!)|(?:emergency|critical|urgen(?:t|cy)|high.?priority)/igm;
                       const bFoundMatchTitle        = Boolean( findWordList.test( iss_title ) );
                       const bFoundMatchBody         = Boolean( findWordList.test( iss_body ) );
 
@@ -594,6 +837,9 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_DEPENDABOT }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
+                          if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
+                              core.info( `Skipping: Detected ${ iss_author }` )
+
                           // Rename title to contain Urgent:
                           // Make sure issue / pr title doesnt already contain a beginning title tag
 
@@ -623,140 +869,9 @@ jobs:
                       core.setOutput( 'issue_title', iss_title )
                       console.log( "\n\n" )
 
-            # #
-            #   Labels > Roadmap
-            #
-            #   Title of issue is carried over from the previous step.
-            # #
-
-            - name: >-
-                  🏷️ ${{ env.PREFIX_ROADMAP }} › Assignment
-              uses: actions/github-script@v7
-              id: task_issues_roadmap
-              with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
-                  script: |
-                      const issueLabels = await github.rest.issues.listLabelsOnIssue(
-                      {
-                          owner:            context.repo.owner,
-                          repo:             context.repo.repo,
-                          issue_number:     context.issue.number
-                      });
-
-                      let add_labels                = issueLabels.data.map( label => label.name );
-
-                      let iss_title                 = `${{ steps.task_issues_urgent.outputs.issue_title }}` || `${ context.payload.issue.title }`;
-                      let iss_body                  = `${ context.payload.issue.body }`;
-
-                      const iss_title_lc            = iss_title.toLowerCase( );
-
-                      console.log( "Road Title .................... " + iss_title )
-                      console.log( "Road Output ................... " + `${{ steps.task_issues_urgent.outputs.issue_title }}` )
-                      console.log( "Road Payload .................. " + `${ context.payload.issue.title }` )
-
-                      /*
-                          Tags
-                      */
-
-                      const bug_tag                 = `${{ env.PREFIX_BUG }}:`;
-                      const bug_lbl                 = `${{ env.LABEL_BUG }}`;
-                      const feat_tag                = `${{ env.PREFIX_FEATURE }}:`;
-                      const feat_lbl                = `${{ env.LABEL_FEATURE }}`;
-                      const urgn_tag                = `${{ env.PREFIX_URGENT }}:`;
-                      const urgn_lbl                = `${{ env.LABEL_URGENT }}`;
-                      const road_tag                = `${{ env.PREFIX_ROADMAP }}:`;
-                      const road_lbl                = `${{ env.LABEL_ROADMAP }}`;
-
-                      /*
-                          Roadmap
-                      */
-
-                      const words                   = [ "roadmap", "road map", "planned" ];
-                      const bTriggerWordInTitle     = words.some( s => s.includes( iss_title_lc ) || iss_title_lc.includes( s ) );
-
-                      /*
-                          Find regex based phrases
-                          Roadmap requires headers #Summary and #Proposal | #Objective
-
-                          Regex:
-                              https://regex101.com/r/ucajBZ/1
-                      */
-
-                      const findWordList 	        = /#\s*Summary[\S\s]+#\s*(?:Proposal|Objective)[^\]]+/igm;
-                      const bFoundMatchTitle        = Boolean( findWordList.test( iss_title ) );
-                      const bFoundMatchBody         = Boolean( findWordList.test( iss_body ) );
-
-                      /*
-                          Do not change a title if the item starts with a PR: #
-
-                          Regex:
-                              https://regex101.com/r/JOrqbN/1
-                      */
-
-                      const road_findPRTitle      = /^PR\s?#?(?:[0-9]*:)/igm;
-                      const road_bFoundPRTitle    = Boolean( road_findPRTitle.test( iss_title ) );
-
-                      console.log( "Title Lowercase ............... " + iss_title_lc  )
-                      console.log( "Startswith " + road_tag.toLowerCase( ) + "............ " + iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
-                      console.log( "Title Includes Keyword ........ " + bTriggerWordInTitle  )
-                      console.log( "Title Includes Regex .......... " + bFoundMatchTitle  )
-                      console.log( "Body Includes Regex ........... " + bFoundMatchBody  )
-                      console.log( "\n" )
-
-                      /*
-                          - Check if issue title matches the issue label "Roadmap:"
-                          - Check if title contains word in words
-                      */
-
-                      // change TAG per category
-                      if ( iss_title_lc.startsWith( road_tag.toLowerCase( ) ) || bTriggerWordInTitle || bFoundMatchTitle || bFoundMatchBody )
-                      {
-
-                          console.log( "⚠️ " + road_tag + " ---------------------------------------" )
-                          console.log( "Already starts with " + bug_tag + " ...... " + iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) )
-                          console.log( "Already starts with " + feat_tag + " .. " + iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) )
-                          console.log( "Already starts with " + urgn_tag + " ... " + iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) )
-                          console.log( "Already starts with " + road_tag + " .. " + iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
-
-                          // change LBL per category
-                          add_labels.push( `${ road_lbl }` );
-
-                          console.log( `Adding Tag .................... ${ road_lbl }` )
-                          console.log( "\n" )
-
-                          if ( iss_author === `${{ env.BOT_NAME_DEPENDABOT }}` )
-                              core.info( `Skipping: Detected ${ iss_author }` )
-
-                          // Rename title to contain Roadmap:
-                          // Make sure issue / pr title doesnt already contain a beginning title tag
-
-                          if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !road_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
-                          {
-                              console.log( "Renaming Title" )
-                              console.log( `Old Title: .................. ${ iss_title }` )
-
-                              const title           = context.payload.issue.title
-                              let title_new         = title.replace( /^\s?broad(.*?)\s?map\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?planned\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?broadmap\s*(.*?)\b/gi, '' );
-                              iss_title             = `${ road_tag } ${ title_new }`; // change TAG per category
-                          }
-
-                          console.log( `New Title: .................... ${ iss_title }` )
-
-                          await github.rest.issues.update(
-                          {
-                              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
-                              title: `${ iss_title }`, labels: add_labels
-                          } );
-                      }
-
-                      core.setOutput( 'issue_title', iss_title )
-                      console.log( "\n\n" )
-
     # #
     #   Job > Phrase Search
-    #
+    #   
     #   Checks a message for certain keywords and then responds to the user as a reply / comment
     # #
 
@@ -766,6 +881,8 @@ jobs:
         needs:
             - job-labels-create
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         permissions:
             contents: 'read'
             id-token: 'write'
@@ -773,7 +890,7 @@ jobs:
         steps:
 
             # #
-            #   [ Search Phrase ] Checkout
+            #   Phrase Search > Checkout
             # #
 
             - name: >-
@@ -784,14 +901,16 @@ jobs:
                   fetch-depth: 0
 
             # #
-            #   [ Search Phrase ] Search
+            #   Phrase Search > Search
+            #   
+            #   if an issue message contains certain keywords; have our bot reply with helpful links and information.
             # #
 
             - name: >-
                   👄 Search Phrases
               uses: actions/github-script@v7
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       const fs            = require( 'fs' );
                       const iss_title     = `${ context.payload.issue.title }`;
@@ -851,11 +970,16 @@ jobs:
         name: >-
             ✍️ Issue › Assignees
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         needs: [ job-assign-labels ]
-        if: |
-            always()
-            && contains( needs.*.result, 'success' )
-            && !contains( needs.*.result, 'failure' )
+      # disable
+      #
+      # if: |
+      #     always()
+      #     && contains( needs.*.result, 'success' )
+      #     && !contains( needs.*.result, 'failure' )
+        if: false
         permissions:
             contents: write
         steps:
@@ -868,7 +992,7 @@ jobs:
                   ✍️ Set Assignees
               uses: actions/github-script@v7
               with:
-                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
+                  github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
                       const assignees = [ `${{ github.repository_owner }}` ];
 

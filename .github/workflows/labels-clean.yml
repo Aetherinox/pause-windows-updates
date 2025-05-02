@@ -1,8 +1,11 @@
 # #
 #   @type               github workflow
+#   @desc               manually activated workflow to remove issue labels
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              manually activated workflow to create issue labels
+#
+#   @notes              This Github action must be activated manually.  This workflow script will do the following:
+#                           - Remove all existing labels in repository
 #
 #   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
 #                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
@@ -26,12 +29,12 @@
 #                       Add system env var with path to act.exe
 #                       Run the commands:
 #                           git pull https://github.com/username/repo
-#                           act -W .github/workflows/labels-create.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
-#                           act -W .github/workflows/labels-create.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
+#                           act -W .github/workflows/labels-clean.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/labels-clean.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: '🎫 Labels › Create'
-run-name: '🎫 Labels › Create'
+name: '🧹 Labels › Clean'
+run-name: '🧹 Labels › Clean'
 
 # #
 #   triggers
@@ -53,6 +56,15 @@ env:
 
     LABELS_JSON: |
       [
+          { "name": "bug",                          "color": "8F1784", "description": "Default github label" },
+          { "name": "documentation",                "color": "8F1784", "description": "Default github label" },
+          { "name": "duplicate",                    "color": "8F1784", "description": "Default github label" },
+          { "name": "enhancement",                  "color": "8F1784", "description": "Default github label" },
+          { "name": "good first issue",             "color": "8F1784", "description": "Default github label" },
+          { "name": "help wanted",                  "color": "8F1784", "description": "Default github label" },
+          { "name": "invalid",                      "color": "8F1784", "description": "Default github label" },
+          { "name": "question",                     "color": "8F1784", "description": "Default github label" },
+          { "name": "wontfix",                      "color": "8F1784", "description": "Default github label" },
           { "name": "AC › Changes Made",            "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
           { "name": "AC › Changes Required",        "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
           { "name": "AC › Failed",                  "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
@@ -120,15 +132,14 @@ env:
 jobs:
 
     # #
-    #   Job [ Verify / Create Labels ]
+    #   Job › Remove Labels
     #
-    #   This job will ensure you have labels already created in your repo.
-    #   All labels come from the JSON table LABELS_JSON.
+    #   This job removes all existing labels
     # #
 
-    issues-labels-create:
+    issues-labels-clean:
         name: >-
-            🎫 Labels › Create
+            🧹 Labels › Clean
         runs-on: ubuntu-latest
       # runs-on: apollo-x64
         timeout-minutes: 3
@@ -139,21 +150,21 @@ jobs:
         steps:
 
             # #
-            #   [ Create Labels ] Start
+            #   Labels › Start
             # #
 
             - name: >-
                   ✅ Start
-              id: task_label_create_start
+              id: task_label_remove_start
               run: |
-                  echo "Assigning labels and assignees"
+                  echo "Starting workflow"
 
             # #
-            #   Create Labels › Set Env Variables
+            #   Labels › Set Env Variables
             # #
 
             - name: >-
-                🕛 Get Timestamp
+                  🕛 Get Timestamp
               id: task_label_set_timestamp
               run: |
                   echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
@@ -163,52 +174,64 @@ jobs:
                   echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
             # #
-            #   [ Create Labels ] Checkout
+            #   Labels › Checkout
             # #
 
             - name: >-
                   ☑️ Checkout
-              id: task_label_create_checkout
+              id: task_label_remove_checkout
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
-            #   [ Create Labels ] Verify Existing Labels
+            #   Labels › Start
             # #
 
             - name: >-
-                  🏷️ Verify Existing Labels
-              id: task_label_verify_existing
+                  🏷️ Delete Existing Labels
+              id: task_label_remove_run
               uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
                   script: |
-                      const labels = JSON.parse( process.env.LABELS_JSON );
+                      const targetOwner = context.repo.owner;
+                      const targetRepo = context.repo.repo;
+
+                      // Fetch labels from the source repository
+                      const response = await github.rest.issues.listLabelsForRepo({
+                          owner: targetOwner,
+                          repo: targetRepo,
+                      });
+                      console.log("Labels fetched: ", response.data);
+
+                      const labels = response.data;
+                      if (labels.length === 0) {
+                          console.log("No labels found in the source repository.");
+                      }
+
+                      // Fetch all labels from the target repository and delete them
+                      const existingLabels = await github.rest.issues.listLabelsForRepo({
+                          owner: targetOwner,
+                          repo: targetRepo,
+                      });
+
+                      // const labels = JSON.parse( process.env.LABELS_JSON );
                       let result = Object.keys(labels).length;
                       for ( const label of labels )
                       {
                           try
                           {
-                              await github.rest.issues.createLabel(
+                              await github.rest.issues.deleteLabel(
                               {
                                   owner:        context.repo.owner,
                                   repo:         context.repo.repo,
                                   name:         label.name,
-                                  description:  label.description || '',
-                                  color:        label.color
                               });
                           }
                           catch ( err )
                           {
-                              if ( err.status === 422 )
-                              {
-                                  console.log( `Label '${label.name}' already exists. Skipping.` );
-                              }
-                              else
-                              {
-                                  console.error( `Error creating label '${label.name}': ${err}` );
-                              }
+                            console.error("Error: " + err);
                           }
                       }
 
@@ -217,7 +240,7 @@ jobs:
                       return result
 
             # #
-            #   Cleanup › Get Weekly Commits
+            #   Labels › Get Weekly Commits
             # #
 
             - name: >-
@@ -227,4 +250,3 @@ jobs:
                   echo 'WEEKLY_COMMITS<<EOF' >> $GITHUB_ENV
                   git log --format="[\`%h\`](${{ github.server_url }}/${{ github.repository }}/commit/%H) %s - %an" --since=7.days >> $GITHUB_ENV
                   echo 'EOF' >> $GITHUB_ENV
-

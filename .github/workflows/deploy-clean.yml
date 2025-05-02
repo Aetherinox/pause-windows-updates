@@ -1,90 +1,91 @@
 # #
 #   @type               github workflow
-#   @desc               cleans up the list of deployments in the environment history
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
+#   @usage              cleans up the list of deployments in the environment history
+#                       edit the 'environment:' to determine which deployment to keep clean
+#                           - can be ran manually
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#   
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/deploy-clean.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/deploy-clean.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: "⚙️ Deploy › Clean"
-run-name: "⚙️ Deploy › Clean"
+# #
+
+name: '🧹 Deployments › Clean'
+run-name: '🧹 Deployments › Clean'
 
 # #
 #   triggers
 # #
 
 on:
+
+    # #
+    #   Trigger > Workflow Dispatch
+    # #
+
     workflow_dispatch:
+        inputs:
+
+            # #
+            #   Deployment Environment Name
+            #   
+            #   this is the name of the deployment item
+            # #
+
+            DEPLOYMENT_ENV:
+                description:    '📦 Deployment Environment'
+                required:       true
+                default:        'orion'
+                type:           string
+
+            # #
+            #   Delay
+            #
+            #   Milliseconds to wait between cleaning up each action in history. Avoids secondary rate limit. Default: 500
+            # #
+
+            DEPLOYMENT_DELAY:
+                description:    '🕛 Delete Delay'
+                required:       true
+                default:        '1000'
+                type:           string
 
 # #
 #   environment variables
 # #
 
 env:
-    BOT_NAME_1:           AdminServ
-    BOT_NAME_2:           AdminServX
-    BOT_NAME_3:           EuropaServ
-    BOT_NAME_DEPENDABOT:  dependabot[bot]
-    LABELS_JSON: |
-      [
-          { "name": "AC › Changes Made",           "color": "8F1784", "description": "Requested changes have been made and are pending a re-scan" },
-          { "name": "AC › Changes Required",       "color": "8F1784", "description": "Requires changes to be made to the package before being accepted" },
-          { "name": "AC › Failed",                 "color": "a61f2d", "description": "Autocheck failed to run through a complete cycle, requires investigation" },
-          { "name": "AC › Needs Rebase",           "color": "8F1784", "description": "Due to the permissions on the requesting repo, this pull request must be rebased by the author" },
-          { "name": "AC › Passed",                 "color": "146b4a", "description": "Ready to be reviewed" },
-          { "name": "AC › Review Required",        "color": "8F1784", "description": "PR needs to be reviewed by another person, after the requested changes have been made" },
-          { "name": "AC › Security Warning",       "color": "761620", "description": "Does not conform to developer policies, or includes potentially dangerous code" },
-          { "name": "AC › Skipped Scan",           "color": "8F1784", "description": "Author has skipped code scan" },
-          { "name": "Status 𐄂 Duplicate",          "color": "75536b", "description": "Issue or pull request already exists" },
-          { "name": "Status 𐄂 Accepted",            "color": "2e7539", "description": "This pull request has been accepted" },
-          { "name": "Status 𐄂 Autoclosed",          "color": "3E0915", "description": "Originally stale and was autoclosed for no activity" },
-          { "name": "Status 𐄂 Denied",              "color": "ba4058", "description": "Pull request has been denied" },
-          { "name": "Status 𐄂 Locked",              "color": "550F45", "description": "Automatically locked by AdminServ for a prolonged period of inactivity" },
-          { "name": "Status 𐄂 Need Info",           "color": "2E3C4C", "description": "Not enough information to resolve" },
-          { "name": "Status 𐄂 No Action",           "color": "030406", "description": "Closed without any action being taken" },
-          { "name": "Status 𐄂 Pending",             "color": "984b12", "description": "Pending pull request" },
-          { "name": "Status 𐄂 Released",            "color": "1b6626", "description": "Issues or PR has been implemented and is now live" },
-          { "name": "Status 𐄂 Reopened",            "color": "8a6f14", "description": "A previously closed PR which has been re-opened" },
-          { "name": "Status 𐄂 Review",              "color": "9e1451", "description": "Currently pending review" },
-          { "name": "Status 𐄂 Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
-          { "name": "Type ◦ Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
-          { "name": "Type ◦ Dependency",            "color": "243759", "description": "Item is associated to dependency" },
-          { "name": "Type ◦ Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
-          { "name": "Type ◦ Feature",               "color": "3c4e93", "description": "Feature request" },
-          { "name": "Type ◦ Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
-          { "name": "Type ◦ Pull Request",          "color": "8F1784", "description": "Normal pull request" },
-          { "name": "Type ◦ Roadmap",               "color": "8F1784", "description": "Feature or bug currently planned for implementation" },
-          { "name": "Type ◦ Internal",              "color": "A51994", "description": "Assigned items are for internal developer use" },
-          { "name": "Build ◦ Desktop",              "color": "c7ca4a", "description": "Specific to desktop" },
-          { "name": "Build ◦ Linux",                "color": "c7ca4a", "description": "Specific to Linux" },
-          { "name": "Build ◦ MacOS",                "color": "c7ca4a", "description": "Specific to MacOS" },
-          { "name": "Build ◦ Mobile",               "color": "c7ca4a", "description": "Specific to mobile" },
-          { "name": "Build ◦ Web",                  "color": "c7ca4a", "description": "Specific to web" },
-          { "name": "Build ◦ Windows",              "color": "c7ca4a", "description": "Specific to Windows" },
-          { "name": "› API",                        "color": "F99B50", "description": "Plugin API, CLI, browser JS API" },
-          { "name": "› Auto-type",                  "color": "9141E0", "description": "Auto-type functionality in desktop apps" },
-          { "name": "› Browser",                    "color": "9141E0", "description": "Browser plugins and passing data to <=> from app" },
-          { "name": "› Customization",              "color": "E3F0FC", "description": "Customizations: plugins, themes, configs" },
-          { "name": "› Design",                     "color": "FA70DE", "description": "Design related queries" },
-          { "name": "› Dist",                       "color": "FA70DE", "description": "Installers and other forms of software distribution" },
-          { "name": "› Enterprise",                 "color": "11447a", "description": "Issues about collaboration, administration, and so on" },
-          { "name": "› Hardware",                   "color": "5a7503", "description": "YubiKey, other tokens, biometrics" },
-          { "name": "› Import/Export",              "color": "F5FFCC", "description": "Import from and export to different file formats" },
-          { "name": "› Improvement",                "color": "185c98", "description": "Enhance an existing feature" },
-          { "name": "› Performance",                "color": "006b75", "description": "Web and desktop performance issues" },
-          { "name": "› Plugin Request",             "color": "FCE9CA", "description": "Requested changes should be implemented as a plugin" },
-          { "name": "› Security",                   "color": "F75D39", "description": "Security issues" },
-          { "name": "› Self-Hosting",               "color": "fad8c7", "description": "Self-hosting installations and configs" },
-          { "name": "› Storage",                    "color": "5319e7", "description": "Storage providers: Dropbox, Google, WebDAV, etc." },
-          { "name": "› Updater",                    "color": "1BADDE", "description": "Auto-updater issues" },
-          { "name": "› UX",                         "color": "1BADDE", "description": "UX and usability" },
-          { "name": "› Website",                    "color": "fef2c0", "description": "Website related issues" },
-          { "name": "⚠ Urgent",                     "color": "a8740e", "description": "Requires urgent attention" },
-          { "name": "⚠ Announcement",               "color": "DB4712", "description": "Announcements" },
-          { "name": "📰 Progress Report",           "color": "392297", "description": "Development updates" },
-          { "name": "📦 Release",                   "color": "277542", "description": "Release announcements" },
-          { "name": "✔️ Poll",                      "color": "972255", "description": "Community polls" },
-          { "name": "❔ Question",                  "color": "FFFFFF", "description": "All questions" }
-      ]
+    DEPLOYMENT_ENV:             ${{ github.event.inputs.DEPLOYMENT_ENV || 'orion' }}
+    DEPLOYMENT_DELAY:           ${{ github.event.inputs.DEPLOYMENT_DELAY || '1000' }}
+    BOT_NAME_1:                 EuropaServ
+    BOT_NAME_2:                 BinaryServ
+    BOT_NAME_DEPENDABOT:        dependabot[bot]
+    BOT_NAME_RENOVATE:          renovate[bot]
 
 # #
 #   jobs
@@ -92,15 +93,63 @@ env:
 
 jobs:
     cleanup:
+        name: >-
+            🧹 Deployments › Clean
         runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
         permissions: write-all
-  
+
         steps:
+
+            # #
+            #   Cleanup › Set Env Variables
+            # #
+
+            - name: >-
+                🕛 Get Timestamp
+              id: task_cleanup_set_timestamp
+              run: |
+                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
+                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
+                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+            # #
+            #   Release › Github › Checkout › Arm64
+            # #
+
+            - name: >-
+                ✅ Checkout
+              id: task_cleanup_gh_checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
+            #   Cleanup › Start
+            # #
+
             - name: >-
                 ⚙️ Deployments › Clean
+              id: task_cleanup_start
               uses: Aetherinox/delete-deploy-env-action@v3
               with:
                   token: ${{ secrets.SELF_TOKEN_CL }}
-                  environment: orion
+                  environment: '${{ env.DEPLOYMENT_ENV }}'
                   onlyRemoveDeployments: true
-                  delay: "1000"
+                  delay: "${{ env.DEPLOYMENT_DELAY }}"
+
+            # #
+            #   Cleanup › Get Weekly Commits
+            # #
+
+            - name: >-
+                🕛 Get Weekly Commit List
+              id: task_cleanup_set_weekly_commit_list
+              run: |
+                  echo 'WEEKLY_COMMITS<<EOF' >> $GITHUB_ENV
+                  git log --format="[\`%h\`](${{ github.server_url }}/${{ github.repository }}/commit/%H) %s - %an" --since=7.days >> $GITHUB_ENV
+                  echo 'EOF' >> $GITHUB_ENV
+
