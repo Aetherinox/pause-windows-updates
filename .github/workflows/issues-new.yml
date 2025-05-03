@@ -394,19 +394,45 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
-                          // Rename title to contain Bug:
-                          // Make sure issue / pr title doesnt already contain a beginning title tag
+                          /*
+                              Rename title to contain Bug:
+                              if bug title or body contains keyword hinting at the issue being about a bug; change the title of the issue
+                              Make sure issue / pr title doesnt already contain a beginning title tag
+
+                              @ref            https://jsfiddle.net/aetherinox/wj17x8mp/2/
+                          */
 
                           if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !bug_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                           {
                               console.log( "Renaming Title" )
                               console.log( `Old Title: .................. ${ iss_title }` )
 
-                              const title           = context.payload.issue.title
-                              let title_new         = title.replace( /^\s?bug\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?fail\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?issue\s*(.*?)\b/gi, '' );
-                              iss_title             = `${ bug_tag } ${ title_new }`;
+                              /*
+                                  If a user creates an issue starting with our tag; strip it and add ours with the emoji instead
+                                      original:       Bug: CMD windows opens then closes, can't run the script.
+                                      new:            🐛 Bug: CMD windows opens then closes, can't run the script.
+                              */
+
+                              const removeBeginning1 		  = bug_tag.substring(3); 				          // "Bug:"
+                              let removeBeginning2 		    = bug_tag.substring(0);				            // "🐛 Bug:"
+                              removeBeginning2			      = removeBeginning2.replace(/\s/g, '')	    // "Bug:"
+
+                              if ( iss_title.startsWith(removeBeginning1) )                         // "Bug:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning1.length);
+                                  iss_title = iss_title.trim();
+                              }
+                              else if ( iss_title.startsWith(removeBeginning2) )                    // "🐛Bug:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning2.length);
+                                  iss_title = iss_title.trim();
+                              }
+  
+                              const title             = iss_title;
+                              let title_new           = title.replace( /^\s?bug\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?fail\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?issue\s*(.*?)\b/gi, '' );
+                              iss_title               = `${ bug_tag } ${ title_new }`;
                           }
 
                           console.log( `New Title: ...................... ${ iss_title }` )
@@ -540,20 +566,46 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
-                          // Rename title to contain Feature:
-                          // Make sure issue / pr title doesnt already contain a beginning title tag
+                          /*
+                              Rename title to contain Feature:
+                              if feature title or body contains keyword hinting at the issue being about a feature; change the title of the issue
+                              Make sure issue / pr title doesnt already contain a beginning title tag
+
+                              @ref            https://jsfiddle.net/aetherinox/wj17x8mp/2/
+                          */
 
                           if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !feat_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                           {
                               console.log( "Renaming Title" )
                               console.log( `Old Title: .................. ${ iss_title }` )
 
-                              const title           = context.payload.issue.title
-                              let title_new         = title.replace( /^\s?feature\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?request\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?add(.*?)\s?feature\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?add(.*?)\s?support\s*(.*?)\b/gi, '' );
-                              iss_title             = `${ feat_tag } ${ title_new }`; // change TAG per category
+                              /*
+                                  If a user creates an issue starting with our tag; strip it and add ours with the emoji instead
+                                      original:       Feature: CMD windows opens then closes, can't run the script.
+                                      new:            💡 Feature: CMD windows opens then closes, can't run the script.
+                              */
+
+                              const removeBeginning1 		  = feat_tag.substring(3); 				          // "Feature:"
+                              let removeBeginning2 		    = feat_tag.substring(0);				          // "💡 Feature:"
+                              removeBeginning2			      = removeBeginning2.replace(/\s/g, '')	    // "Feature:"
+
+                              if ( iss_title.startsWith(removeBeginning1) )                         // "Feature:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning1.length);
+                                  iss_title = iss_title.trim();
+                              }
+                              else if ( iss_title.startsWith(removeBeginning2) )                    // "💡 Feature:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning2.length);
+                                  iss_title = iss_title.trim();
+                              }
+
+                              const title             = iss_title;
+                              let title_new           = title.replace( /^\s?feature\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?request\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?add(.*?)\s?feature\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?add(.*?)\s?support\s*(.*?)\b/gi, '' );
+                              iss_title               = `${ feat_tag } ${ title_new }`; // change TAG per category
                           }
 
                           console.log( `New Title: ...................... ${ iss_title }` )
@@ -688,19 +740,45 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
-                          // Rename title to contain Roadmap:
-                          // Make sure issue / pr title doesnt already contain a beginning title tag
+                          /*
+                              Rename title to contain Roadmap:
+                              if roadmap title or body contains keyword hinting at the issue being about roadmap; change the title of the issue
+                              Make sure issue / pr title doesnt already contain a beginning title tag
+
+                              @ref            https://jsfiddle.net/aetherinox/wj17x8mp/2/
+                          */
 
                           if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !road_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                           {
                               console.log( "Renaming Title" )
                               console.log( `Old Title: .................. ${ iss_title }` )
 
-                              const title           = context.payload.issue.title
-                              let title_new         = title.replace( /^\s?broad(.*?)\s?map\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?planned\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?broadmap\s*(.*?)\b/gi, '' );
-                              iss_title             = `${ road_tag } ${ title_new }`; // change TAG per category
+                              /*
+                                  If a user creates an issue starting with our tag; strip it and add ours with the emoji instead
+                                      original:       Roadmap: CMD windows opens then closes, can't run the script.
+                                      new:            🗺️ Roadmap: CMD windows opens then closes, can't run the script.
+                              */
+
+                              const removeBeginning1 		  = road_tag.substring(3); 				          // "Roadmap:"
+                              let removeBeginning2 		    = road_tag.substring(0);				          // "🗺️ Roadmap:"
+                              removeBeginning2			      = removeBeginning2.replace(/\s/g, '')	    // "Roadmap:"
+
+                              if ( iss_title.startsWith(removeBeginning1) )                         // "Roadmap:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning1.length);
+                                  iss_title = iss_title.trim();
+                              }
+                              else if ( iss_title.startsWith(removeBeginning2) )                    // "🗺️ Roadmap:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning2.length);
+                                  iss_title = iss_title.trim();
+                              }
+
+                              const title             = iss_title;
+                              let title_new           = title.replace( /^\s?broad(.*?)\s?map\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?planned\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?broadmap\s*(.*?)\b/gi, '' );
+                              iss_title               = `${ road_tag } ${ title_new }`; // change TAG per category
                           }
 
                           console.log( `New Title: .................... ${ iss_title }` )
@@ -840,21 +918,47 @@ jobs:
                           if ( iss_author === `${{ env.BOT_NAME_RENOVATE }}` )
                               core.info( `Skipping: Detected ${ iss_author }` )
 
-                          // Rename title to contain Urgent:
-                          // Make sure issue / pr title doesnt already contain a beginning title tag
+                          /*
+                              Rename title to contain Urgent:
+                              if urgent title or body contains keyword hinting at the issue being about urgent; change the title of the issue
+                              Make sure issue / pr title doesnt already contain a beginning title tag
+
+                              @ref            https://jsfiddle.net/aetherinox/wj17x8mp/2/
+                          */
 
                           if ( iss_author !== `${{ env.BOT_NAME_DEPENDABOT }}` && !urgn_bFoundPRTitle && !iss_title_lc.startsWith( bug_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( feat_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( urgn_tag.toLowerCase( ) ) && !iss_title_lc.startsWith( road_tag.toLowerCase( ) ) )
                           {
                               console.log( "Renaming Title" )
                               console.log( `Old Title: .................. ${ iss_title }` )
 
-                              const title           = context.payload.issue.title
-                              let title_new         = title.replace( /^\s?emergency\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?urgent\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?urgency\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?important\s*(.*?)\b/gi, '' );
-                              title_new             = title.replace( /^\s?critical\s*(.*?)\b/gi, '' );
-                              iss_title             = `${ urgn_tag } ${ title_new }`; // change TAG per category
+                              /*
+                                  If a user creates an issue starting with our tag; strip it and add ours with the emoji instead
+                                      original:       Urgent: CMD windows opens then closes, can't run the script.
+                                      new:            ⚠ Urgent: CMD windows opens then closes, can't run the script.
+                              */
+
+                              const removeBeginning1 		  = urgn_tag.substring(3); 				          // "Urgent:"
+                              let removeBeginning2 		    = urgn_tag.substring(0);				          // "⚠ Urgent:"
+                              removeBeginning2			      = removeBeginning2.replace(/\s/g, '')	    // "Urgent:"
+                    
+                              if ( iss_title.startsWith(removeBeginning1) )                         // "Urgent:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning1.length);
+                                  iss_title = iss_title.trim();
+                              }
+                              else if ( iss_title.startsWith(removeBeginning2) )                    // "⚠ Urgent:"
+                              {
+                                  iss_title = iss_title.slice(removeBeginning2.length);
+                                  iss_title = iss_title.trim();
+                              }
+
+                              const title             = context.payload.issue.title;
+                              let title_new           = title.replace( /^\s?emergency\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?urgent\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?urgency\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?important\s*(.*?)\b/gi, '' );
+                              title_new               = title.replace( /^\s?critical\s*(.*?)\b/gi, '' );
+                              iss_title               = `${ urgn_tag } ${ title_new }`;
                           }
 
                           console.log( `New Title: ...................... ${ iss_title }` )
