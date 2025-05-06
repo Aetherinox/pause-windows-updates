@@ -39,6 +39,10 @@
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
   - [Option 2 (manual)](#option-2-manual)
   - [Option 3 (batch utility)](#option-3-batch-utility)
+- [Frequently Asked Questions](#frequently-asked-questions)
+  - [Is It Safe?](#is-it-safe)
+  - [Is It Free?](#is-it-free)
+  - [Contributing](#contributing)
 - [Preview](#preview)
 - [Contributors](#contributors)
 
@@ -301,6 +305,38 @@ When the options appear, select option `(2)   Enable Updates`
 </p>
 
 </div>
+
+<br />
+
+---
+
+<br />
+
+## Frequently Asked Questions
+
+Have a question? It may be answered here:
+
+### Is It Safe?
+
+Yes. This repository contains two ways that you can enable / disable updates; via a `.bat batch ` file, or a `.reg registry` file. We picked these languages because the runtime scripts do not require being compiled and the source code is freely available to review. You can open any of the scripts within something as simple as notepad and go through the list of changes being made.
+
+The downside to .bat files is that they require elevated permissions in order to do everything the script has to offer. Running scripts with elevated permissions can be dangerous if you are unaware of what the script does, and the potential for malicious code to be injected. 
+
+This is why we offer the `.reg` registry alternative for users who do not wish to grant elevated permissions to a script. The downside to the `.reg` file is that it does not do nearly as much as the .bat file. Both will enable / disable Windows Updates, but the .bat file contains a lot more functionality if you want to take a deeper dive into what your system has. The choice is yours.
+
+The point of this project is to make life easier, and re-gain at least some minimal amount of control with your system. The scripts contain anything other than what they say they do, and it will stay that way.
+
+<br />
+
+### Is It Free?
+
+The great thing about Github is that you are provided with the source code to a project. No paywalls, no one-time payments, just a free utility that you can do as you wish. We will not charge for this app. We do accept donations to help with development, but that is completely optional. If not, hey, that's fine. Continue to enjoy the script without limitations.
+
+<br />
+
+### Contributing
+
+We are always willing to accept new contributions, however, the code will be vetted before it is pushed to the public. Contributions shall not include functionality which is unrelated to Microsoft Windows, or Microsoft applications.
 
 <br />
 
