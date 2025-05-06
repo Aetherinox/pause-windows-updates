@@ -192,6 +192,15 @@ set crapware[38]=Microsoft.XboxApp
 set crapware[39]=Microsoft.Xbox.TCUI
 
 :: # #
+::  @desc           registry
+:: # #
+
+set "registry[1]=HKLM|hklm.reg"
+set "registry[2]=HKCU|hkcu.reg"
+set "registry[3]=HKCR|hkcr.reg"
+set "registry[4]=HKU|hku.reg"
+set "registry[5]=HKCC|hkcc.reg"
+
 ::  @desc           define os ver and name
 :: # #
 
@@ -882,7 +891,7 @@ goto :EOF
 
 :taskBackupRegistry
 
-setlocal disabledelayedexpansion
+    setlocal disabledelayedexpansion
 
     echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
 
@@ -892,65 +901,29 @@ setlocal disabledelayedexpansion
         md "%dir_reg%"
     )
 
-    if exist "%dir_reg%\HKLM.reg" (
-        erase "%dir_reg%\HKLM.reg"
-    )
-    call :progressUpdate 20 "Export HKLM from registry to file HKLM.reg"
-    reg export HKLM "%dir_reg%\HKLM.reg" > nul
+    set registryProg=0
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set registry[ 2^>nul') do (
+        if exist "%dir_reg%\%%~x" (
+            erase "%dir_reg%\%%~x"
+        )
 
-    if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKLM.reg"%u%
-    ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKLM.reg"%u%
-    )
+        echo.   %purplel% Status  %u%        Backing up %purplel%%%~w%u% to file %goldm%"%%~x"%u%
 
-    if exist "%dir_reg%\HKCU.reg" (
-        erase "%dir_reg%\HKCU.reg"
-    )
-    call :progressUpdate 40 "Export HKCU from registry to file HKCU.reg"
-    reg export HKCU "%dir_reg%\HKCU.reg" > nul
+        call :progressUpdate !registryProg! "Export %%~w from registry to file %%~x"
+        reg export HKLM "%dir_reg%\%%~x" > nul
+    
+        set /a registryProg+=20
 
-    if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCU.reg"%u%
-    ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCU.reg"%u%
-    )
+        if %errorlevel% neq 0 (
+            echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\%%~x"%u%
+        ) else if %errorlevel% equ 0 (
+            setlocal enabledelayedexpansion
+            echo.   %greenl% Success %u%        %green%(!registryProg!%%^^^)%u% Backed up %grayd%"%dir_reg%\%%~x"%u%
+            setlocal disabledelayedexpansion
+        )
 
-    if exist "%dir_reg%\HKCR.reg" (
-        erase "%dir_reg%\HKCR.reg"
-    )
-    call :progressUpdate 60 "Export HKCR from registry to file HKCR.reg"
-    reg export HKCR "%dir_reg%\HKCR.reg" > nul
-
-    if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCR.reg"%u%
-    ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCR.reg"%u%
-    )
-
-    if exist "%dir_reg%\HKU.reg" (
-        erase "%dir_reg%\HKU.reg"
-    )
-    call :progressUpdate 80 "Export HKU from registry to file HKU.reg"
-    reg export HKU "%dir_reg%\HKU.reg" > nul
-
-    if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKU.reg"%u%
-    ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKU.reg"%u%
-    )
-
-    if exist "%dir_reg%\HKCC.reg" (
-        erase "%dir_reg%\HKCC.reg"
-    )
-    call :progressUpdate 100 "Export HKCC from registry to file HKCC.reg"
-    reg export HKCC "%dir_reg%\HKCC.reg" > nul
-
-    if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\HKCC.reg"%u%
-    ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Backed up %grayd%"%dir_reg%\HKCC.reg"%u%
-    )
+        call :progressUpdate !registryProg! "Completed %%~w"
+    ) 
 
     call :progressUpdate 100 "Export Complete"
     echo.   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
