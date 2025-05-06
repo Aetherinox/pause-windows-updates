@@ -326,7 +326,7 @@ The downside to .bat files is that they require elevated permissions in order to
 
 This is why we offer the `.reg` registry alternative for users who do not wish to grant elevated permissions to a script. The downside to the `.reg` file is that it does not do nearly as much as the .bat file. Both will enable / disable Windows Updates, but the .bat file contains a lot more functionality if you want to take a deeper dive into what your system has. The choice is yours.
 
-The point of this project is to make life easier, and re-gain at least some minimal amount of control with your system. The scripts contain anything other than what they say they do, and it will stay that way.
+The point of this project is to make life easier, and re-gain at least some minimal amount of control with your system. The scripts do not contain anything other than what is described in this documentation, and it will stay that way.
 
 <br />
 
