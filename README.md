@@ -316,6 +316,8 @@ When the options appear, select option `(2)   Enable Updates`
 
 Have a question? It may be answered here:
 
+<br />
+
 ### Is It Safe?
 
 Yes. This repository contains two ways that you can enable / disable updates; via a `.bat batch ` file, or a `.reg registry` file. We picked these languages because the runtime scripts do not require being compiled and the source code is freely available to review. You can open any of the scripts within something as simple as notepad and go through the list of changes being made.
@@ -336,7 +338,7 @@ The great thing about Github is that you are provided with the source code to a 
 
 ### Contributing
 
-We are always willing to accept new contributions, however, the code will be vetted before it is pushed to the public. Contributions shall not include functionality which is unrelated to Microsoft Windows, or Microsoft applications.
+We are always willing to accept new contributions, however, the code will be vetted before it is pushed to the public. Contributions shall not include functionality which is unrelated to Microsoft Windows, or Microsoft applications. New features must give the user the ability to opt in by choice, and not have it forced upon them, and new features shall be disabled by default and only enabled after the user has consented to such a change.
 
 <br />
 
