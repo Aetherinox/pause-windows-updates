@@ -50,7 +50,10 @@
 
 ## About
 
-Formerly known as a simply registry tweak to disable Microsoft Windows updates, this repository has grown into a utility known as **WPU** _(Windows Personalization Utility)_; a more complete solution for Windows users. See a list of the features for each option below:
+Formerly known as a simply registry tweak to disable Microsoft Windows updates, this repository has grown into a utility known as **WPU** _(Windows Personalization Utility)_; a more complete solution for Windows users. To get an idea of how the utility works, check out Youtube videos this project was reviewed on:
+
+- [Britec09 - Control Windows Updates With One Click](https://youtube.com/watch?v=vNM6AS9hTIs)
+- [SCPC Informática - Bloquea Updates en 1 Click](https://youtube.com/watch?v=Cikj2DS9PhU)
 
 <br />
 
