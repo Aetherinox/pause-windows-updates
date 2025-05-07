@@ -28,13 +28,11 @@
 <br />
 
 - [About](#about)
-  - [WP Utility](#wp-utility)
-  - [Registry Scripts](#registry-scripts)
 - [Notice](#notice)
 - [Install](#install)
-  - [Registry Scripts](#registry-scripts-1)
-  - [WP Utility](#wp-utility-1)
-  - [Confirm Updates Status](#confirm-updates-status)
+  - [WP Utility](#wp-utility)
+  - [Registry Scripts](#registry-scripts)
+- [Confirm Updates Enabled/Disabled](#confirm-updates-enableddisabled)
 - [Re-enable Updates](#re-enable-updates)
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
   - [Option 2 (manual)](#option-2-manual)
@@ -44,7 +42,7 @@
   - [Is It Free?](#is-it-free)
   - [Contributing](#contributing)
 - [Preview](#preview)
-- [Contributors](#contributors)
+- [Contributors ✨](#contributors-)
 
 <br />
 
@@ -70,7 +68,31 @@ If you are here to simply disable Windows Updates; this repository provides two 
 - Backup your entire system registry
 - Remove Windows telemetry and tracking
 - Uninstall Windows "crapware / bloatware" applications
-- Install apps such as `Powershell 7`, `Cortana`, etc.
+  - Microsoft.Teams
+  - Microsoft.BingSearch
+  - Microsoft.BingHealthAndFitness
+  - Microsoft.BingFoodAndDrink
+  - Microsoft.WindowsFeedback
+  - Microsoft.BingTranslator
+  - Microsoft.BingTravel
+  - Microsoft.Copilot
+  - Microsoft.Edge
+  - <sup><sub>**Many more**</sub></sup>
+- Install / Uninstall apps such as:
+  - Chrome
+  - Cortana
+  - DuckDuckGo
+  - Firefox
+  - Microsoft .NET SDK
+  - Microsoft Edge
+  - Microsoft IronPython
+  - Microsoft OneDrive
+  - Microsoft OpenSSH
+  - Microsoft Visual C++
+  - Opera
+  - Powershell 7
+  - Tor Browser
+  - <sup><sub>**Many more**</sub></sup>
 - Requires elevated admin permissions to run
 - Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `wputility.bat`
@@ -85,71 +107,6 @@ If you are here to simply disable Windows Updates; this repository provides two 
 - Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `windows-updates-pause.reg`
     - `windows-updates-unpause.reg`
-
-<br />
-<br />
-
-### WP Utility
-
-To use the WP Utility, double-click the batch `.bat` file. You will be presented and numerous options that you can choose from:
-
-1. Enable Windows Updates
-2. Disable Windows Updates
-3. Disable Microsoft Telemetry
-4. Remove Cached Update Files
-5. Manage Update Services
-     1. View Services Status
-     2. Enable Services
-     3. Disable Services
-6. Backup Registry
-7. Advanced
-   - Enable/Disable Cortana
-   - Uninstall Crapware
-     - Microsoft.Teams
-     - Microsoft.BingSearch
-     - Microsoft.BingHealthAndFitness
-     - Microsoft.BingFoodAndDrink
-     - Microsoft.WindowsFeedback
-     - Microsoft.BingTranslator
-     - Microsoft.BingTravel
-     - Microsoft.Copilot
-     - Microsoft.Edge
-     - **Many more**
-   - Install Apps
-     - Install Powershell 7.x
-     - Install PowerToys
-
-<br />
-
-<div align="center">
-
-<p float="left">
-  <img style="padding-right:15px;" src="docs/img/batch/1.png" width="340" />
-  <img src="docs/img/batch/2.png" width="340" /> 
-</p>
-
-</div>
-
-<br />
-
-> [!NOTE]
-> When launching the `.bat` file, you will be asked to allow the utility to have administrative permissions. Unfortunately, this script requires these permissions in order to change registry settings.
->
-> If you do not feel comfortable with this, you may opt to use the [Registry Scripts method](#registry-scripts) listed above
-
-<br />
-
-### Registry Scripts
-
-If you decide to go with the **registry** method, download the `.reg` file, and then double-click on the file depending on if you want to pause or unpause windows updates.
-
-<br />
-
-<div align="center">
-
-<p float="left">
-  <img style="padding-right:15px;" src="docs/img/registry/1.gif" width="640" />
-</p>
 
 </div>
 
@@ -176,8 +133,8 @@ This script is meant to stop Windows from updating and then automatically restar
 This repo contains two different ways you can disable Windows Updates:
 
 
-1. [Registry Scripts](#registry-scripts)
-2. [WPUtility](#wp-utility)
+1. [WPUtility](#wp-utility)
+2. [Registry Scripts](#registry-scripts)
 
 <br />
 
@@ -188,6 +145,66 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 | `wputility.bat` | Batch Utility | Enable / Disable Windows Updates<br />Disable Microsoft Telemetry<br/>Clean Cached Update Files<br/>Manage Update Services<br/>Backup system registry |
 | `windows-updates-pause.reg` | Registry Script | Disable Windows Updates until 2051 |
 | `windows-updates-unpause.reg` | Registry Script | Enable Windows Updates |
+
+<br />
+<br />
+
+### WP Utility
+
+- Download the `.bat` file to your computer from the bottom of our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page.
+- Double-click the file and Command Prompt or Powershell will launch.
+
+<br />
+
+> [!NOTE]
+> When launching the `.bat` file, you will be asked to allow the utility to have administrative permissions. Unfortunately, this script requires these permissions in order to change registry settings.
+>
+> If you do not feel comfortable with this, you may opt to use the [Registry Scripts method](#registry-scripts) listed above
+
+<br />
+
+- You will be prompted to give the script permission so that it can modify your registry, select **Yes**.
+- Read the options in the menu, and select the option you want. You will be presented and numerous options that you can choose from:
+  1. Enable Windows Updates
+  2. Disable Windows Updates
+  3. Disable Microsoft Telemetry
+  4. Remove Cached Update Files
+  5. Manage Update Services
+      1. View Services Status
+      2. Enable Services
+      3. Disable Services
+  6. Backup Registry
+  7. Advanced
+    - Enable/Disable Cortana
+    - Uninstall Crapware
+      - Microsoft.Teams
+      - Microsoft.BingSearch
+      - Microsoft.BingHealthAndFitness
+      - Microsoft.BingFoodAndDrink
+      - Microsoft.WindowsFeedback
+      - Microsoft.BingTranslator
+      - Microsoft.BingTravel
+      - Microsoft.Copilot
+      - Microsoft.Edge
+      - <sup><sub>**Many more**</sub></sup>
+    - Install Apps
+      - Install Powershell 7.x
+      - Install PowerToys
+
+<br />
+
+<div align="center">
+
+<p float="left">
+  <img style="padding-right:15px;" src="docs/img/batch/1.png" width="340" />
+  <img src="docs/img/batch/2.png" width="340" /> 
+</p>
+
+</div>
+
+<br />
+<br />
+<br />
 
 <br />
 
@@ -207,18 +224,14 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 >
 > If you cannot do the above, right-click the file, select **Open With** and select **Registry Editor**.
 
-<br />
-
-### WP Utility
-
-- Download the `.bat` file to your computer from the bottom of our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page.
-- Double-click the file and Command Prompt or Powershell will launch.
-- You will be prompted to give the script permission so that it can modify your registry, select **Yes**.
-- Read the options in the menu, and select the option you want.
 
 <br />
 
-### Confirm Updates Status
+---
+
+<br />
+
+## Confirm Updates Enabled/Disabled
 
 To see whether or not Windows Updates are currently enabled or disabled:
 
@@ -242,10 +255,11 @@ Our `wpUtility.bat` script also tells you if Windows Updates are enabled or disa
 
 You can re-enable Windows updates by performing one of the following:
 
-- Option 1 - [enable using unpause.reg](#option-1-unpausereg)
-- Option 2 - [enable manually](#option-2-manual)
-- Option 3 - [enable using batch `.bat` script](#option-3-batch-utility)
+- Option 1 - [Enable using unpause.reg](#option-1-unpausereg)
+- Option 2 - [Enable manually](#option-2-manual)
+- Option 3 - [Enable using batch `.bat` script](#option-3-batch-utility)
 
+<br />
 <br />
 
 ### Option 1 (unpause.reg)
@@ -258,6 +272,7 @@ This repository includes two scripts:
 
 Download and run the script `windows-updates-unpause.reg`. Windows updates will be re-activated, but you'll be able to re-pause updates whenever you want and for any duration.
 
+<br />
 <br />
 
 ### Option 2 (manual)
@@ -290,6 +305,7 @@ At the top of the Windows Update interface, click **Resume Updates**.
 
 To pause updates again, re-run the `.reg` file in this repo.
 
+<br />
 <br />
 
 ### Option 3 (batch utility)
@@ -358,16 +374,58 @@ We are always willing to accept new contributions, however, the code will be vet
 
 <br />
 
-## Contributors
+---
+
+<br />
+
+## Contributors ✨
+
+We are always looking for contributors. If you feel that you can provide something useful to Gistr, then we'd love to review your suggestion. Before submitting your contribution, please review the following resources:
+
+- [Pull Request Procedure](.github/PULL_REQUEST_TEMPLATE.md)
+- [Contributor Policy](CONTRIBUTING.md)
+
+<br />
+
+Want to help but can't write code?
+
+- Review [active questions by our community](https://github.com/Aetherinox/pause-windows-updates/labels/❔%20Question) and answer the ones you know.
+
+<br />
 
 <div align="center">
 
-![Alt](https://repobeats.axiom.co/api/embed/fdab55f1b01c4ee5e359299e94ebb8412add488f.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/fdab55f1b01c4ee5e359299e94ebb8412add488f.svg "Analytics")
 
 </div>
 
 <br />
+
+The following people have helped get this project going:
+
 <br />
+
+<div align="center">
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![Contributors][contribs-all-img]](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top"><a href="https://github.com/Aetherinox"><img src="https://avatars.githubusercontent.com/u/118329232?v=4?s=40" width="80px;" alt="Aetherinox"/><br /><sub><b>Aetherinox</b></sub></a><br /><a href="https://github.com/Aetherinox/pause-windows-updates/commits?author=Aetherinox" title="Code">💻</a> <a href="#projectManagement-Aetherinox" title="Project Management">📆</a> <a href="#fundingFinding-Aetherinox" title="Funding Finding">🔍</a></td>
+      <td align="center" valign="top"><a href="https://github.com/kenshyura"><img src="https://avatars.githubusercontent.com/u/140276088?v=4?s=40" width="80px;" alt="kenshyura"/><br /><sub><b>kenshyura</b></sub></a><br /><a href="https://github.com/Aetherinox/pause-windows-updates/commits?author=kenshyura" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
