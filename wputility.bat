@@ -106,26 +106,34 @@ set "spaces=                                       "
 :: # #
 ::  define services
 ::      uhssvc                                      Microsoft Update Health Service
+::                                                  Maintains Update Health
+::                                                  "C:\Program Files\Microsoft Update Health Tools\uhssvc.exe"
+::
 ::      UsoSvc                                      Update Orchestrator Service
+::                                                  Manages Windows Updates. If stopped, your devices will not be able to download and install the latest updates.
+::                                                  C:\Windows\system32\svchost.exe -k netsvcs -p
+::
 ::      WaaSMedicSvc                                Windows Update Medic Service
+::                                                  C:\Windows\system32\svchost.exe -k wusvcs -p
+::
 ::      wuauserv                                    Windows Update Service
-::      
+::                                                  Enables the detection, download, and installation of updates for Windows and other programs. If this service is disabled, users of this computer will not be able to use Windows Update or its automatic updating feature, and programs will not be able to use the Windows Update Agent (WUA) API.
+::                                                  C:\Windows\system32\svchost.exe -k netsvcs -p
+::
 ::      DiagTrack                                   Connected User Experiences and Telemetry
 ::      dmwappushservice                            Device Management Wireless Application Protocol (WAP) Push message Routing Service
 ::      diagsvc                                     Diagnostic Execution Service
 ::      diagnosticshub.standardcollector.service    Microsoft (R) Diagnostics Hub Standard Collector Service
 :: # #
 
-set servicesUpdates=uhssvc UsoSvc WaaSMedicSvc wuauserv
-set servicesTelemetry=DiagTrack dmwappushservice diagsvc diagnosticshub.standardcollector.service
-
-:: Update Service IDs to Names
-set servicesUpdatesNames[uhssvc]=Microsoft Update Health Service
-set servicesUpdatesNames[UsoSvc]=Update Orchestrator Service
-set servicesUpdatesNames[WaaSMedicSvc]=WaaSMedicSvc
-set servicesUpdatesNames[wuauserv]=Windows Update
+:: Windows Update Services
+set "servicesUpdates[uhssvc]=Microsoft Update Health Service|uhssvc"
+set "servicesUpdates[UsoSvc]=Update Orchestrator Service|UsoSvc"
+set "servicesUpdates[WaaSMedicSvc]=Windows Update Medic Service|WaaSMedicSvc"
+set "servicesUpdates[wuauserv]=Windows Update Service|WaaSMedicSvc"
 
 :: Telemetry Service IDs to Names
+set servicesTelemetry=DiagTrack dmwappushservice diagsvc diagnosticshub.standardcollector.service
 set servicesTelemetryNames[DiagTrack]=Connected User Experiences and Telemetry
 set servicesTelemetryNames[dmwappushservice]=Device Management Wireless Application
 set servicesTelemetryNames[diagsvc]=Diagnostic Execution Service
@@ -662,8 +670,8 @@ goto :EOF
     echo.
 
     echo       %yellowd%^(1^)%u%   View Status
-    echo       %yellowd%^(2^)%u%   Enable Update Services
-    echo       %yellowd%^(3^)%u%   Disable Update Services
+    echo       %yellowd%^(2^)%u%   Enable All Update Services
+    echo       %yellowd%^(3^)%u%   Disable All Update Services
     echo.
     echo       %redl%^(R^)%redl%   Return
 
@@ -680,18 +688,17 @@ goto :EOF
         echo.   %cyand% Notice  %u%        Getting Service Status%u%
 
         :: loop services and check status
-        for %%i in (%servicesUpdates%) do (
-            set y=!servicesUpdatesNames[%%i]!
-            for /F "tokens=3 delims=: " %%H in ('sc query "%%i" ^| findstr "        STATE"') do (
-                set "service=!y! %pink%[%%i] !spaces!"
-                set "service=!service:~0,50!"
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
+            for /F "tokens=3 delims=: " %%H in ('sc query "%%~x" ^| findstr "        STATE"') do (
+                set "service=%%~w %pink%[%%~x] !spaces!"
+                set "service=!service:~0,60!"
                 if /I "%%H" neq "RUNNING" (
-                    echo.   %cyand%         %grayd%          !service! %red%Not Running%u%
+                    echo.   %cyand%         %grayd%          !service! %redl%Not Running%u%
                 ) else (
                     echo.   %cyand%         %grayd%          !service! %greenl%Running%u%
                 )
             )
-        )
+        ) 
 
         echo.   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
@@ -703,15 +710,14 @@ goto :EOF
     if /I "%q_mnu_serv%" equ "2" (
         echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
-        for %%i in (%servicesUpdates%) do (
-            set y=!servicesUpdatesNames[%%i]!
-            set "service=!y! %pink%[%%i] !spaces!"
-            set "service=!service:~0,50!"
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
+            set "service=%%~w %pink%[%%~x] !spaces!"
+            set "service=!service:~0,60!"
 
             echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
-            sc config %%i start= auto > nul 2>&1
-            net start %%i > nul 2>&1
-        )
+            sc config %%~x start= auto > nul 2>&1
+            net start %%~x > nul 2>&1
+        ) 
 
         echo.   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
@@ -723,16 +729,15 @@ goto :EOF
     if /I "%q_mnu_serv%" equ "3" (
         echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
-        for %%i in (%servicesUpdates%) do (
-            set y=!servicesUpdatesNames[%%i]!
-            set "service=!y! %pink%[%%i] !spaces!"
-            set "service=!service:~0,50!"
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
+            set "service=%%~w %pink%[%%~x] !spaces!"
+            set "service=!service:~0,60!"
 
-            echo.   %cyand%         %grayd%          !service! %red%disabled%u%
-            net stop %%i > nul 2>&1
-            sc config %%i start= disabled > nul 2>&1
-            sc failure %%i reset= 0 actions= "" > nul 2>&1
-        )
+            echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
+            net stop %%~x > nul 2>&1
+            sc config %%~x start= disabled > nul 2>&1
+            sc failure %%~x reset= 0 actions= "" > nul 2>&1
+        ) 
 
         echo.   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
@@ -980,7 +985,6 @@ goto :EOF
 :: # #
 
 :taskBackupRegistry
-
     setlocal disabledelayedexpansion
 
     echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
@@ -1019,8 +1023,7 @@ goto :EOF
     echo.   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
 
     endlocal
-
-    goto :sessFinish
+goto :sessFinish
 
 :: # #
 ::  @desc           Start Erase Task
@@ -1098,7 +1101,7 @@ goto :EOF
     if exist %folder_distrb%\ (
         erase /s /f /q %folder_distrb%\*.* && rmdir /s /q %folder_distrb%
     ) else (
-        echo.   %cyand% Notice  %u%        Windows Updates folder already clean, skipping %grayd% %folder_distrb%%u%
+        echo.   %cyand% Notice  %u%        Windows Updates folder already clean, skipping %grayd%%folder_distrb%%u%
         goto sessFinish
     )
 
@@ -1167,18 +1170,19 @@ goto :EOF
 :: # #
 
 :taskUpdatesDisable
+    setlocal
+
     echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...%u%
 
-    for %%i in (%servicesUpdates%) do (
-        set y=!servicesUpdatesNames[%%i]!
-        set "service=!y! %pink%[%%i] !spaces!"
-        set "service=!service:~0,50!"
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
+        set "service=%%~w %pink%[%%~x] !spaces!"
+        set "service=!service:~0,60!"
 
-        echo.   %cyand%         %grayd%          !service! %red%disabled%u%
-        net stop %%i > nul 2>&1
-        sc config %%i start= disabled > nul 2>&1
-        sc failure %%i reset= 0 actions= "" > nul 2>&1
-    )
+        echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
+        net stop %%~x > nul 2>&1
+        sc config %%~x start= disabled > nul 2>&1
+        sc failure %%~x reset= 0 actions= "" > nul 2>&1
+    ) 
 
     :: Windows Update > Dates
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "2025-01-01T00:00:00Z" /f > nul
@@ -1230,15 +1234,14 @@ goto :EOF
     setlocal
     echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
 
-    for %%i in (%servicesUpdates%) do (
-        set y=!servicesUpdatesNames[%%i]!
-        set "service=!y! %pink%[%%i] !spaces!"
-        set "service=!service:~0,50!"
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
+        set "service=%%~w %pink%[%%~x] !spaces!"
+        set "service=!service:~0,60!"
 
         echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
-        sc config %%i start= auto > nul 2>&1
-        net start %%i > nul 2>&1
-    )
+        sc config %%~x start= auto > nul 2>&1
+        net start %%~x > nul 2>&1
+    ) 
 
     :: Windows Update > Dates
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "" /f > nul
