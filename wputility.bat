@@ -132,12 +132,11 @@ set "servicesUpdates[UsoSvc]=Update Orchestrator Service|UsoSvc"
 set "servicesUpdates[WaaSMedicSvc]=Windows Update Medic Service|WaaSMedicSvc"
 set "servicesUpdates[wuauserv]=Windows Update Service|WaaSMedicSvc"
 
-:: Telemetry Service IDs to Names
-set servicesTelemetry=DiagTrack dmwappushservice diagsvc diagnosticshub.standardcollector.service
-set servicesTelemetryNames[DiagTrack]=Connected User Experiences and Telemetry
-set servicesTelemetryNames[dmwappushservice]=Device Management Wireless Application
-set servicesTelemetryNames[diagsvc]=Diagnostic Execution Service
-set servicesTelemetryNames[diagnosticshub.standardcollector.service]=Microsoft (R) Diagnostics Hub
+:: Windows Telemetry Services
+set "servicesTelemetry[DiagTrack]=Connected User Experiences and Telemetry|DiagTrack"
+set "servicesTelemetry[dmwappushservice]=Device Management Wireless Application|dmwappushservice"
+set "servicesTelemetry[diagsvc]=Diagnostic Execution Service|diagsvc"
+set "servicesTelemetry[diagnosticshub.standardcollector.service]=Microsoft (R) Diagnostics Hub|diagnosticshub.standardcollector.service"
 
 :: Disable tasks
 set schtasksDisable[0]=\Microsoft\Windows\Application Experience\AITAgent
@@ -1488,15 +1487,14 @@ goto :EOF
     ::      Routes Wireless Application Protocol (WAP) Push messages received by the device and synchronizes Device Management sessions
     :: # #
 
-    for %%i in (%servicesTelemetry%) do (
-        set y=!servicesTelemetryNames[%%i]!
-        set "service=!y! %pink%[%%i] !spaces!"
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesTelemetry[ 2^>nul') do (
+        set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,80!"
 
         echo.   %cyand%         %grayd%          !service! %red%disabled%u%
-        net stop %%i > nul 2>&1
-        sc config %%i start= disabled > nul 2>&1
-        sc failure %%i reset= 0 actions= "" > nul 2>&1
+        net stop %%~x > nul 2>&1
+        sc config %%~x start= disabled > nul 2>&1
+        sc failure %%~x reset= 0 actions= "" > nul 2>&1
     )
 
     goto sessFinish
