@@ -209,6 +209,8 @@ set crapware[36]=Microsoft.BingNews
 set crapware[37]=Microsoft.BingFinance
 set crapware[38]=Microsoft.XboxApp
 set crapware[39]=Microsoft.Xbox.TCUI
+set crapware[39]=Microsoft.3dbuilder
+set crapware[40]=Microsoft.WindowsAlarms
 
 :: # #
 ::  @desc           registry
@@ -382,8 +384,8 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         )
         echo             %grayd%Enable windows updates on your system.
         echo:
-        echo       %goldm%^(3^)%greenm%   Disable Microsoft Telemetry%u%
-        echo             %grayd%Disables the ability for Microsoft to receive telemetry data from your device.
+        echo       %goldm%^(3^)%greenm%   Backup Registry%u%
+        echo             %grayd%Create a backup of your registry
         echo:
         echo       %goldm%^(4^)%greenm%   Remove Update Files%u%
         echo             %grayd%Pending update files on your device will be deleted to clean up disk-space.
@@ -393,9 +395,6 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo             %grayd%This option allows you to view Windows Update's current status, as well as 
         echo             %grayd%enable or disable Windows Update system services.
         echo             %grayd%This task is automatically performed if you select option 1%u%
-        echo:
-        echo       %goldm%^(6^)%greenm%   Backup Registry%u%
-        echo             %grayd%Create a backup of your registry
         echo:
         echo       %goldm%^(S^)%greenm%   Supporters%u%
         echo             %grayd%A list of people who have donated to this project.
@@ -448,9 +447,9 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         goto :taskUpdatesEnable
     )
 
-    :: option > (3) Disable Telemetry
+    :: option > (3) Backup Registry
     if /I "%q_mnu_main%" equ "3" (
-        goto :taskDisableTelemetry
+        goto :taskBackupRegistry
     )
 
     :: option > (4) Clean windows update dist folder
@@ -461,11 +460,6 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     :: option > (5) Manage Update Services
     if /I "%q_mnu_main%" equ "5" (
         goto :menuServices
-    )
-
-    :: option > (6) Backup Registry
-    if /I "%q_mnu_main%" equ "6" (
-        goto :taskBackupRegistry
     )
 
     :: option > (A) Advanced
@@ -603,31 +597,37 @@ goto :EOF
 
     echo:
     echo:
-    echo      %goldm%^(1^)%u%   %stateCortanaOpp% Cortana
-    echo      %goldm%^(2^)%u%   Uninstall Crapware
-    echo      %goldm%^(3^)%u%   Install / Uninstall Apps
+    echo     %goldm%^(1^)%u%   Disable Microsoft Telemetry
+    echo     %goldm%^(2^)%u%   %stateCortanaOpp% Cortana
+    echo     %goldm%^(3^)%u%   Remove Crapware
+    echo     %goldm%^(4^)%u%   Add / Remove Apps
     echo:
-    echo      %redl%^(R^)%redl%   Return
+    echo     %redl%^(R^)%redl%   Return
     echo:
     echo:
     set /p q_mnu_adv="%goldm%    Pick Option » %u%"
     echo:
     echo:
 
-    :: option > (1) Disable Cortana
-    if /I "%q_mnu_adv%" equ "1" (
+    :: option > (1) Disable Telemetry
+    if /I "%q_mnu_main%" equ "1" (
+        goto :taskDisableTelemetry
+    )
+
+    :: option > (2) Disable Cortana
+    if /I "%q_mnu_adv%" equ "2" (
         call :taskToggleCortana %stateCortanaOpp%
         goto :menuAdvanced
     )
 
-    :: option > (2) Uninstall Crapware
-    if /I "%q_mnu_adv%" equ "2" (
+    :: option > (3) Uninstall Crapware
+    if /I "%q_mnu_adv%" equ "3" (
         call :taskUninstallCrapware
         goto :menuAdvanced
     )
 
-    :: option > (3) Install
-    if /I "%q_mnu_adv%" equ "3" (
+    :: option > (4) Install
+    if /I "%q_mnu_adv%" equ "4" (
         goto :menuInstall
     )
 
