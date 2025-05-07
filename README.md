@@ -356,6 +356,8 @@ The great thing about Github is that you are provided with the source code to a 
 
 We are always willing to accept new contributions, however, the code will be vetted before it is pushed to the public. Contributions shall not include functionality which is unrelated to Microsoft Windows, or Microsoft applications. New features must give the user the ability to opt in by choice, and not have it forced upon them, and new features shall be disabled by default and only enabled after the user has consented to such a change.
 
+The one exception to the rule is the list of apps we offer via our `(A)dvanced Menu`. A majority of the selections are from Microsoft Corporation; however, there are additional packages such as Firefox, Chrome, and Bitwarden. These applications are picked based on popularity, security, and most being free / open-source. They are based on what applications a user may need the most when doing a fresh install of Windows.
+
 <br />
 
 ---

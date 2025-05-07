@@ -610,7 +610,7 @@ goto :EOF
     echo:
 
     :: option > (1) Disable Telemetry
-    if /I "%q_mnu_main%" equ "1" (
+    if /I "%q_mnu_adv%" equ "1" (
         goto :taskDisableTelemetry
     )
 
@@ -1481,7 +1481,7 @@ goto :EOF
         sc failure %%~x reset= 0 actions= "" > nul 2>&1
     )
 
-    goto sessFinish
+    goto sessAdvanced
     endlocal
 goto :EOF
 
@@ -1506,6 +1506,17 @@ exit /B 0
     pause > nul
     endlocal
 goto :main
+
+:: # #
+::  @desc           Finish and Return to Advanced
+:: # #
+
+:sessAdvanced
+    setlocal
+    echo   %cyand% Notice  %u%        Operation completed, Press any key to return%u%
+    pause > nul
+    endlocal
+goto :menuAdvanced
 
 :: # #
 ::  @desc           Finish with error and Exit
