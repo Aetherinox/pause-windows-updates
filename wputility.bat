@@ -31,6 +31,7 @@ if %errorlevel% neq 0 (
 :variables
 set dir_home=%~dp0
 set dir_reg=%dir_home%registryBackup
+set dir_cache=%dir_home%cache
 set repo_url=https://github.com/Aetherinox/pause-windows-updates
 set repo_author=Aetherinox
 set repo_version=1.3.1
@@ -41,7 +42,7 @@ set cnt_dirs=0
 
 :: throws extra prints and information
 set debugMode=false
-
+set appsInitialized=true
 set noUpdatesState="0x0"
 set AutoUpdate=false
 set AutoUpdateBool=disabled
@@ -201,6 +202,45 @@ set "registry[3]=HKCR|hkcr.reg"
 set "registry[4]=HKU|hku.reg"
 set "registry[5]=HKCC|hkcc.reg"
 
+:: # #
+::  @desc           manageable packages
+:: # #
+
+set "apps[01]=Cyberduck|Iterate.Cyberduck"
+set "apps[02]=DuckDuckGo Browser|DuckDuckGo.DesktopBrowser"
+set "apps[03]=Google Chrome|Google.Chrome.EXE"
+set "apps[04]=Microsoft .NET SDK 6.0.427 (x64)|Microsoft.DotNet.SDK.6"
+set "apps[05]=Microsoft AppInstaller|Microsoft.AppInstaller"
+set "apps[06]=Microsoft DevHome|Microsoft.DevHome"
+set "apps[07]=Microsoft Edge|Microsoft.Edge"
+set "apps[08]=Microsoft IronPython|Microsoft.IronPython.3"
+set "apps[09]=Microsoft OneDrive|Microsoft.OneDrive"
+set "apps[10]=Microsoft OpenSSH|Microsoft.OpenSSH.Preview"
+set "apps[11]=Microsoft Powershell|Microsoft.PowerShell"
+set "apps[12]=Microsoft Powertoys|Microsoft.PowerToys"
+set "apps[13]=Microsoft Visual C++ 2005 Redistributable (x32)|Microsoft.VCRedist.2005.x86"
+set "apps[14]=Microsoft Visual C++ 2005 Redistributable (x64)|Microsoft.VCRedist.2005.x64"
+set "apps[15]=Microsoft Visual C++ 2008 Redistributable (x32)|Microsoft.VCRedist.2008.x86"
+set "apps[16]=Microsoft Visual C++ 2008 Redistributable (x64)|Microsoft.VCRedist.2008.x64"
+set "apps[17]=Microsoft Visual C++ 2010 Redistributable (x32)|Microsoft.VCRedist.2010.x86"
+set "apps[18]=Microsoft Visual C++ 2010 Redistributable (x64)|Microsoft.VCRedist.2010.x64"
+set "apps[19]=Microsoft Visual C++ 2012 Redistributable (x32)|Microsoft.VCRedist.2012.x86"
+set "apps[20]=Microsoft Visual C++ 2012 Redistributable (x64)|Microsoft.VCRedist.2012.x64"
+set "apps[21]=Microsoft Visual C++ 2013 Redistributable (x32)|Microsoft.VCRedist.2013.x86"
+set "apps[22]=Microsoft Visual C++ 2013 Redistributable (x64)|Microsoft.VCRedist.2013.x64"
+set "apps[23]=Microsoft Visual C++ 2015 UWP Desktop Runtime|Microsoft.VCLibs.Desktop.14"
+set "apps[24]=Microsoft Visual C++ 2015-2022 Redistributable (x32)|Microsoft.VCRedist.2015+.x32"
+set "apps[25]=Microsoft Visual C++ 2015-2022 Redistributable (x64)|Microsoft.VCRedist.2015+.x64"
+set "apps[26]=Microsoft Visual Studio Code|Microsoft.VisualStudioCode"
+set "apps[27]=Microsoft Visual Studio Code Insiders|Microsoft.VisualStudioCode.Insiders"
+set "apps[28]=Mozilla Firefox|Mozilla.Firefox"
+set "apps[29]=Opera Browser (Stable)|Opera.Opera"
+set "apps[30]=Opera GX Browser (Stable)|Opera.OperaGX"
+set "apps[31]=Tor Browser|TorProject.TorBrowser"
+set "apps[32]=Windows Terminal|Microsoft.WindowsTerminal"
+set "apps[33]=WinRAR|RARLab.WinRAR"
+
+:: # #
 ::  @desc           define os ver and name
 :: # #
 
@@ -449,49 +489,98 @@ goto :EOF
 
 :: # #
 ::  @desc           Menu > Install Apps
+::
+::      set "apps[index]=name|package"
+:: 
+::          Index ............. %%~v
+::          Name .............. %%~w
+::          Package ........... %%~x
 :: # #
 
 :menuInstall
     setlocal enabledelayedexpansion
     cls
-    
+
     set q_mnu_install=
+    set appStatus=Install
 
     echo.
+    if "!appsInitialized!" == "true" (
+        echo.   %blue% Status   %u%        Please wait while we determine what apps are installed.
+        
+        if NOT exist "%dir_cache%" (
+            md "%dir_cache%"
+        )
+
+        winget list > "%dir_cache%\%~n0.out" 2>&1
+    )
+
+    if exist "%dir_cache%\%~n0.out" (
+        echo.   %blue% Status   %u%        Found cache %orange%%dir_cache%\%~n0.out %u%
+    ) else (
+        echo.   %red% Error   %u%         Could not open app cache %orange%%dir_cache%\%~n0.out%u%, press return and try again.
+        pause > nul
+
+        set appsInitialized=true
+        goto :menuInstall
+    )
+
     echo.
 
-    echo      %yellowd%^(1^)%u%   Install Powershell v7.x
-    echo      %yellowd%^(2^)%u%   Install PowerToys
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
+        findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
+        if errorlevel 1 (
+            set appStatus=%greenl%Install%u%
+        ) else (
+            set appStatus=%redl%Uninstall%u%
+        )
+        echo      %yellowd%^(%%~v^)%u%   !appStatus! %%~w
+    ) 
     echo.
-    echo      %redl%^(R^)%redl%   Return
+    echo      %redl%^(R^)%redl%    Return
 
     echo.
     echo.
     set /p q_mnu_install="%goldm%    Pick Option » %u%"
     echo.
 
-    echo.
+    :: # #
+    ::  Apps > generate list of selectable options
+    :: # #
 
-    :: option > (1) Install Powershell 7
-    if /I "%q_mnu_install%" equ "1" (
-        call :installAppPrompt "winget" "Microsoft.PowerShell"
-        goto :menuAdvanced
-    )
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
+        if /I "%q_mnu_install%" equ "%%~v" (
 
-    :: option > (2) Install Powertoys
-    if /I "%q_mnu_install%" equ "2" (
-        call :installAppPrompt "winget" "Microsoft.PowerToys"
-        goto :menuAdvanced
-    )
+            set appStatus=Install
+            findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
+            if errorlevel 1 (
+                set appStatus=Install
+            ) else (
+                set appStatus=Uninstall
+            )
+
+            echo.
+            echo.   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
+
+            if /I "!appStatus!"=="Install" call :installAppPrompt "winget" "%%~x"
+            if /I "!appStatus!"=="Uninstall" call :uninstallAppPrompt "winget" "%%~x"
+            set appsInitialized=true
+
+            goto :menuInstall
+        )
+    ) 
 
     :: option > (R) Return
     if /I "%q_mnu_install%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set appsInitialized=true
         goto :main
     ) else (
         echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_install%%u%, press any key and try again.
         pause > nul
 
-        goto :menuAdvanced
+        set appsInitialized=false
+        goto :menuInstall
     )
 
     endlocal
@@ -520,7 +609,7 @@ goto :EOF
 
     echo      %goldm%^(1^)%u%   %stateCortanaOpp% Cortana
     echo      %goldm%^(2^)%u%   Uninstall Crapware
-    echo      %goldm%^(3^)%u%   Install Apps
+    echo      %goldm%^(3^)%u%   Install / Uninstall Apps
     echo.
     echo      %redl%^(R^)%redl%   Return
 
@@ -664,7 +753,8 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Toggle > Cortana
+::  @desc                       Toggle > Cortana
+::  @arg str state              Enable || Disable
 :: # #
 
 :taskToggleCortana
@@ -699,8 +789,8 @@ goto :EOF
 ::  @desc           Toggle > App > Install
 ::                  This func directly installs a package, should not be called directly, call using prompt func installAppPrompt
 ::
-::  @arg string manager         powershell || winget
-::  @arg string package         Microsoft.Package.Example
+::  @arg str manager            powershell || winget
+::  @arg str package            Microsoft.Package.Example
 :: # #
 
 :installApp
@@ -739,8 +829,8 @@ goto :EOF
 ::  @desc           Toggle > App > Uninstall
 ::                  This func directly uninstalls a package, should not be called directly, call using prompt func uninstallApp
 ::
-::  @arg string manager         powershell || winget
-::  @arg string package         Microsoft.Package.Example
+::  @arg str manager            powershell || winget
+::  @arg str package            Microsoft.Package.Example
 :: # #
 
 :uninstallApp
@@ -780,8 +870,8 @@ goto :EOF
 ::  @desc           Toggle > App > Install Prompt
 ::                  provides the prompt for installing a new package, does not actually install unless user presses Y
 ::
-::  @arg string manager         powershell || winget
-::  @arg string package         Microsoft.Package.Example
+::  @arg str manager            powershell || winget
+::  @arg str package            Microsoft.Package.Example
 :: # #
 
 :installAppPrompt
@@ -817,8 +907,8 @@ goto :EOF
 ::  @desc           Toggle > App > Uninstall Prompt
 ::                  provides the prompt for uninstalling a package, does not actually uninstall unless user presses Y
 ::
-::  @arg string manager         powershell || winget
-::  @arg string package         Microsoft.Package.Example
+::  @arg str manager            powershell || winget
+::  @arg str package            Microsoft.Package.Example
 :: # #
 
 :uninstallAppPrompt
