@@ -1,15 +1,15 @@
 Windows Registry Editor Version 5.00
 
-;   @script     : windows-updates-pause.reg
-;   @author     : Aetherinox
-;   @url        : https://github.com/Aetherinox/Windows-Update-Killer
+;   @script       windows-updates-pause.reg
+;   @author       Aetherinox
+;   @url          https://github.com/Aetherinox/pause-windows-updates
 ;
 ;   A script to pause Windows Updates for a long period of time.
 ;
 ;   User can un-pause updates by opening the 'Windows Update' window.
 ;   You can also access that window by opening your start menu, select 'Run'
 ;   and type
-;        ms-settings:windowsupdate
+;       ms-settings:windowsupdate
 ;
 ;   You can also re-enable updates by executing the other file included
 ;   in the repo URL above:
