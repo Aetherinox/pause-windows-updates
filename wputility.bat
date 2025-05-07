@@ -20,7 +20,7 @@ if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
 
 net session > nul 2>&1
 if %errorlevel% neq 0 (
-	echo.   %red% Error   %u%         This script requires elevated privileges to run.
+	echo   %red% Error   %u%         This script requires elevated privileges to run.
 	goto :sessError
 )
 
@@ -29,76 +29,77 @@ if %errorlevel% neq 0 (
 :: # #
 
 :variables
-set dir_home=%~dp0
-set dir_reg=%dir_home%registryBackup
-set dir_cache=%dir_home%cache
-set repo_url=https://github.com/Aetherinox/pause-windows-updates
-set repo_author=Aetherinox
-set repo_version=1.3.1
+set "dir_home=%~dp0"
+set "dir_reg=%dir_home%registryBackup"
+set "dir_cache=%dir_home%cache"
+set "repo_url=https://github.com/Aetherinox/pause-windows-updates"
+set "repo_author=Aetherinox"
+set "repo_version=1.3.1"
 set "folder_distrb=c:\windows\softwaredistribution"
 set "folder_uhssvc=c:\Program Files\Microsoft Update Health Tools"
-set cnt_files=0
-set cnt_dirs=0
+set "cnt_files=0"
+set "cnt_dirs=0"
 
 :: throws extra prints and information
-set debugMode=false
-set appsInitialized=true
-set noUpdatesState="0x0"
-set AutoUpdate=false
-set AutoUpdateBool=disabled
-set AutoUpdateStr=disable
+set "debugMode=true"
+set "appsInitialized=true"
+set "noUpdatesState=0x0"
+set "AutoUpdate=false"
+set "AutoUpdateBool=disabled"
+set "AutoUpdateStr=disable"
 
-set u=[0m
-set bold=[1m
-set under=[4m
-set inverse=[7m
-set blink=[5m
-set cyanl=[96m
-set cyand=[36m
-set magental=[95m
-set magentad=[35m
-set white=[97m
+:: colors
+set "u=[0m"
+set "bold=[1m"
+set "under=[4m"
+set "inverse=[7m"
+set "blink=[5m"
+set "cyanl=[96m"
+set "cyand=[36m"
+set "magental=[95m"
+set "magentad=[35m"
+set "white=[97m"
 
 :: 256 colors
-set lime=[38;5;154m
-set brown=[38;5;94m
-set greenl=[38;5;46m
-set green=[38;5;40m
-set greenm=[38;5;42m
-set greend=[38;5;35m
-set yellowl=[38;5;226m
-set yellow=[38;5;220m
-set bluel=[38;5;45m
-set blue=[38;5;39m
-set blued=[38;5;33m
-set blueb=[38;5;75m
-set purplel=[38;5;105m
-set purple=[38;5;99m
-set fuchsia1=[38;5;1m
-set fuchsia2=[38;5;162m
-set peach=[38;5;174m
-set debug=[38;5;91m
-set pinkl=[38;5;13m
-set pink=[38;5;206m
-set pinkd=[38;5;200m
-set yellowl=[38;5;228m
-set yellowm=[38;5;226m
-set yellowd=[38;5;190m
-set orangel=[38;5;215m
-set orange=[38;5;208m
-set oranged=[38;5;202m
-set goldl=[38;5;220m
-set goldm=[38;5;178m
-set goldd=[38;5;214m
-set grayb=[38;5;250m
-set greyl=[38;5;247m
-set graym=[38;5;244m
-set grayd=[38;5;238m
-set grayz=[38;5;237m
-set redl=[91m
-set red=[38;5;160m
-set redd=[38;5;124m
-set redz=[38;5;88m
+set "lime=[38;5;154m"
+set "brown=[38;5;94m"
+set "greenl=[38;5;46m"
+set "green=[38;5;40m"
+set "greenm=[38;5;42m"
+set "greend=[38;5;35m"
+set "yellowl=[38;5;226m"
+set "yellow=[38;5;220m"
+set "bluel=[38;5;45m"
+set "blue=[38;5;39m"
+set "blued=[38;5;33m"
+set "blueb=[38;5;75m"
+set "purplel=[38;5;105m"
+set "purple=[38;5;99m"
+set "fuchsia1=[38;5;1m"
+set "fuchsia2=[38;5;162m"
+set "peach=[38;5;174m"
+set "debug=[38;5;91m"
+set "pinkl=[38;5;13m"
+set "pink=[38;5;206m"
+set "pinkd=[38;5;200m"
+set "yellowl=[38;5;228m"
+set "yellowm=[38;5;226m"
+set "yellowd=[38;5;190m"
+set "orangel=[38;5;215m"
+set "orange=[38;5;208m"
+set "oranged=[38;5;202m"
+set "goldl=[38;5;220m"
+set "goldm=[38;5;178m"
+set "goldd=[38;5;214m"
+set "grayb=[38;5;250m"
+set "greyl=[38;5;247m"
+set "graym=[38;5;244m"
+set "grayd=[38;5;238m"
+set "grayz=[38;5;237m"
+set "redl=[91m"
+set "red=[38;5;160m"
+set "redd=[38;5;124m"
+set "redz=[38;5;88m"
 
 :: add spaces so that service names are in columns
 set "spaces=                                       "
@@ -111,14 +112,14 @@ set "spaces=                                       "
 ::
 ::      UsoSvc                                      Update Orchestrator Service
 ::                                                  Manages Windows Updates. If stopped, your devices will not be able to download and install the latest updates.
-::                                                  C:\Windows\system32\svchost.exe -k netsvcs -p
+::                                                  "C:\Windows\system32\svchost.exe -k netsvcs -p"
 ::
 ::      WaaSMedicSvc                                Windows Update Medic Service
-::                                                  C:\Windows\system32\svchost.exe -k wusvcs -p
+::                                                  "C:\Windows\system32\svchost.exe -k wusvcs -p"
 ::
 ::      wuauserv                                    Windows Update Service
 ::                                                  Enables the detection, download, and installation of updates for Windows and other programs. If this service is disabled, users of this computer will not be able to use Windows Update or its automatic updating feature, and programs will not be able to use the Windows Update Agent (WUA) API.
-::                                                  C:\Windows\system32\svchost.exe -k netsvcs -p
+::                                                  "C:\Windows\system32\svchost.exe -k netsvcs -p"
 ::
 ::      DiagTrack                                   Connected User Experiences and Telemetry
 ::      dmwappushservice                            Device Management Wireless Application Protocol (WAP) Push message Routing Service
@@ -273,18 +274,17 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     :: # #
 
     for /F "usebackq tokens=3*" %%A in (`REG QUERY "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) do (
-        set noUpdatesState=%%A
+        set "noUpdatesState=%%A"
     )
 
     if /i "%noUpdatesState%" == "0x0" (
-        set AutoUpdate=true
-        set AutoUpdateBool=%greenm%enabled%u%
-        set AutoUpdateStr=%greenm%!AutoUpdateBool:~0,-1!%u%
-
+        set "AutoUpdate=true"
+        set "AutoUpdateBool=%greenm%enabled%u%"
+        set "AutoUpdateStr=%greenm%!AutoUpdateBool:~0,-1!%u%"
     ) else (
-        set AutoUpdate=false
-        set AutoUpdateBool=%orange%disabled%u%
-        set AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%
+        set "AutoUpdate=false"
+        set "AutoUpdateBool=%orange%disabled%u%"
+        set "AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%"
     )
 
     title WPU (Windows Personalization Utility)
@@ -294,54 +294,48 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     chcp 65001 > nul
     cls
-    echo.
-    echo.
-    echo.     %goldm%v%repo_version%%u%                               %grayd%Windows Personalization Utility%u%
-    echo.
+    echo:
+    echo:
+    echo     %goldm%v%repo_version%%u%                               %grayd%Windows Personalization Utility%u%
+    echo:
     echo  %fuchsia2%    ██╗    ██╗██████╗ ██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
     echo      ██║    ██║██╔══██╗██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
     echo      ██║ █╗ ██║██████╔╝██║   ██║   ██║   ██║██║     ██║   ██║    ╚████╔╝ 
     echo      ██║███╗██║██╔═══╝ ██║   ██║   ██║   ██║██║     ██║   ██║     ╚██╔╝  
     echo      ╚███╔███╔╝██║     ╚██████╔╝   ██║   ██║███████╗██║   ██║      ██║   
     echo       ╚══╝╚══╝ ╚═╝      ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝   
-    echo.
-    echo.
+    echo:
+    echo:
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-
-    echo.    %cyand% Author  %grayb%       %repo_author%%u%
-    echo.    %cyand% Repo    %grayb%       %repo_url%
-    echo.    %cyand% OS      %grayb%       %version% %graym%(%name% %osarchitecture%)%u%
-    echo.    %cyand% Uptime  %grayb%       %d% %graym%days%u% %h% %graym%hours%u% %n% %graym%minutes%u% %s% %graym%seconds
-    echo.    %cyand% Status  %grayb%       Windows Updates %AutoUpdateBool%%u%
-
+    echo    %cyand% Author  %grayb%       %repo_author%%u%
+    echo    %cyand% Repo    %grayb%       %repo_url%
+    echo    %cyand% OS      %grayb%       %version% %graym%(%name% %osarchitecture%)%u%
+    echo    %cyand% Uptime  %grayb%       %d% %graym%days%u% %h% %graym%hours%u% %n% %graym%minutes%u% %s% %graym%seconds
+    echo    %cyand% Status  %grayb%       Windows Updates %AutoUpdateBool%%u%
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-    echo.
-
+    echo:
     if /I "%AutoUpdate%" equ "true" (
-        echo.     %goldm%^(1^)%u%   Disable Updates
-        echo.     %grayd%^(2^)%grayd%   Enable Updates
+        echo     %goldm%^(1^)%u%   Disable Updates
+        echo     %grayd%^(2^)%grayd%   Enable Updates
     ) else (
-        echo.     %grayd%^(1^)%grayd%   Disable Updates
-        echo.     %goldm%^(2^)%u%   Enable Updates
+        echo     %grayd%^(1^)%grayd%   Disable Updates
+        echo     %goldm%^(2^)%u%   Enable Updates
     )
-
-    echo.
-
-    echo.     %goldm%^(3^)%u%   Disable Microsoft Telemetry
-    echo.     %goldm%^(4^)%u%   Remove Update Files
-    echo.     %goldm%^(5^)%u%   Manage Update Services
-    echo.     %goldm%^(6^)%u%   Backup Registry
-    echo.
-    echo.     %goldm%^(A^)%u%   Advanced
-    echo.
-    echo.     %greenm%^(H^)%greenm%   Help
-    echo.     %blueb%^(S^)%blueb%   Supporters
-    echo.     %redl%^(Q^)%redl%   Quit
-
-    echo.
-    echo.
+    echo:
+    echo     %goldm%^(3^)%u%   Disable Microsoft Telemetry
+    echo     %goldm%^(4^)%u%   Remove Update Files
+    echo     %goldm%^(5^)%u%   Manage Update Services
+    echo     %goldm%^(6^)%u%   Backup Registry
+    echo:
+    echo     %goldm%^(A^)%u%   Advanced
+    echo:
+    echo     %greenm%^(H^)%greenm%   Help
+    echo     %blueb%^(S^)%blueb%   Supporters
+    echo     %redl%^(Q^)%redl%   Quit
+    echo:
+    echo:
     set /p q_mnu_main="%goldm%    Pick Option » %u%"
-    echo.
+    echo:
 
     :: # #
     ::  @desc           Menu > Help
@@ -351,10 +345,10 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
         cls
 
-        echo.
-        echo.
+        echo:
+        echo:
         echo %u%    This utility allows you to do the following tasks:
-        echo.
+        echo:
 
         if /I "%AutoUpdate%" equ "true" (
             echo       %goldm%^(1^)%greenm%   Disable Updates%u%
@@ -364,8 +358,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo             %grayd%Disable Windows automatic updates. Updates will be halted until re-enabled.
         echo             %grayd%All pending update files on your device will be deleted to clean up disk-space.
         echo             %grayd%Files will be re-downloaded if you enable Windows updates at a later time.
-
-        echo.
+        echo:
 
         if /I "%AutoUpdate%" equ "true" (
             echo       %grayd%^(2^)%greend%   Enable Updates%u% %goldd%[Already enabled]%u%
@@ -373,43 +366,30 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
             echo       %goldm%^(2^)%greenm%   Enable Updates%u%
         )
         echo             %grayd%Enable windows updates on your system.
-
-        echo.
-
+        echo:
         echo       %goldm%^(3^)%greenm%   Disable Microsoft Telemetry%u%
         echo             %grayd%Disables the ability for Microsoft to receive telemetry data from your device.
-
-        echo.
-
+        echo:
         echo       %goldm%^(4^)%greenm%   Remove Update Files%u%
         echo             %grayd%Pending update files on your device will be deleted to clean up disk-space.
         echo             %grayd%This task is automatically performed if you select option 1%u%
-
-        echo.
-
+        echo:
         echo       %goldm%^(5^)%greenm%   Manage Update Services%u%
         echo             %grayd%This option allows you to view Windows Update's current status, as well as 
         echo             %grayd%enable or disable Windows Update system services.
         echo             %grayd%This task is automatically performed if you select option 1%u%
-
-        echo.
-
+        echo:
         echo       %goldm%^(6^)%greenm%   Backup Registry%u%
         echo             %grayd%Create a backup of your registry
-
-        echo.
-
+        echo:
         echo       %goldm%^(S^)%greenm%   Supporters%u%
         echo             %grayd%A list of people who have donated to this project.
-
-        echo.
-
+        echo:
         echo       %redl%^(R^)%redl%   Return
-    
-        echo.
-        echo.
+        echo:
+        echo:
         set /p q_mnu_main="%goldm%    Pick Option » %u%"
-        echo.
+        echo:
     )
 
     :: # #
@@ -420,25 +400,21 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
         cls
 
-        echo.
-        echo.
-
+        echo:
+        echo:
         echo %u%    If you wish to support this project, you may drop a donation at %goldd%https://buymeacoffee.com/aetherinox.
         echo %u%    To have your name added, donate and leave a comment which gives us your Github username.
-        echo.
+        echo:
         echo %u%    A special thanks to the following for donating:
-
-        echo.
+        echo:
         echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-        echo.
-
+        echo:
         echo       %greenm%   Chad May%u%
-
-        echo.
+        echo:
         echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-        echo.
+        echo:
+        echo   %cyand% Notice  %u%        Press any key to return
 
-        echo.   %cyand% Notice  %u%        Press any key to return
         pause > nul
     )
 
@@ -486,7 +462,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     if /I "%q_mnu_main%" equ "Q" (
         goto :sessQuit
     ) else (
-        echo.   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
+        echo   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
 
         goto :main
     )
@@ -511,9 +487,9 @@ goto :EOF
     set q_mnu_install=
     set appStatus=Install
 
-    echo.
+    echo:
     if "!appsInitialized!" == "true" (
-        echo.   %blue% Status   %u%        Please wait while we determine what apps are installed.
+        echo   %blue% Status   %u%        Please wait while we determine what apps are installed.
         
         if NOT exist "%dir_cache%" (
             md "%dir_cache%"
@@ -523,16 +499,16 @@ goto :EOF
     )
 
     if exist "%dir_cache%\%~n0.out" (
-        echo.   %blue% Status   %u%        Found cache %orange%%dir_cache%\%~n0.out %u%
+        echo   %blue% Status   %u%        Found cache %orange%%dir_cache%\%~n0.out %u%
     ) else (
-        echo.   %red% Error   %u%         Could not open app cache %orange%%dir_cache%\%~n0.out%u%, press return and try again.
+        echo   %red% Error   %u%         Could not open app cache %orange%%dir_cache%\%~n0.out%u%, press return and try again.
         pause > nul
 
-        set appsInitialized=true
+        set "appsInitialized=true"
         goto :menuInstall
     )
 
-    echo.
+    echo:
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
         findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
@@ -543,13 +519,13 @@ goto :EOF
         )
         echo      %yellowd%^(%%~v^)%u%   !appStatus! %%~w
     ) 
-    echo.
-    echo      %redl%^(R^)%redl%    Return
 
-    echo.
-    echo.
+    echo:
+    echo      %redl%^(R^)%redl%    Return
+    echo:
+    echo:
     set /p q_mnu_install="%goldm%    Pick Option » %u%"
-    echo.
+    echo:
 
     :: # #
     ::  Apps > generate list of selectable options
@@ -566,12 +542,12 @@ goto :EOF
                 set appStatus=Uninstall
             )
 
-            echo.
-            echo.   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
+            echo:
+            echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
 
             if /I "!appStatus!"=="Install" call :installAppPrompt "winget" "%%~x"
             if /I "!appStatus!"=="Uninstall" call :uninstallAppPrompt "winget" "%%~x"
-            set appsInitialized=true
+            set "appsInitialized=true"
 
             goto :menuInstall
         )
@@ -580,13 +556,13 @@ goto :EOF
     :: option > (R) Return
     if /I "%q_mnu_install%" equ "R" (
         del "%dir_cache%\%~n0.out" /f > nul 2>&1
-        set appsInitialized=true
+        set "appsInitialized=true"
         goto :main
     ) else (
-        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_install%%u%, press any key and try again.
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_install%%u%, press any key and try again.
         pause > nul
 
-        set appsInitialized=false
+        set "appsInitialized=false"
         goto :menuInstall
     )
 
@@ -602,6 +578,7 @@ goto :EOF
     cls
 
     :: set states
+    set q_mnu_adv=
     set stateCortanaDword=0x0
     set stateCortanaOpp=Disable
     for /F "usebackq tokens=3*" %%A in (`reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" 2^>nul`) do (
@@ -609,23 +586,18 @@ goto :EOF
     )
     if /I "%stateCortanaDword%"=="0x0" set stateCortanaOpp=Enable
 
-    set q_mnu_adv=
-
-    echo.
-    echo.
-
+    echo:
+    echo:
     echo      %goldm%^(1^)%u%   %stateCortanaOpp% Cortana
     echo      %goldm%^(2^)%u%   Uninstall Crapware
     echo      %goldm%^(3^)%u%   Install / Uninstall Apps
-    echo.
+    echo:
     echo      %redl%^(R^)%redl%   Return
-
-    echo.
-    echo.
+    echo:
+    echo:
     set /p q_mnu_adv="%goldm%    Pick Option » %u%"
-    echo.
-
-    echo.
+    echo:
+    echo:
 
     :: option > (1) Disable Cortana
     if /I "%q_mnu_adv%" equ "1" (
@@ -648,7 +620,7 @@ goto :EOF
     if /I "%q_mnu_adv%" equ "R" (
         goto :main
     ) else (
-        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_adv%%u%, press any key and try again.
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_adv%%u%, press any key and try again.
         pause > nul
 
         goto :menuAdvanced
@@ -664,27 +636,25 @@ goto :EOF
 :menuServices
     setlocal enabledelayedexpansion
     cls
+
     set q_mnu_serv=
 
-    echo.
-
+    echo:
     echo       %yellowd%^(1^)%u%   View Status
     echo       %yellowd%^(2^)%u%   Enable All Update Services
     echo       %yellowd%^(3^)%u%   Disable All Update Services
-    echo.
+    echo:
     echo       %redl%^(R^)%redl%   Return
-
-    echo.
-    echo.
+    echo:
+    echo:
     set /p q_mnu_serv="%goldm%    Pick Option » %u%"
-    echo.
-
-    echo.
+    echo:
+    echo:
 
     :: option > (1) View Service Status
     if /I "%q_mnu_serv%" equ "1" (
 
-        echo.   %cyand% Notice  %u%        Getting Service Status%u%
+        echo   %cyand% Notice  %u%        Getting Service Status%u%
 
         :: loop services and check status
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
@@ -692,14 +662,14 @@ goto :EOF
                 set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
                 set "service=!service:~0,60!"
                 if /I "%%H" neq "RUNNING" (
-                    echo.   %cyand%         %grayd%          !service! %redl%Not Running%u%
+                    echo   %cyand%         %grayd%          !service! %redl%Not Running%u%
                 ) else (
-                    echo.   %cyand%         %grayd%          !service! %greenl%Running%u%
+                    echo   %cyand%         %grayd%          !service! %greenl%Running%u%
                 )
             )
         ) 
 
-        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
 
         goto :menuServices
@@ -707,18 +677,18 @@ goto :EOF
 
     :: option > (2) Enable Update Services
     if /I "%q_mnu_serv%" equ "2" (
-        echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...
+        echo   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
             set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
             set "service=!service:~0,60!"
 
-            echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
+            echo   %cyand%         %grayd%          !service! %greenl%enabled%u%
             sc config %%~x start= auto > nul 2>&1
             net start %%~x > nul 2>&1
         ) 
 
-        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
         goto :menuServices
@@ -726,19 +696,19 @@ goto :EOF
 
     :: option > (3) Disable Update Services
     if /I "%q_mnu_serv%" equ "3" (
-        echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...
+        echo   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
             set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
             set "service=!service:~0,60!"
 
-            echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
+            echo   %cyand%         %grayd%          !service! %redl%disabled%u%
             net stop %%~x > nul 2>&1
             sc config %%~x start= disabled > nul 2>&1
             sc failure %%~x reset= 0 actions= "" > nul 2>&1
         ) 
 
-        echo.   %cyand% Notice  %u%        Operation complete. Press any key
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
         goto :menuServices
@@ -748,7 +718,7 @@ goto :EOF
     if /I "%q_mnu_serv%" equ "R" (
         goto :main
     ) else (
-        echo.   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
         pause > nul
 
         goto :menuServices
@@ -766,7 +736,7 @@ goto :EOF
     set state=%1
     set setToIng=!state:~0,-1!ing
 
-    echo.   %cyand% Notice  %u%        !setToIng! Cortana
+    echo   %cyand% Notice  %u%        !setToIng! Cortana
 
     If "!state!"=="Enable" (
         powershell -command "Get-AppXPackage -AllUsers -Name Microsoft.549981C3F5F10 | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
@@ -784,7 +754,7 @@ goto :EOF
         reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000000" /f> nul
     )
 
-    echo.   %cyand% Notice  %u%        Operation complete. Press any key
+    echo   %cyand% Notice  %u%        Operation complete. Press any key
     pause > nul
     endlocal
 goto :EOF
@@ -804,24 +774,24 @@ goto :EOF
     call :helperUnquote package %2
 
     if /i "%manager%" == "powershell" (
-        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo.
+        if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
         powershell -command "Get-AppXPackage -AllUsers -Name *%package%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
     ) else if /i "%manager%" == "winget" (
-        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
+        if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo:
 
         winget list | findstr /i %package% >nul
         if errorlevel 1 (
-            echo.   %cyand% Notice  %u%        Package %yellowl%%package%%u% not installed, now installing%u%
+            echo   %cyand% Notice  %u%        Package %yellowl%%package%%u% not installed, now installing%u%
             winget install --id %package% --accept-source-agreements --accept-package-agreements --silent
             if errorlevel 1 (
-                echo.   %red% Error   %u%         Failed to install %yellowl%%package%%u%, you will need to install it manually.
+                echo   %red% Error   %u%         Failed to install %yellowl%%package%%u%, you will need to install it manually.
                 pause > nul
             ) else (
-                echo.   %greenl% Success %u%        Installed package %grayd%%package%%u%
+                echo   %greenl% Success %u%        Installed package %grayd%%package%%u%
                 timeout /t 3 > nul
             )
         ) else (
-            echo.   %cyand% Notice  %u%        Package %yellowl%%package%%u% already installed, skipping
+            echo   %cyand% Notice  %u%        Package %yellowl%%package%%u% already installed, skipping
             timeout /t 3 > nul
         )
     )
@@ -844,24 +814,24 @@ goto :EOF
     call :helperUnquote package %2
 
     if /i "%manager%" == "powershell" (
-        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo.
+        if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
         powershell -command "Get-AppxPackage *%package%* | Remove-AppxPackage"
     ) else if /i "%manager%" == "winget" (
-        if /I "%debugMode%" equ "true" echo.   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo.
+        if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo:
 
         winget list | findstr /i %package% >nul
         if errorlevel 1 (
-            echo.   %cyand% Notice  %u%        No package %yellowl%%package%%u% found, skipping%u%
+            echo   %cyand% Notice  %u%        No package %yellowl%%package%%u% found, skipping%u%
             timeout /t 3 > nul
         ) else (
-            echo.   %cyand% Notice  %u%        Found package %yellowl%%package%%u%, uninstallling ...
+            echo   %cyand% Notice  %u%        Found package %yellowl%%package%%u%, uninstallling ...
             winget uninstall --id %package%
 
             if %errorlevel% neq 0 (
-                echo.   %red% Error   %u%        There was an issue uninstalling %grayd%%package%%u%. Press any key to continue.
+                echo   %red% Error   %u%        There was an issue uninstalling %grayd%%package%%u%. Press any key to continue.
                 pause > nul
             ) else if %errorlevel% equ 0 (
-                echo.   %greenl% Success %u%        Uninstalled package %grayd%%package%%u%
+                echo   %greenl% Success %u%        Uninstalled package %grayd%%package%%u%
                 timeout /t 1 > nul
             )
         )
@@ -885,15 +855,14 @@ goto :EOF
     call :helperUnquote package %2
 
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-
-    echo.
+    echo:
     echo       %green%^(y^)%green%   Yes     %graym%Install %package%%u%
     echo       %orange%^(n^)%orange%   No      %graym%Do not install %package%%u%
     echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
-    echo.
+    echo:
 
     set /p confirm="%goldm%    Install %package%? %graym%(y/n)%goldm% » %u%"
-    echo.
+    echo:
 
     If "%confirm%"=="Y"         call :installApp %manager% %package%
     If "%Confirm%"=="y"         call :installApp %manager% %package%
@@ -904,6 +873,7 @@ goto :EOF
     If "%Confirm%"=="a"         goto :main
     If "%Confirm%"=="abort"     goto :main
     If "%Confirm%"=="Abort"     goto :main
+
     endlocal
 goto :EOF
 
@@ -922,15 +892,14 @@ goto :EOF
     call :helperUnquote package %2
 
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-
-    echo.
+    echo:
     echo       %green%^(y^)%green%   Yes     %graym%Uninstall %package%%u%
     echo       %orange%^(n^)%orange%   No      %graym%Keep %package%%u%
     echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
-    echo.
+    echo:
 
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n)%goldm% » %u%"
-    echo.
+    echo:
 
     If "%confirm%"=="Y"         call :uninstallApp %manager% %package%
     If "%Confirm%"=="y"         call :uninstallApp %manager% %package%
@@ -974,7 +943,7 @@ goto :EOF
     )
 
     call :progressUpdate 100 "Crapware Uninstall Complete"
-    echo.   %cyand% Notice  %u%        Operation complete. Press any key
+    echo   %cyand% Notice  %u%        Operation complete. Press any key
     pause > nul
     endlocal
 goto :EOF
@@ -986,7 +955,7 @@ goto :EOF
 :taskBackupRegistry
     setlocal disabledelayedexpansion
 
-    echo.   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
+    echo   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
 
     call :progressUpdate 10 "Creating new file %dir_reg%"
 
@@ -1000,7 +969,7 @@ goto :EOF
             erase "%dir_reg%\%%~x"
         )
 
-        echo.   %purplel% Status  %u%        Backing up %purplel%%%~w%u% to file %goldm%"%%~x"%u%
+        echo   %purplel% Status  %u%        Backing up %purplel%%%~w%u% to file %goldm%"%%~x"%u%
 
         call :progressUpdate !registryProg! "Export %%~w from registry to file %%~x"
         reg export HKLM "%dir_reg%\%%~x" > nul
@@ -1008,10 +977,10 @@ goto :EOF
         set /a registryProg+=20
 
         if %errorlevel% neq 0 (
-            echo.   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\%%~x"%u%
+            echo   %red% Error   %u%        Error occurred backing up %grayd%"%dir_reg%\%%~x"%u%
         ) else if %errorlevel% equ 0 (
             setlocal enabledelayedexpansion
-            echo.   %greenl% Success %u%        %green%(!registryProg!%%^^^)%u% Backed up %grayd%"%dir_reg%\%%~x"%u%
+            echo   %greenl% Success %u%        %green%(!registryProg!%%^^^)%u% Backed up %grayd%"%dir_reg%\%%~x"%u%
             setlocal disabledelayedexpansion
         )
 
@@ -1019,7 +988,7 @@ goto :EOF
     ) 
 
     call :progressUpdate 100 "Export Complete"
-    echo.   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
+    echo   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
 
     endlocal
 goto :sessFinish
@@ -1031,12 +1000,12 @@ goto :sessFinish
 :taskStartErase
     setlocal
 
-    echo.
+    echo:
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
-    echo.
+    echo:
 
-    echo.
-    echo.   %cyand% Notice  %u%        %grayl%Scanning %blue%%folder_distrb% %u%
+    echo:
+    echo   %cyand% Notice  %u%        %grayl%Scanning %blue%%folder_distrb% %u%
 
     if exist %folder_distrb%\ (
 
@@ -1048,19 +1017,19 @@ goto :sessFinish
             set /A cnt_dirs+=1
         )
 
-        echo.   %u%                 %graym%Files%u%           %yellowl%!cnt_files!%u%
-        echo.   %u%                 %graym%Folders%u%         %yellowl%!cnt_dirs!%u%
+        echo   %u%                 %graym%Files%u%           %yellowl%!cnt_files!%u%
+        echo   %u%                 %graym%Folders%u%         %yellowl%!cnt_dirs!%u%
     ) else (
-        echo.   %cyand% Notice  %u%        Could not find %grayd%%folder_distrb%%u%; nothing to do.
+        echo   %cyand% Notice  %u%        Could not find %grayd%%folder_distrb%%u%; nothing to do.
         goto sessFinish
     )
 
     timeout /t 1 > nul
-    echo.
 
-    echo.   %goldm% Confirm         %goldm%Would you like to delete the Windows Update distribution files?%u%
-    echo.   %u%                 Type %greenm%Yes to delete files%u% or %redl%No to return%u%
-    echo.
+    echo:
+    echo   %goldm% Confirm         %goldm%Would you like to delete the Windows Update distribution files?%u%
+    echo   %u%                 Type %greenm%Yes to delete files%u% or %redl%No to return%u%
+    echo:
 
     set /p confirm="%goldm%    Delete files? %graym%(y/n)%goldm% » %u%"
 
@@ -1100,20 +1069,20 @@ goto :EOF
     if exist %folder_distrb%\ (
         erase /s /f /q %folder_distrb%\*.* && rmdir /s /q %folder_distrb%
     ) else (
-        echo.   %cyand% Notice  %u%        Windows Updates folder already clean, skipping %grayd%%folder_distrb%%u%
+        echo   %cyand% Notice  %u%        Windows Updates folder already clean, skipping %grayd%%folder_distrb%%u%
         goto sessFinish
     )
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        An error has occurred while trying to delete files and folders in %grayd%%folder_distrb%%u%
+        echo   %red% Error   %u%        An error has occurred while trying to delete files and folders in %grayd%%folder_distrb%%u%
     ) else if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        No errors reported while deleting files, continuing.
+        echo   %greenl% Success %u%        No errors reported while deleting files, continuing.
     )
 
     :: windows update dist folder found
 
     if exist %folder_distrb%\ (
-        echo.   %red% Error   %u%         Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
+        echo   %red% Error   %u%         Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
 
         set cnt_files=0
         set cnt_dirs=0
@@ -1122,8 +1091,8 @@ goto :EOF
         )
 
         If NOT "!cnt_files!"=="0" (
-            echo.   %red% Error   %u%         Something went wrong, files still exist in %grayd%%folder_distrb%%u%
-            echo.   %yellowd%                  Try navigating to the folder and manually deleting all files and folders.
+            echo   %red% Error   %u%         Something went wrong, files still exist in %grayd%%folder_distrb%%u%
+            echo   %yellowd%                  Try navigating to the folder and manually deleting all files and folders.
             goto sessError
         )
 
@@ -1132,15 +1101,15 @@ goto :EOF
         )
 
         If NOT "!cnt_dirs!"=="0" (
-            echo.   %red% Error   %u%        Something went wrong, folders still exist in %grayd%%folder_distrb%%u%
-            echo.   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
+            echo   %red% Error   %u%        Something went wrong, folders still exist in %grayd%%folder_distrb%%u%
+            echo   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
             goto sessError
         )
 
         :: just here as a catch-all for issues
         goto sessError
     ) else (
-        echo.   %cyand% Notice  %u%        Validated that all files and folders have been deleted in %grayd% %folder_distrb%%u%
+        echo   %cyand% Notice  %u%        Validated that all files and folders have been deleted in %grayd% %folder_distrb%%u%
         goto sessFinish
     )
 
@@ -1171,13 +1140,13 @@ goto :EOF
 :taskUpdatesDisable
     setlocal
 
-    echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...%u%
+    echo   %cyand% Notice  %u%        Disabling Windows Update Services ...%u%
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
         set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,60!"
 
-        echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
+        echo   %cyand%         %grayd%          !service! %redl%disabled%u%
         net stop %%~x > nul 2>&1
         sc config %%~x start= disabled > nul 2>&1
         sc failure %%~x reset= 0 actions= "" > nul 2>&1
@@ -1213,12 +1182,12 @@ goto :EOF
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "2025-01-01T00:00:00Z" /f > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%         An error occurred trying to edit your registry%u%
+        echo   %red% Error   %u%         An error occurred trying to edit your registry%u%
         goto sessError
     )
 
     if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Registry has been modified, updates are disabled.
+        echo   %greenl% Success %u%        Registry has been modified, updates are disabled.
     )
 
     goto taskFilesErase
@@ -1231,13 +1200,13 @@ goto :EOF
 
 :taskUpdatesEnable
     setlocal
-    echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
+    echo   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
         set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,60!"
 
-        echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
+        echo   %cyand%         %grayd%          !service! %greenl%enabled%u%
         sc config %%~x start= auto > nul 2>&1
         net start %%~x > nul 2>&1
     ) 
@@ -1272,12 +1241,12 @@ goto :EOF
     reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings" /v "PausedFeatureDate" /t REG_SZ /d "" /f > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        An error occurred trying to edit your registry%u%
+        echo   %red% Error   %u%        An error occurred trying to edit your registry%u%
         goto sessError
     )
 
     if %errorlevel% equ 0 (
-        echo.   %greenl% Success %u%        Registry has been modified
+        echo   %greenl% Success %u%        Registry has been modified
     )
 
     goto sessFinish
@@ -1291,7 +1260,7 @@ goto :EOF
 :taskDisableTelemetry
     setlocal
 
-    echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
+    echo   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
 
     reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1385,11 +1354,11 @@ goto :EOF
     reg add "HKCU\SOFTWARE\Microsoft\Tracing\WPPMediaPerApp\Skype\ETW" /v "WPPFilePath" /t REG_SZ /d "%%SYSTEMDRIVE%%\TEMP\WPPMedia" /f > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred trying to edit your registry%u%
+        echo   %red% Error   %u%        Error occurred trying to edit your registry%u%
         goto sessError
     )
 
-    echo.   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Office%u% telemetry settings%u%
+    echo   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Office%u% telemetry settings%u%
 
 	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common" /v "QMEnable" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common\Feedback" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
@@ -1410,18 +1379,18 @@ goto :EOF
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableUpload" /t REG_DWORD /d "0x00000000" /f > nul
 
-    echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+    echo   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl" > nul 2>&1
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+        echo   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
     )
 
-    echo.   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+    echo   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl" > nul 2>&1
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+        echo   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
     )
 
 	echo "" > "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\AutoLogger-Diagtrack-Listener.etl"
@@ -1430,11 +1399,11 @@ goto :EOF
     ::  Windows Media Player Usage Telemetry
     :: # #
 
-    echo.   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
+    echo   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
 	reg add "HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences" /v "UsageTracking" /t REG_DWORD /d "0x00000000" /f > nul
 
     if %errorlevel% neq 0 (
-        echo.   %red% Error   %u%        Error occurred trying to edit your registry%blue%UsageTracking%u%
+        echo   %red% Error   %u%        Error occurred trying to edit your registry%blue%UsageTracking%u%
         goto sessError
     )
 
@@ -1460,7 +1429,7 @@ goto :EOF
 
     for /l %%n in (0,1,11) do (
         set task=!schtasksDisable[%%n]!
-        echo.   %purplel% Status  %u%        Disable task %blue%!task! %u%
+        echo   %purplel% Status  %u%        Disable task %blue%!task! %u%
 	    schtasks /Change /TN "!task!" /DISABLE > nul 2>&1
     )
 
@@ -1469,7 +1438,7 @@ goto :EOF
     ::  This process connects to Microsoft's servers to share diagnostics and feedback about how you use Microsoft Windows
     :: # #
 
-    echo.   %purplel% Status  %u%        Disable process %blue%%windir%\System32\CompatTelRunner.exe %u%
+    echo   %purplel% Status  %u%        Disable process %blue%%windir%\System32\CompatTelRunner.exe %u%
 	takeown /F %windir%\System32\CompatTelRunner.exe > nul 2>&1
 	icacls %windir%\System32\CompatTelRunner.exe /grant %username%:F > nul 2>&1
 	del %windir%\System32\CompatTelRunner.exe /f > nul 2>&1
@@ -1491,7 +1460,7 @@ goto :EOF
         set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,80!"
 
-        echo.   %cyand%         %grayd%          !service! %red%disabled%u%
+        echo   %cyand%         %grayd%          !service! %red%disabled%u%
         net stop %%~x > nul 2>&1
         sc config %%~x start= disabled > nul 2>&1
         sc failure %%~x reset= 0 actions= "" > nul 2>&1
@@ -1507,7 +1476,7 @@ goto :EOF
 
 :sessQuit
     setlocal
-    echo.   %greenl% Success %u%        Exiting, Press any key to exit%u%
+    echo   %greenl% Success %u%        Exiting, Press any key to exit%u%
     pause > nul
     endlocal
 exit /B 0
@@ -1518,7 +1487,7 @@ exit /B 0
 
 :sessFinish
     setlocal
-    echo.   %cyand% Notice  %u%        Operation completed, Press any key to return%u%
+    echo   %cyand% Notice  %u%        Operation completed, Press any key to return%u%
     pause > nul
     endlocal
 goto :main
@@ -1529,7 +1498,7 @@ goto :main
 
 :sessError
     setlocal
-    echo.   %red% Error   %u%        This utility finished, but with errors. Read the logs above to see the issue.%u%
+    echo   %red% Error   %u%        This utility finished, but with errors. Read the logs above to see the issue.%u%
     pause > nul
     endlocal
 goto :EOF
