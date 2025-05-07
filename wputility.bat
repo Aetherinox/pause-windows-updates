@@ -1,8 +1,6 @@
-@ECHO       OFF
-TITLE       WPU (Windows Personalization Utility)
-MODE        con:cols=125 lines=40
-MODE        125,40
-GOTO        comment_end
+@echo       off
+title       WPU (Windows Personalization Utility)
+goto        comment_end
 
     This script automatically modifies the registry to disable or enable Windows updates.
     It will also check the standard windows folder where updates are stored, and deletes any
@@ -23,6 +21,18 @@ if %errorlevel% neq 0 (
 	echo   %red% Error   %u%         This script requires elevated privileges to run.
 	goto :sessError
 )
+
+:: # #
+::  @desc           resize the batch window and adjust the buffer so that text does not get cut off.
+:: # #
+
+set cols=125
+set lines=40
+set colsbuff=125
+set linesbuff=500
+
+mode con: cols=%cols% lines=%lines%
+powershell -command "&{$H=get-host;$W=$H.ui.rawui;$B=$W.buffersize;$B.width=%colsbuff%;$B.height=%linesbuff%;$W.buffersize=$B;}"
 
 :: # #
 ::  @desc           define vars
@@ -302,7 +312,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     cls
     echo:
     echo:
-    echo     %goldm%v%repo_version%%u%                               %grayd%Windows Personalization Utility%u%
+    echo      %goldm%v%repo_version%%u%                              %grayd%Windows Personalization Utility%u%
     echo:
     echo  %fuchsia2%    ██╗    ██╗██████╗ ██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
     echo      ██║    ██║██╔══██╗██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
