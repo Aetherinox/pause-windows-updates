@@ -689,7 +689,7 @@ goto :EOF
         :: loop services and check status
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
             for /F "tokens=3 delims=: " %%H in ('sc query "%%~x" ^| findstr "        STATE"') do (
-                set "service=%%~w %pink%[%%~x] !spaces!"
+                set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
                 set "service=!service:~0,60!"
                 if /I "%%H" neq "RUNNING" (
                     echo.   %cyand%         %grayd%          !service! %redl%Not Running%u%
@@ -710,7 +710,7 @@ goto :EOF
         echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
-            set "service=%%~w %pink%[%%~x] !spaces!"
+            set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
             set "service=!service:~0,60!"
 
             echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
@@ -729,7 +729,7 @@ goto :EOF
         echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
         for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
-            set "service=%%~w %pink%[%%~x] !spaces!"
+            set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
             set "service=!service:~0,60!"
 
             echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
@@ -1174,7 +1174,7 @@ goto :EOF
     echo.   %cyand% Notice  %u%        Disabling Windows Update Services ...%u%
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
-        set "service=%%~w %pink%[%%~x] !spaces!"
+        set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,60!"
 
         echo.   %cyand%         %grayd%          !service! %redl%disabled%u%
@@ -1234,7 +1234,7 @@ goto :EOF
     echo.   %cyand% Notice  %u%        Enabling Windows Update Services ...%u%
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUpdates[ 2^>nul') do (
-        set "service=%%~w %pink%[%%~x] !spaces!"
+        set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
         set "service=!service:~0,60!"
 
         echo.   %cyand%         %grayd%          !service! %greenl%enabled%u%
