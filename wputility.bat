@@ -338,10 +338,9 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo     %goldm%^(2^)%u%   Enable Updates
     )
     echo:
-    echo     %goldm%^(3^)%u%   Disable Microsoft Telemetry
+    echo     %goldm%^(3^)%u%   Backup Registry
     echo     %goldm%^(4^)%u%   Remove Update Files
     echo     %goldm%^(5^)%u%   Manage Update Services
-    echo     %goldm%^(6^)%u%   Backup Registry
     echo:
     echo     %goldm%^(A^)%u%   Advanced
     echo:
