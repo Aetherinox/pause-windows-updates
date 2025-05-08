@@ -641,6 +641,91 @@ goto :EOF
 goto :EOF
 
 :: # #
+::  @desc           Menu > Users > Delete
+::  @ref            https://superuser.com/a/1152800
+::                  https://windowsreport.com/anniversary-update-defaultuser0/
+::  
+::  @arg            str user    "Default Account"
+:: # #
+
+:menuDeleteUser
+    setlocal enabledelayedexpansion
+    cls
+
+    call :helperUnquote userId %1
+
+    set q_mnu_user=
+
+    echo:
+
+    If "!userId!"=="!userDefault0!" (
+        echo %graym%    The %blue%!userId!%graym% account bug has been haunting Windows users for a long time. Nobody 
+        echo %graym%    knows exactly why this account is being created or how users can prevent its creation. The 
+        echo %graym%    commonly accepted hypothesis suggests the !userId! profile is created when 
+        echo %graym%    something goes wrong during the profile creation phase of the main account, and it should 
+        echo %graym%    be harmless.
+        echo:
+        echo %graym%    To read up more on this issue, please visit the links:
+        echo %goldm%          https://superuser.com/a/1152800
+        echo %goldm%          https://windowsreport.com/anniversary-update-defaultuser0
+    ) else (
+        echo %graym%    Are you sure you wish to delete the user %blue%!userId!%graym%?
+    )
+    echo:
+    echo:
+    echo     %yellowd%^(1^)%u%   Delete user %blue%!userId!%u%
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_user="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1) View Debloat Service Status
+    if /I "%q_mnu_user%" equ "1" (
+
+        echo   %cyand% Notice  %u%        Deleting user %blue%!userId!%u%
+
+        set "bUserFound=false"
+        for /f "tokens=2*" %%a in ('net user !userId! 2^>nul ^| findstr /C:"Account active"') do (
+            set "bUserFound=true"
+        )
+
+        if /I "!bUserFound!" equ "true" (
+            net user !userId! /delete > nul
+            echo   %greenl% Success %u%        %redl%Removed%u% user %blue%!userId!%u%
+        ) else (
+            echo   %red% Error   %u%        Could not find user %blue%!userId!%u%, no user to delete.
+        )
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
+
+        goto :menuUsersManage
+    )
+
+    :: # #
+    ::  defaultuser0 > return
+    :: # #
+
+    :: option > (R) Return
+    if /I "%q_mnu_user%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set "appsInitialized=true"
+        goto :menuUsersManage
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_user%%u%, press any key and try again.
+        pause > nul
+
+        set "appsInitialized=false"
+        goto :menuDeleteUser
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
 ::  @desc           Menu > Users > Disable
 ::  
 ::  @arg            str userName    "Default Account"
