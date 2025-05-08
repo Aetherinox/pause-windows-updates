@@ -328,7 +328,7 @@ set "apps[34]=Opera Browser (Stable)|Opera.Opera|winget"
 set "apps[35]=Opera GX Browser (Stable)|Opera.OperaGX|winget"
 set "apps[36]=PeaZip|Giorgiotani.Peazip|winget"
 set "apps[37]=Tor Browser|TorProject.TorBrowser|winget"
-set "apps[38]=Windows Terminal|Microsoft.WindowsTerminal"
+set "apps[38]=Windows Calculator|windowscalculator|powershell"
 set "apps[39]=Windows Terminal|Microsoft.WindowsTerminal|winget"
 set "apps[40]=WinRAR|RARLab.WinRAR|winget"
 
