@@ -856,7 +856,7 @@ goto :EOF
     echo:
     echo:
 
-    :: option > (1) Delete defaultuser01
+    :: option > (1) Delete defaultuser0
     if /I "%q_mnu_user%" equ "1" (
         call :menuDeleteUser !userDefault0!
         goto :menuUsersManage
