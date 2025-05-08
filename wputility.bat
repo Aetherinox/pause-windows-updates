@@ -2046,6 +2046,29 @@ goto :EOF
         sc failure %%~x reset= 0 actions= "" > nul 2>&1
     )
 
+    goto sessFinish
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Disables Useless Windows Services
+:: # #
+
+:taskDebloatServices
+    setlocal
+
+    echo   %cyand% Motice  %u%        %goldm%Disabling / debloat%u% Windows services%u%
+
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+        set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
+        set "service=!service:~0,80!"
+
+        echo   %cyand%         %grayd%          !service! %red%disabled%u%
+        net stop %%~x > nul 2>&1
+        sc config %%~x start= disabled > nul 2>&1
+        sc failure %%~x reset= 0 actions= "" > nul 2>&1
+    )
+
     goto sessAdvanced
     endlocal
 goto :EOF
