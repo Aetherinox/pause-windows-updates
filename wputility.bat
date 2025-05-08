@@ -291,45 +291,46 @@ set "registry[5]=HKCC|hkcc.reg"
 ::                  list of packages which can be added/removed
 :: # #
 
-set "apps[01]=7zip|7zip.7zip"
-set "apps[02]=Bitwarden|Bitwarden.Bitwarden"
-set "apps[03]=Cyberduck|Iterate.Cyberduck"
-set "apps[04]=DuckDuckGo Browser|DuckDuckGo.DesktopBrowser"
-set "apps[05]=GNU Privacy Guard (GPG)|GnuPG.GnuPG"
-set "apps[06]=Google Chrome|Google.Chrome.EXE"
-set "apps[07]=jq|jqlang.jq"
-set "apps[08]=Microsoft .NET SDK 6.0.427 (x64)|Microsoft.DotNet.SDK.6"
-set "apps[09]=Microsoft AppInstaller|Microsoft.AppInstaller"
-set "apps[10]=Microsoft DevHome|Microsoft.DevHome"
-set "apps[11]=Microsoft Edge|Microsoft.Edge"
-set "apps[12]=Microsoft IronPython|Microsoft.IronPython.3"
-set "apps[13]=Microsoft OneDrive|Microsoft.OneDrive"
-set "apps[14]=Microsoft OpenSSH|Microsoft.OpenSSH.Preview"
-set "apps[15]=Microsoft Powershell|Microsoft.PowerShell"
-set "apps[16]=Microsoft Powertoys|Microsoft.PowerToys"
-set "apps[17]=Microsoft Visual C++ 2005 Redistributable (x32)|Microsoft.VCRedist.2005.x86"
-set "apps[18]=Microsoft Visual C++ 2005 Redistributable (x64)|Microsoft.VCRedist.2005.x64"
-set "apps[19]=Microsoft Visual C++ 2008 Redistributable (x32)|Microsoft.VCRedist.2008.x86"
-set "apps[20]=Microsoft Visual C++ 2008 Redistributable (x64)|Microsoft.VCRedist.2008.x64"
-set "apps[21]=Microsoft Visual C++ 2010 Redistributable (x32)|Microsoft.VCRedist.2010.x86"
-set "apps[22]=Microsoft Visual C++ 2010 Redistributable (x64)|Microsoft.VCRedist.2010.x64"
-set "apps[23]=Microsoft Visual C++ 2012 Redistributable (x32)|Microsoft.VCRedist.2012.x86"
-set "apps[24]=Microsoft Visual C++ 2012 Redistributable (x64)|Microsoft.VCRedist.2012.x64"
-set "apps[25]=Microsoft Visual C++ 2013 Redistributable (x32)|Microsoft.VCRedist.2013.x86"
-set "apps[26]=Microsoft Visual C++ 2013 Redistributable (x64)|Microsoft.VCRedist.2013.x64"
-set "apps[27]=Microsoft Visual C++ 2015 UWP Desktop Runtime|Microsoft.VCLibs.Desktop.14"
-set "apps[28]=Microsoft Visual C++ 2015-2022 Redistributable (x32)|Microsoft.VCRedist.2015+.x32"
-set "apps[29]=Microsoft Visual C++ 2015-2022 Redistributable (x64)|Microsoft.VCRedist.2015+.x64"
-set "apps[30]=Microsoft Visual Studio Code|Microsoft.VisualStudioCode"
-set "apps[31]=Microsoft Visual Studio Code Insiders|Microsoft.VisualStudioCode.Insiders"
-set "apps[32]=Mozilla Firefox|Mozilla.Firefox"
-set "apps[33]=NMap|Insecure.Nmap"
-set "apps[34]=Opera Browser (Stable)|Opera.Opera"
-set "apps[35]=Opera GX Browser (Stable)|Opera.OperaGX"
-set "apps[36]=PeaZip|Giorgiotani.Peazip"
-set "apps[37]=Tor Browser|TorProject.TorBrowser"
+set "apps[01]=7zip|7zip.7zip|winget"
+set "apps[02]=Bitwarden|Bitwarden.Bitwarden|winget"
+set "apps[03]=Cyberduck|Iterate.Cyberduck|winget"
+set "apps[04]=DuckDuckGo Browser|DuckDuckGo.DesktopBrowser|winget"
+set "apps[05]=GNU Privacy Guard (GPG)|GnuPG.GnuPG|winget"
+set "apps[06]=Google Chrome|Google.Chrome.EXE|winget"
+set "apps[07]=jq|jqlang.jq|winget"
+set "apps[08]=Microsoft .NET SDK 6.0.427 (x64)|Microsoft.DotNet.SDK.6|winget"
+set "apps[09]=Microsoft AppInstaller|Microsoft.AppInstaller|winget"
+set "apps[10]=Microsoft DevHome|Microsoft.DevHome|winget"
+set "apps[11]=Microsoft Edge|Microsoft.Edge|winget"
+set "apps[12]=Microsoft IronPython|Microsoft.IronPython.3|winget"
+set "apps[13]=Microsoft OneDrive|Microsoft.OneDrive|winget"
+set "apps[14]=Microsoft OpenSSH|Microsoft.OpenSSH.Preview|winget"
+set "apps[15]=Microsoft Powershell|Microsoft.PowerShell|winget"
+set "apps[16]=Microsoft Powertoys|Microsoft.PowerToys|winget"
+set "apps[17]=Microsoft Visual C++ 2005 Redistributable (x32)|Microsoft.VCRedist.2005.x86|winget"
+set "apps[18]=Microsoft Visual C++ 2005 Redistributable (x64)|Microsoft.VCRedist.2005.x64|winget"
+set "apps[19]=Microsoft Visual C++ 2008 Redistributable (x32)|Microsoft.VCRedist.2008.x86|winget"
+set "apps[20]=Microsoft Visual C++ 2008 Redistributable (x64)|Microsoft.VCRedist.2008.x64|winget"
+set "apps[21]=Microsoft Visual C++ 2010 Redistributable (x32)|Microsoft.VCRedist.2010.x86|winget"
+set "apps[22]=Microsoft Visual C++ 2010 Redistributable (x64)|Microsoft.VCRedist.2010.x64|winget"
+set "apps[23]=Microsoft Visual C++ 2012 Redistributable (x32)|Microsoft.VCRedist.2012.x86|winget"
+set "apps[24]=Microsoft Visual C++ 2012 Redistributable (x64)|Microsoft.VCRedist.2012.x64|winget"
+set "apps[25]=Microsoft Visual C++ 2013 Redistributable (x32)|Microsoft.VCRedist.2013.x86|winget"
+set "apps[26]=Microsoft Visual C++ 2013 Redistributable (x64)|Microsoft.VCRedist.2013.x64|winget"
+set "apps[27]=Microsoft Visual C++ 2015 UWP Desktop Runtime|Microsoft.VCLibs.Desktop.14|winget"
+set "apps[28]=Microsoft Visual C++ 2015-2022 Redistributable (x32)|Microsoft.VCRedist.2015+.x32|winget"
+set "apps[29]=Microsoft Visual C++ 2015-2022 Redistributable (x64)|Microsoft.VCRedist.2015+.x64|winget"
+set "apps[30]=Microsoft Visual Studio Code|Microsoft.VisualStudioCode|winget"
+set "apps[31]=Microsoft Visual Studio Code Insiders|Microsoft.VisualStudioCode.Insiders|winget"
+set "apps[32]=Mozilla Firefox|Mozilla.Firefox|winget"
+set "apps[33]=NMap|Insecure.Nmap|winget"
+set "apps[34]=Opera Browser (Stable)|Opera.Opera|winget"
+set "apps[35]=Opera GX Browser (Stable)|Opera.OperaGX|winget"
+set "apps[36]=PeaZip|Giorgiotani.Peazip|winget"
+set "apps[37]=Tor Browser|TorProject.TorBrowser|winget"
 set "apps[38]=Windows Terminal|Microsoft.WindowsTerminal"
-set "apps[39]=WinRAR|RARLab.WinRAR"
+set "apps[39]=Windows Terminal|Microsoft.WindowsTerminal|winget"
+set "apps[40]=WinRAR|RARLab.WinRAR|winget"
 
 :: # #
 ::  @desc           define os ver and name
@@ -588,7 +589,7 @@ goto :EOF
 
     echo:
 
-    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
+    for /f "tokens=2-4* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
         findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
         if errorlevel 1 (
             set appStatus=%greenl%Install%u%
@@ -609,9 +610,10 @@ goto :EOF
     ::  Apps > generate list of selectable options
     :: # #
 
-    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
+    for /f "tokens=2-4* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
         if /I "%q_mnu_install%" equ "%%~v" (
 
+            set "pkgManager=%%~y"
             set appStatus=Install
             findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
             if errorlevel 1 (
@@ -621,10 +623,10 @@ goto :EOF
             )
 
             echo:
-            echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
+            echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u% using !pkgManager!%u%
 
-            if /I "!appStatus!"=="Install" call :promptAppsInstall "winget" "%%~x"
-            if /I "!appStatus!"=="Uninstall" call :promptAppsUninstall "winget" "%%~x"
+            if /I "!appStatus!"=="Install" call :promptAppsInstall "!pkgManager!" "%%~x"
+            if /I "!appStatus!"=="Uninstall" call :promptAppsUninstall "!pkgManager!" "%%~x"
             set "appsInitialized=true"
 
             goto :menuAppsManage
