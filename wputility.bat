@@ -7,6 +7,41 @@ goto        comment_end
     files or folders within the folder to clean up disk-space. Updates are normally found in:
         c:\windows\softwaredistribution
 
+    Menu List
+        menuAdvanced
+        menuAppsManage
+        menuDebloatServices
+        menuDeleteUser
+        menuServicesDebloat
+        menuServicesUpdates
+        menuUpdatesCleanFiles
+        menuUsersManage
+    Task List
+        taskAppsInstall
+        taskAppsUninstall
+        taskCortanaToggle
+        taskCrapwareUninstall
+        taskDebloatServices
+        taskRegistryBackup
+        taskTelemetryDisable
+        taskUpdatesCleanFiles
+        taskUpdatesDisable
+        taskUpdatesEnable
+        taskUserEnableDisable
+        taskUserGetStatus
+    Prompt List
+        promptAppsInstall
+        promptAppsUninstall
+    Session List
+        sessAdvanced
+        sessError
+        sessFinish
+        sessQuit
+    Internal List
+        forceQuit
+        helperUnquote
+        actionProgUpdate
+
 :comment_end
 
 :: # #
@@ -214,6 +249,7 @@ set crapware[40]=Microsoft.WindowsAlarms
 
 :: # #
 ::  @desc           registry
+::                  list of registry classes for backing up the registry
 :: # #
 
 set "registry[1]=HKLM|hklm.reg"
@@ -224,6 +260,7 @@ set "registry[5]=HKCC|hkcc.reg"
 
 :: # #
 ::  @desc           manageable packages
+::                  list of packages which can be added/removed
 :: # #
 
 set "apps[01]=7zip|7zip.7zip"
@@ -268,6 +305,7 @@ set "apps[39]=WinRAR|RARLab.WinRAR"
 
 :: # #
 ::  @desc           define os ver and name
+::                  get information about the device operating system
 :: # #
 
 for /f "usebackq tokens=1,2 delims==|" %%I in (`wmic os get osarchitecture^,name^,version /format:list`) do 2> nul set "%%I=%%J"
@@ -279,10 +317,12 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
 :: # #
 ::  @desc           Main
+::                  Main initial inteface
 :: # #
 
 :main
     setlocal enabledelayedexpansion
+    title WPU (Windows Personalization Utility)
 
     :: # #
     ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
@@ -304,8 +344,6 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         set "AutoUpdateBool=%orange%disabled%u%"
         set "AutoUpdateStr=%orange%!AutoUpdateBool:~0,-1!%u%"
     )
-
-    title WPU (Windows Personalization Utility)
 
     set q_mnu_main=
     set q_mnu_adv=
@@ -356,6 +394,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     :: # #
     ::  @desc           Menu > Help
+    ::                  Shows help menu
     :: # #
 
     if /I "!q_mnu_main!" equ "H" (
@@ -585,6 +624,7 @@ goto :EOF
 :menuAdvanced
     setlocal enabledelayedexpansion
     cls
+    title WPU (Windows Personalization Utility) Advanced Options
 
     :: set states
     set q_mnu_adv=
@@ -645,7 +685,8 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Menu > Services
+::  @desc           Menu > Services > Update
+::                  user can control windows update services
 :: # #
 
 :menuServices
@@ -776,10 +817,10 @@ goto :EOF
 
 :: # #
 ::  @desc           Toggle > App > Install
-::                  This func directly installs a package, should not be called directly, call using prompt func installAppPrompt
+::                  This func directly installs a package, should not be called directly, call using prompt func promptAppsInstall
 ::
-::  @arg str manager            powershell || winget
-::  @arg str package            Microsoft.Package.Example
+::  @arg            str manager    "powershell" || "winget"
+::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
 :installApp
@@ -816,10 +857,10 @@ goto :EOF
 
 :: # #
 ::  @desc           Toggle > App > Uninstall
-::                  This func directly uninstalls a package, should not be called directly, call using prompt func uninstallApp
+::                  This func directly uninstalls a package, should not be called directly, call using prompt func taskAppsUninstall
 ::
-::  @arg str manager            powershell || winget
-::  @arg str package            Microsoft.Package.Example
+::  @arg            str manager    "powershell" || "winget"
+::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
 :uninstallApp
@@ -859,8 +900,8 @@ goto :EOF
 ::  @desc           Toggle > App > Install Prompt
 ::                  provides the prompt for installing a new package, does not actually install unless user presses Y
 ::
-::  @arg str manager            powershell || winget
-::  @arg str package            Microsoft.Package.Example
+::  @arg            str manager    "powershell" || "winget"
+::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
 :installAppPrompt
@@ -896,8 +937,8 @@ goto :EOF
 ::  @desc           Toggle > App > Uninstall Prompt
 ::                  provides the prompt for uninstalling a package, does not actually uninstall unless user presses Y
 ::
-::  @arg str manager            powershell || winget
-::  @arg str package            Microsoft.Package.Example
+::  @arg            str manager    "powershell" || "winget"
+::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
 :uninstallAppPrompt
@@ -932,6 +973,10 @@ goto :EOF
 
 :: # #
 ::  @desc           Toggle > Uninstall Crapware
+::                  gives the user a series of dialog confirmation prompts as to which apps they want to
+::                  keep and remove.
+::
+::                  these are apps that Microsoft includes with Windows that nobody asked for
 :: # #
 
 :taskUninstallCrapware
@@ -965,6 +1010,7 @@ goto :EOF
 
 :: # #
 ::  @desc           Backup Registry
+::                  backs up the registry before any major changes are made
 :: # #
 
 :taskBackupRegistry
@@ -1010,6 +1056,7 @@ goto :sessFinish
 
 :: # #
 ::  @desc           Start Erase Task
+::                  removes any lingering files left over from previous windows update runs
 :: # #
 
 :taskStartErase
@@ -1132,7 +1179,7 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Disables Windows Updates
+::  @desc           Windows Updates > Disable
 ::  @usage          [ QUERY | ADD | DELETE | COPY | SAVE | LOAD | UNLOAD | RESTORE | COMPARE | EXPORT | IMPORT | FLAGS ]
 ::
 ::                  Return Code: (Except for REG COMPARE)
@@ -1210,7 +1257,7 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Enables Windows Updates
+::  @desc           Windows Updates > Enable
 :: # #
 
 :taskUpdatesEnable
