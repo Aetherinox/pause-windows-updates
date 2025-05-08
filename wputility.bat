@@ -1101,7 +1101,7 @@ goto :EOF
     echo     %goldm%^(1^)%u%   Disable Microsoft Telemetry
     echo     %goldm%^(2^)%u%   %stateCortanaOpp% Cortana
     echo     %goldm%^(3^)%u%   Remove Crapware
-    echo     %goldm%^(4^)%u%   Add / Remove Apps
+    echo     %goldm%^(4^)%u%   Manage Apps
     echo     %goldm%^(5^)%u%   Manage Services
     echo:
     echo     %redl%^(R^)%redl%   Return
@@ -1128,9 +1128,10 @@ goto :EOF
         goto :menuAdvanced
     )
 
-    :: option > (4) Install
+    :: option > (4) > Debloat > Manage Apps
     if /I "%q_mnu_adv%" equ "4" (
-        goto :menuInstall
+        goto :menuAppsManage
+    )
 
     :: option > (5) > Debloat > Manage Services
     if /I "%q_mnu_adv%" equ "5" (
