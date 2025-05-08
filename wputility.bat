@@ -1399,10 +1399,10 @@ goto :EOF
     If "%Confirm%"=="Yes"       call :taskAppsInstall %manager% %package%
     If "%Confirm%"=="yes"       call :taskAppsInstall %manager% %package%
 
-    If "%Confirm%"=="A"         goto :main
-    If "%Confirm%"=="a"         goto :main
-    If "%Confirm%"=="abort"     goto :main
-    If "%Confirm%"=="Abort"     goto :main
+    If "%Confirm%"=="A"         goto :menuAdvanced
+    If "%Confirm%"=="a"         goto :menuAdvanced
+    If "%Confirm%"=="abort"     goto :menuAdvanced
+    If "%Confirm%"=="Abort"     goto :menuAdvanced
 
     endlocal
 goto :EOF
@@ -1436,10 +1436,10 @@ goto :EOF
     If "%Confirm%"=="Yes"       call :taskAppsUninstall %manager% %package%
     If "%Confirm%"=="yes"       call :taskAppsUninstall %manager% %package%
 
-    If "%Confirm%"=="A"         goto :main
-    If "%Confirm%"=="a"         goto :main
-    If "%Confirm%"=="abort"     goto :main
-    If "%Confirm%"=="Abort"     goto :main
+    If "%Confirm%"=="A"         goto :menuAdvanced
+    If "%Confirm%"=="a"         goto :menuAdvanced
+    If "%Confirm%"=="abort"     goto :menuAdvanced
+    If "%Confirm%"=="Abort"     goto :menuAdvanced
 
     endlocal
 goto :EOF
