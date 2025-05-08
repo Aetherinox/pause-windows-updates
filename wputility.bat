@@ -1389,7 +1389,7 @@ goto :EOF
     echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
     echo:
 
-    set /p confirm="%goldm%    Install %package%? %graym%(y/n)%goldm% » %u%"
+    set /p confirm="%goldm%    Install %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
     If "%confirm%"=="Y"         call :taskAppsInstall %manager% %package%
@@ -1426,7 +1426,7 @@ goto :EOF
     echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
     echo:
 
-    set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n)%goldm% » %u%"
+    set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
     If "%confirm%"=="Y"         call :taskAppsUninstall %manager% %package%
@@ -1570,6 +1570,7 @@ goto :sessFinish
     If "%Confirm%"=="y" goto taskUpdatesCleanFiles
     If "%Confirm%"=="Yes" goto taskUpdatesCleanFiles
     If "%Confirm%"=="yes" goto taskUpdatesCleanFiles
+
     If "%Confirm%"=="N" goto main
     If "%Confirm%"=="n" goto main
     If "%Confirm%"=="No" goto main
