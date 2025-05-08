@@ -10,9 +10,8 @@ goto        comment_end
     Menu List
         menuAdvanced
         menuAppsManage
-        menuDebloatServices
-        menuDeleteUser
         menuServicesDebloat
+        menuDeleteUser
         menuServicesUpdates
         menuUpdatesCleanFiles
         menuUsersManage
@@ -657,7 +656,7 @@ goto :EOF
 ::                      Package ........... %%~x
 :: # #
 
-:menuDebloatServices
+:menuServicesDebloat
     setlocal enabledelayedexpansion
     cls
 
@@ -721,7 +720,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
 
-        goto :menuDebloatServices
+        goto :menuServicesDebloat
     )
 
     :: option > (2) Enable Debloated Services
@@ -740,7 +739,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
-        goto :menuDebloatServices
+        goto :menuServicesDebloat
     )
 
     :: option > (3) Disable Debloated Services
@@ -760,7 +759,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
-        goto :menuDebloatServices
+        goto :menuServicesDebloat
     )
 
     :: # #
@@ -792,7 +791,7 @@ goto :EOF
             echo   %cyand% Notice  %u%        Operation complete. Press any key
             pause > nul
 
-            goto :menuDebloatServices
+            goto :menuServicesDebloat
         )
     ) 
 
@@ -920,7 +919,7 @@ goto :EOF
     If "!userId!"=="!userDefault0!" (
         echo %graym%    The %blue%!userId!%graym% account bug has been haunting Windows users for a long time. Nobody 
         echo %graym%    knows exactly why this account is being created or how users can prevent its creation. The 
-        echo %graym%    commonly accepted hypothesis suggests the !userId! profile is created when 
+        echo %graym%    commonly accepted hypothesis suggests the %blue%!userId!%graym% profile is created when 
         echo %graym%    something goes wrong during the profile creation phase of the main account, and it should 
         echo %graym%    be harmless.
         echo:
@@ -941,7 +940,7 @@ goto :EOF
     echo:
     echo:
 
-    :: option > (1) View Debloat Service Status
+    :: option > (1) Delete Users > Delete DefaultUser0
     if /I "%q_mnu_user%" equ "1" (
 
         echo   %cyand% Notice  %u%        Deleting user %blue%!userId!%u%
@@ -964,11 +963,7 @@ goto :EOF
         goto :menuUsersManage
     )
 
-    :: # #
-    ::  defaultuser0 > return
-    :: # #
-
-    :: option > (R) Return
+    :: option > (R) Delete Users > Return
     if /I "%q_mnu_user%" equ "R" (
         del "%dir_cache%\%~n0.out" /f > nul 2>&1
         set "appsInitialized=true"
@@ -1139,7 +1134,7 @@ goto :EOF
 
     :: option > (5) > Debloat > Manage Services
     if /I "%q_mnu_adv%" equ "5" (
-        goto :menuDebloatServices
+        goto :menuServicesDebloat
     )
 
     :: option > (6) > Debloat > Manage Users
@@ -1183,7 +1178,7 @@ goto :EOF
     echo:
     echo:
 
-    :: option > (1) View Service Status
+    :: option > (1) > Windows Update Services > View Service Status
     if /I "%q_mnu_serv%" equ "1" (
 
         echo   %cyand% Notice  %u%        Getting Service Status%u%
@@ -1207,7 +1202,7 @@ goto :EOF
         goto :menuServicesUpdates
     )
 
-    :: option > (2) Enable Update Services
+    :: option > (2) > Windows Update Services > Enable Update Services
     if /I "%q_mnu_serv%" equ "2" (
         echo   %cyand% Notice  %u%        Enabling Windows Update Services ...
 
@@ -1226,7 +1221,7 @@ goto :EOF
         goto :menuServicesUpdates
     )
 
-    :: option > (3) Disable Update Services
+    :: option > (3) > Windows Update Services > Disable Update Services
     if /I "%q_mnu_serv%" equ "3" (
         echo   %cyand% Notice  %u%        Disabling Windows Update Services ...
 
@@ -1246,7 +1241,7 @@ goto :EOF
         goto :menuServicesUpdates
     )
 
-    :: option > (R) Return
+    :: option > (R) > Windows Update Services > Return
     if /I "%q_mnu_serv%" equ "R" (
         goto :main
     ) else (
@@ -1255,71 +1250,6 @@ goto :EOF
 
         goto :menuServicesUpdates
     )
-    endlocal
-goto :EOF
-
-:: # #
-::  @desc           Menu > Services > Debloat
-::
-::                  set "apps[index]=name|package"
-::                      Index ............. %%~v
-::                      Name .............. %%~w
-::                      Package ........... %%~x
-:: # #
-
-:menuServicesDebloat
-    setlocal enabledelayedexpansion
-    cls
-
-    set q_mnu_services=
-    set appStatus=Install
-
-    echo:
-    echo     %redl%^(R^)%redl%    Return
-    echo:
-    echo:
-    set /p q_mnu_services="%goldm%    Pick Option » %u%"
-    echo:
-
-    :: # #
-    ::  Apps > generate list of selectable options
-    :: # #
-
-    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
-        if /I "%q_mnu_services%" equ "%%~v" (
-
-            set appStatus=Install
-            findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
-            if errorlevel 1 (
-                set appStatus=Install
-            ) else (
-                set appStatus=Uninstall
-            )
-
-            echo:
-            echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
-
-            if /I "!appStatus!"=="Install" call :promptAppsInstall "winget" "%%~x"
-            if /I "!appStatus!"=="Uninstall" call :promptAppsUninstall "winget" "%%~x"
-            set "appsInitialized=true"
-
-            goto :menuServicesDebloat
-        )
-    ) 
-
-    :: option > (R) Return
-    if /I "%q_mnu_services%" equ "R" (
-        del "%dir_cache%\%~n0.out" /f > nul 2>&1
-        set "appsInitialized=true"
-        goto :menuAdvanced
-    ) else (
-        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_services%%u%, press any key and try again.
-        pause > nul
-
-        set "appsInitialized=false"
-        goto :menuServicesDebloat
-    )
-
     endlocal
 goto :EOF
 
