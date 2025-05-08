@@ -1103,6 +1103,7 @@ goto :EOF
     echo     %goldm%^(3^)%u%   Remove Crapware
     echo     %goldm%^(4^)%u%   Manage Apps
     echo     %goldm%^(5^)%u%   Manage Services
+    echo     %goldm%^(6^)%u%   Manage Users
     echo:
     echo     %redl%^(R^)%redl%   Return
     echo:
@@ -1138,9 +1139,12 @@ goto :EOF
         goto :menuDebloatServices
     )
 
+    :: option > (6) > Debloat > Manage Users
+    if /I "%q_mnu_adv%" equ "6" (
+        goto :menuUsersManage
     )
 
-    :: option > (R) Return
+    :: option > (R) > Debloat > Return
     if /I "%q_mnu_adv%" equ "R" (
         goto :main
     ) else (
