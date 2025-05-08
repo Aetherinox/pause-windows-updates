@@ -92,6 +92,10 @@ set "noUpdatesState=0x0"
 set "AutoUpdate=false"
 set "AutoUpdateBool=disabled"
 set "AutoUpdateStr=disable"
+set "userGuest=Guest"
+set "userDefault0=defaultuser0"
+set "userGuestState=Enabled"
+set "userGuestStateOpp=Disable"
 
 :: colors
 set "u=[0m"
@@ -202,6 +206,10 @@ set "servicesUseless[14]=Xbox Live Game Save Save|XblGameSave"
 set "servicesUseless[15]=Xbox Live Networking|XboxNetApiSvc"
 set "servicesUseless[16]=Windows Network Data Usage Monitoring|ndu"
 
+:: Disable Users
+set "usersDisable[2]=Guest|guest"
+set "usersDisable[3]=Administrator|Administrator"
+set "usersDisable[4]=Default Account|DefaultAccount"
 
 :: Disable tasks
 set schtasksDisable[0]=\Microsoft\Windows\Application Experience\AITAgent
