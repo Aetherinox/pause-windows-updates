@@ -619,6 +619,26 @@ goto :EOF
 
 :: # #
 ::  @desc           Menu > Advanced
+
+:: # #
+::  @desc           Menu > Users > Get Account Status
+::                  returns the active state of a user
+:: # #
+
+:taskUserGetStatus
+    call :helperUnquote userName %1
+    call :helperUnquote userId %2
+
+    for /f "tokens=2*" %%a in ('net user "!userId!" ^| findstr /C:"Account active"') do (
+        if /I "%%b"=="Yes" (
+            set "userGuestState=Enabled"
+            set "userGuestStateOpp=Disable"
+        ) else (
+            set "userGuestState=Disabled"
+            set "userGuestStateOpp=Enable"
+        )
+    )
+goto :EOF
 :: # #
 
 :menuAdvanced
