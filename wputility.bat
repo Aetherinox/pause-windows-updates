@@ -621,6 +621,69 @@ goto :EOF
 ::  @desc           Menu > Advanced
 
 :: # #
+::  @desc           Menu > Manage Users
+:: # #
+
+:menuUsersManage
+    setlocal enabledelayedexpansion
+    cls
+
+    set q_mnu_user=
+
+    set "userGuestState=Enabled"
+    set "userGuestStateOpp=Disable"
+
+    echo:
+    echo %graym%    This section allows you to manage various user accounts within your system.
+    echo:
+    echo:
+    echo     %yellowd%^(1^)%u%   Delete user %blue%!userDefault0!%u%
+
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set usersDisable[ 2^>nul') do (
+        call :taskUserGetStatus "%%~w" "%%~x"
+        echo     %yellowd%^(%%~v^)%u%   !userGuestStateOpp! user %blue%%%~w%u%
+    )
+
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_user="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1) Delete defaultuser01
+    if /I "%q_mnu_user%" equ "1" (
+        call :menuDeleteUser !userDefault0!
+        goto :menuUsersManage
+    )
+
+    ::  menuUsersManage > Options > Users > Disable
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set usersDisable[ 2^>nul') do (
+        call :taskUserGetStatus %%~w %%~x
+        if /I "%q_mnu_user%" equ "%%~v" (
+            call :taskUserEnableDisable "%%~w" "%%~x" !userGuestStateOpp!
+            goto :menuUsersManage
+        )
+    )
+
+    :: option > (R) Return
+    if /I "%q_mnu_user%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set "appsInitialized=true"
+        goto :menuAdvanced
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_user%%u%, press any key and try again.
+        pause > nul
+
+        set "appsInitialized=false"
+        goto :menuUsersManage
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
 ::  @desc           Menu > Users > Get Account Status
 ::                  returns the active state of a user
 :: # #
