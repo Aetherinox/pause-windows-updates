@@ -1712,6 +1712,13 @@ goto :EOF
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableUpload" /t REG_DWORD /d "0x00000000" /f > nul
 
+    echo   %purplel% Status  %u%        Modifying Inking / Typing Personalization%u%
+    reg add "HKCU\Software\Microsoft\InputPersonalization" /v "RestrictImplicitInkCollection" /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKCU\Software\Microsoft\InputPersonalization" /v "RestrictImplicitTextCollection " /t REG_DWORD /d "0x00000001" /f > nul
+    reg add "HKCU\Software\Microsoft\InputPersonalization\TrainedDataStore" /v "HarvestContacts " /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\Software\Microsoft\Personalization\Settings" /v "AcceptedPrivacyPolicy  " /t REG_DWORD /d "0x00000000" /f > nul
+
+
     echo   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl" > nul 2>&1
 
