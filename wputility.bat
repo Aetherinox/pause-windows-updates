@@ -903,8 +903,74 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc                       Toggle > Cortana
-::  @arg str state              Enable || Disable
+::  @desc           Menu > Services > Debloat
+::
+::                  set "apps[index]=name|package"
+::                      Index ............. %%~v
+::                      Name .............. %%~w
+::                      Package ........... %%~x
+:: # #
+
+:menuServicesDebloat
+    setlocal enabledelayedexpansion
+    cls
+
+    set q_mnu_services=
+    set appStatus=Install
+
+    echo:
+    echo     %redl%^(R^)%redl%    Return
+    echo:
+    echo:
+    set /p q_mnu_services="%goldm%    Pick Option » %u%"
+    echo:
+
+    :: # #
+    ::  Apps > generate list of selectable options
+    :: # #
+
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
+        if /I "%q_mnu_services%" equ "%%~v" (
+
+            set appStatus=Install
+            findstr /I "%%~x" "%dir_cache%\%~n0.out" >nul
+            if errorlevel 1 (
+                set appStatus=Install
+            ) else (
+                set appStatus=Uninstall
+            )
+
+            echo:
+            echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
+
+            if /I "!appStatus!"=="Install" call :promptAppsInstall "winget" "%%~x"
+            if /I "!appStatus!"=="Uninstall" call :promptAppsUninstall "winget" "%%~x"
+            set "appsInitialized=true"
+
+            goto :menuServicesDebloat
+        )
+    ) 
+
+    :: option > (R) Return
+    if /I "%q_mnu_services%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set "appsInitialized=true"
+        goto :menuAdvanced
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_services%%u%, press any key and try again.
+        pause > nul
+
+        set "appsInitialized=false"
+        goto :menuServicesDebloat
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Toggle > Cortana
+::  
+::  @arg            str state    "Enable" || "Disable"
 :: # #
 
 :taskToggleCortana
