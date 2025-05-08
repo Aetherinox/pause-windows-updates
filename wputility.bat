@@ -184,6 +184,25 @@ set "servicesTelemetry[dmwappushservice]=Device Management Wireless Application|
 set "servicesTelemetry[diagsvc]=Diagnostic Execution Service|diagsvc"
 set "servicesTelemetry[diagnosticshub.standardcollector.service]=Microsoft (R) Diagnostics Hub|diagnosticshub.standardcollector.service"
 
+:: Windows Services > Debloat
+set "servicesUseless[01]=Microsoft Diagnostics Hub Collector|diagnosticshub.standardcollector.service"
+set "servicesUseless[02]=Connected User Experiences & Telemetry|DiagTrack"
+set "servicesUseless[03]=Device Management WAP Push Message|dmwappushservice"
+set "servicesUseless[04]=Geolocation|lfsvc"
+set "servicesUseless[05]=Downloaded Maps Manager|MapsBroker"
+set "servicesUseless[06]=Net.Tcp Port Sharing|NetTcpPortSharing"
+set "servicesUseless[07]=Routing & Remote Access|RemoteAccess"
+set "servicesUseless[08]=Remote Registry|RemoteRegistry"
+set "servicesUseless[09]=Internet Connection Sharing|SharedAccess"
+set "servicesUseless[10]=Distributed Link Tracking Client|TrkWks"
+set "servicesUseless[11]=Windows Biometric|WbioSrvc"
+set "servicesUseless[12]=Windows Media Player Network Sharing|WMPNetworkSvc"
+set "servicesUseless[13]=Xbox Live Auth Manager|XblAuthManager"
+set "servicesUseless[14]=Xbox Live Game Save Save|XblGameSave"
+set "servicesUseless[15]=Xbox Live Networking|XboxNetApiSvc"
+set "servicesUseless[16]=Windows Network Data Usage Monitoring|ndu"
+
+
 :: Disable tasks
 set schtasksDisable[0]=\Microsoft\Windows\Application Experience\AITAgent
 set schtasksDisable[1]=\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser
