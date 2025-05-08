@@ -1102,6 +1102,7 @@ goto :EOF
     echo     %goldm%^(2^)%u%   %stateCortanaOpp% Cortana
     echo     %goldm%^(3^)%u%   Remove Crapware
     echo     %goldm%^(4^)%u%   Add / Remove Apps
+    echo     %goldm%^(5^)%u%   Manage Services
     echo:
     echo     %redl%^(R^)%redl%   Return
     echo:
@@ -1130,6 +1131,12 @@ goto :EOF
     :: option > (4) Install
     if /I "%q_mnu_adv%" equ "4" (
         goto :menuInstall
+
+    :: option > (5) > Debloat > Manage Services
+    if /I "%q_mnu_adv%" equ "5" (
+        goto :menuDebloatServices
+    )
+
     )
 
     :: option > (R) Return
