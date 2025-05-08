@@ -639,6 +639,106 @@ goto :EOF
         )
     )
 goto :EOF
+
+:: # #
+::  @desc           Menu > Users > Disable
+::  
+::  @arg            str userName    "Default Account"
+::  @arg            str userId      "DefaultAccount"
+::  @arg            str toState     "Enable" || "Disable"
+:: # #
+
+:taskUserEnableDisable
+    setlocal enabledelayedexpansion
+    cls
+
+    call :helperUnquote userName %1
+    call :helperUnquote userId %2
+    call :helperUnquote toState %3
+
+    set q_mnu_user=
+
+    echo:
+
+    If "!user!"=="!userId!" (
+        echo %graym%    The %blue%!userName!%graym% account bug has been haunting Windows users for a long time. Nobody 
+        echo %graym%    knows exactly why this account is being created or how users can prevent its creation. The 
+        echo %graym%    commonly accepted hypothesis suggests the !userName! profile is created when 
+        echo %graym%    something goes wrong during the profile creation phase of the main account, and it should 
+        echo %graym%    be harmless.
+        echo:
+        echo %graym%    To read up more on this issue, please visit the links:
+        echo %goldm%          https://superuser.com/a/1152800
+        echo %goldm%          https://windowsreport.com/anniversary-update-defaultuser0
+    ) else (
+        echo %graym%    Are you sure you wish to !toState! the user %blue%!userName!%graym%?
+    )
+    echo:
+    echo:
+    echo     %yellowd%^(1^)%u%   !toState! user %blue%!userName!%u%
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_user="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1) Enable / Disable User
+    if /I "%q_mnu_user%" equ "1" (
+
+        echo   %cyand% Notice  %u%        Disabling user %blue%!userName!%u%
+
+        set "bUserFound=false"
+
+        for /f "tokens=2*" %%a in ('net user !userId! ^| findstr /C:"Account active"') do (
+            if /I "%%b"=="Yes" (
+                echo   %purplel% Status  %u%        User %blue%!userName!%u% currently %greenl%active%u%
+                net user !userId! /active:no > nul
+                if errorlevel 1 (
+                    echo   %red% Error   %u%        Issue occured trying to disable user %blue%!userName!%u%
+                ) else (
+                    echo   %greenl% Success %u%        %redl%Disabled%u% user %blue%!userName!%u%
+                )
+            ) else (
+                echo   %purplel% Status  %u%        User %blue%!userName!%u% currently %redl%disabled%u%
+                net user !userId! /active:yes > nul
+                if errorlevel 1 (
+                    echo   %red% Error   %u%        Issue occured trying to enable user %blue%!uuserNameser!%u%
+                ) else (
+                    echo   %greenl% Success %u%        %greenl%Enabled%u% user %blue%!userName!%u%
+                )
+            )
+        )
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
+
+        goto :menuUsersManage
+    )
+
+    :: # #
+    ::  defaultuser0 > return
+    :: # #
+
+    :: option > (R) Return
+    if /I "%q_mnu_user%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set "appsInitialized=true"
+        goto :menuUsersManage
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_user%%u%, press any key and try again.
+        pause > nul
+
+        set "appsInitialized=false"
+        goto :menuDeleteUser
+    )
+
+    endlocal
+goto :EOF
+
+:: # #
+::  @desc           Menu > Debloat / Advanced
 :: # #
 
 :menuAdvanced
