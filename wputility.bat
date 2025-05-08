@@ -86,7 +86,6 @@ set "cnt_files=0"
 set "cnt_dirs=0"
 
 :: throws extra prints and information
-set "debugMode=true"
 set "appsInitialized=true"
 set "noUpdatesState=0x0"
 set "AutoUpdate=false"
@@ -411,7 +410,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     echo     %goldm%^(4^)%u%   Remove Update Files
     echo     %goldm%^(5^)%u%   Manage Update Services
     echo:
-    echo     %goldm%^(A^)%u%   Advanced
+    echo     %goldm%^(D^)%u%   Debloat (Advanced)
     echo:
     echo     %greenm%^(H^)%greenm%   Help
     echo     %blueb%^(S^)%blueb%   Supporters
