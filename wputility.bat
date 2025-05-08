@@ -618,7 +618,172 @@ goto :EOF
 goto :EOF
 
 :: # #
-::  @desc           Menu > Advanced
+::  @desc           Menu > Debloat > Services
+::
+::                  set "apps[index]=name|package"
+::                      Index ............. %%~v
+::                      Name .............. %%~w
+::                      Package ........... %%~x
+:: # #
+
+:menuDebloatServices
+    setlocal enabledelayedexpansion
+    cls
+
+    set q_mnu_serv=
+
+    echo:
+    echo %greyl%    The services controlled from this menu are extra services on Microsoft Windows which most users
+    echo %greyl%    deem as unnecessary. These services are not required for normal everyday operation.
+    echo:
+    echo %greyl%    You can disable all services grouped in this category at once, or re-enable them.
+    echo:
+    echo %greyl%    Some services require a system reboot after being disabled. Some services may automatically stop
+    echo %greyl%    once started; this happens with on-demand services that do not need to run all of the time.
+    echo:
+    echo     %yellowd%^(1^)%u%   View Service Status
+    echo     %yellowd%^(2^)%u%   Enable All Bloat Services
+    echo     %yellowd%^(3^)%u%   Disable All Bloat Services
+    echo:
+    echo:
+
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+        for /F "tokens=3 delims=: " %%H in ('sc query "%%~x" ^| findstr "        STATE"') do (
+            set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
+            set "service=!service:~0,60!"
+            if /I "%%H" neq "RUNNING" (
+                set appStatus=%greenl%Enable%u%
+            ) else (
+                set appStatus=%redl%Disable%u%
+            )
+        )
+
+        echo    %yellowd%^(%%~v^)%u%   !appStatus! %%~w %pink%[%%~x]%u%
+    )
+
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_serv="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1) View Debloat Service Status
+    if /I "%q_mnu_serv%" equ "1" (
+
+        echo   %cyand% Notice  %u%        Getting Service Status%u%
+
+        :: loop services and check status
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+            for /F "tokens=3 delims=: " %%H in ('sc query "%%~x" ^| findstr "        STATE"') do (
+                set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
+                set "service=!service:~0,60!"
+                if /I "%%H" neq "RUNNING" (
+                    echo   %cyand%         %grayd%          !service! %redl%Not Running%u%
+                ) else (
+                    echo   %cyand%         %grayd%          !service! %greenl%Running%u%
+                )
+            )
+        ) 
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
+
+        goto :menuDebloatServices
+    )
+
+    :: option > (2) Enable Debloated Services
+    if /I "%q_mnu_serv%" equ "2" (
+        echo   %cyand% Notice  %u%        Re-enabling Debloat Windows Services ...
+
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+            set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
+            set "service=!service:~0,60!"
+
+            echo   %cyand%         %grayd%          !service! %greenl%enabled%u%
+            sc config %%~x start= auto > nul 2>&1
+            net start %%~x > nul 2>&1
+        ) 
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
+    
+        goto :menuDebloatServices
+    )
+
+    :: option > (3) Disable Debloated Services
+    if /I "%q_mnu_serv%" equ "3" (
+        echo   %cyand% Notice  %u%        Debloated Windows Services ...
+
+        for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+            set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
+            set "service=!service:~0,60!"
+
+            echo   %cyand%         %grayd%          !service! %redl%disabled%u%
+            net stop %%~x > nul 2>&1
+            sc config %%~x start= disabled > nul 2>&1
+            sc failure %%~x reset= 0 actions= "" > nul 2>&1
+        ) 
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key
+        pause > nul
+    
+        goto :menuDebloatServices
+    )
+
+    :: # #
+    ::  Apps > generate list of selectable options; enable / disable each service
+    :: # #
+
+    for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
+        if /I "%q_mnu_serv%" equ "%%~v" (
+
+            set servStatus=Enable
+            for /F "tokens=3 delims=: " %%H in ('sc query "%%~x" ^| findstr "        STATE"') do (
+                set "service=%grayd%%%~w %pink%[%%~x]!%u%"
+                if /I "%%H" neq "RUNNING" (
+                    set servStatus=Enabled
+                    echo   %purplel% Status  %u%        Service %pink%^(%%~x^)%u% is %redl%Not Running%u% - will be %greenl%!servStatus!%u%
+                    sc config %%~x start= auto > nul 2>&1
+                    net start %%~x > nul 2>&1
+                    echo   %greenl% Success %u%        Service !service! %greenl%!servStatus!%u%
+                ) else (
+                    set servStatus=Disabled
+                    echo   %purplel% Status  %u%        Service %pink%^(%%~x^)%u% is %greenl%Running%u% - will be %redl%!servStatus!%u%
+                    net stop %%~x > nul 2>&1
+                    sc config %%~x start= disabled > nul 2>&1
+                    sc failure %%~x reset= 0 actions= "" > nul 2>&1
+                    echo   %greenl% Success %u%        Service !service! %redl%!servStatus!%u%
+                )
+            )
+        
+            echo   %cyand% Notice  %u%        Operation complete. Press any key
+            pause > nul
+
+            goto :menuDebloatServices
+        )
+    ) 
+
+    :: # #
+    ::  Apps > generate list of selectable options
+    :: # #
+
+    :: option > (R) Return
+    if /I "%q_mnu_serv%" equ "R" (
+        del "%dir_cache%\%~n0.out" /f > nul 2>&1
+        set "appsInitialized=true"
+        goto :menuAdvanced
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
+        pause > nul
+
+        set "appsInitialized=false"
+        goto :menuAppsManage
+    )
+
+    endlocal
+goto :EOF
 
 :: # #
 ::  @desc           Menu > Manage Users
