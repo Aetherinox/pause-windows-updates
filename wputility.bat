@@ -811,7 +811,7 @@ goto :EOF
         pause > nul
 
         set "appsInitialized=false"
-        goto :menuAppsManage
+        goto :menuServicesDebloat
     )
 
     endlocal
