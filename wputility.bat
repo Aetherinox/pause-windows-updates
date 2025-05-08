@@ -475,6 +475,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     :: # #
     ::  @desc           Menu > Sponsors
+    ::                  Shows a list of sponsors
     :: # #
 
     if /I "!q_mnu_main!" equ "S" (
@@ -1112,9 +1113,9 @@ goto :EOF
     echo:
     echo:
 
-    :: option > (1) Disable Telemetry
+    :: option > (1) > Debloat > Disable Microsoft Telemetry
     if /I "%q_mnu_adv%" equ "1" (
-        goto :taskDisableTelemetry
+        goto :taskTelemetryDisable
     )
 
     :: option > (2) Disable Cortana
