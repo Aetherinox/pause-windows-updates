@@ -43,8 +43,10 @@ goto        comment_end
 
     Windows Packages / Apps
         Powershell:
-            Install Calculator:     Get-AppxPackage -allusers *windowscalculator* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register “$($_.InstallLocation)\AppXManifest.xml”}
-            Remove Calculator:      Get-AppxPackage *calculator* | Remove-AppxPackage
+            Install Calculator:             Get-AppxPackage -AllUsers *windowscalculator* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register “$($_.InstallLocation)\AppXManifest.xml”}
+            Remove Calculator:              Get-AppxPackage *calculator* | Remove-AppxPackage
+            Install Alternative:            Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like "*3dbuilder*"} | Remove-AppxProvisionedPackage -Online
+            Uninstall All But MSStore       Get-AppxPackage -AllUsers | Where-Object {$_.name –notlike "*store*"} | Remove-AppxPackage
 
 :comment_end
 
@@ -1619,7 +1621,7 @@ goto :EOF
 
     :: windows update dist folder found
     if exist %folder_distrb%\ (
-        echo   %red% Error   %u%         Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
+        echo   %red% Error   %u%        Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
 
         set cnt_files=0
         set cnt_dirs=0
@@ -1628,9 +1630,11 @@ goto :EOF
         )
 
         If not "!cnt_files!"=="0" (
-            echo   %red% Error   %u%         Something went wrong, files still exist in %grayd%%folder_distrb%%u%
-            echo   %yellowd%                  Try navigating to the folder and manually deleting all files and folders.
-            goto sessError
+            echo   %red% Error   %u%        Something went wrong, files still exist in %grayd%%folder_distrb%%u%
+            echo   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
+
+            pause > nul
+            goto :main
         )
 
         for /f %%a in ('dir /s /B /ad "%folder_distrb%"') do (
@@ -1640,15 +1644,13 @@ goto :EOF
         If not "!cnt_dirs!"=="0" (
             echo   %red% Error   %u%        Something went wrong, folders still exist in %grayd%%folder_distrb%%u%
             echo   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
-            goto sessError
         )
-
-        :: just here as a catch-all for issues
-        goto sessError
     ) else (
         echo   %cyand% Notice  %u%        Validated that all files and folders have been deleted in %grayd% %folder_distrb%%u%
-        goto sessFinish
     )
+
+    pause > nul
+    goto :main
 
     endlocal
 goto :EOF
