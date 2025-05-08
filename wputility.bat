@@ -228,6 +228,8 @@ set schtasksDisable[12]=\Microsoft\Windows\Maintenance\WinSAT
 set schtasksDisable[13]=\Microsoft\Windows\CloudExperienceHost\CreateObjectTask
 set schtasksDisable[14]=\Microsoft\Windows\NetTrace\GatherNetworkInfo
 set schtasksDisable[15]=\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
+set schtasksDisable[16]=\Microsoft\Office\OfficeTelemetryAgentFallBack
+set schtasksDisable[17]=\Microsoft\Office\OfficeTelemetryAgentLogOn
 
 :: Crapware
 set crapwareIndexMax=39
