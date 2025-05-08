@@ -1386,7 +1386,7 @@ goto :EOF
     echo:
     echo       %green%^(y^)%green%   Yes     %graym%Install %package%%u%
     echo       %orange%^(n^)%orange%   No      %graym%Do not install %package%%u%
-    echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
+    echo       %redl%^(A^)%redl%   Abort   %graym%Return to main menu%u%
     echo:
 
     set /p confirm="%goldm%    Install %package%? %graym%(y/n/abort)%goldm% » %u%"
@@ -1421,9 +1421,9 @@ goto :EOF
 
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo:
-    echo       %green%^(y^)%green%   Yes     %graym%Uninstall %package%%u%
-    echo       %orange%^(n^)%orange%   No      %graym%Keep %package%%u%
-    echo       %redl%^(A^)%redl%   Abort   %graym%Cancel and return to main menu%u%
+    echo       %green%^(y^)%green%   Yes     %graym%Uninstall%u%
+    echo       %orange%^(n^)%orange%   No      %graym%Keep%u%
+    echo       %redl%^(a^)%redl%   Abort   %graym%Return to main menu%u%
     echo:
 
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n/abort)%goldm% » %u%"
