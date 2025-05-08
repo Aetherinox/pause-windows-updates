@@ -41,6 +41,11 @@ goto        comment_end
         helperUnquote
         actionProgUpdate
 
+    Windows Packages / Apps
+        Powershell:
+            Install Calculator:     Get-AppxPackage -allusers *windowscalculator* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register “$($_.InstallLocation)\AppXManifest.xml”}
+            Remove Calculator:      Get-AppxPackage *calculator* | Remove-AppxPackage
+
 :comment_end
 
 :: # #
@@ -866,14 +871,11 @@ goto :EOF
 
     :: option > (R) Return
     if /I "%q_mnu_user%" equ "R" (
-        del "%dir_cache%\%~n0.out" /f > nul 2>&1
-        set "appsInitialized=true"
         goto :menuAdvanced
     ) else (
         echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_user%%u%, press any key and try again.
         pause > nul
 
-        set "appsInitialized=false"
         goto :menuUsersManage
     )
 
@@ -889,7 +891,7 @@ goto :EOF
     call :helperUnquote userName %1
     call :helperUnquote userId %2
 
-    for /f "tokens=2*" %%a in ('net user "!userId!" ^| findstr /C:"Account active"') do (
+    for /f "tokens=2*" %%a in ('net user "!userId!" 2^>nul ^| findstr /C:"Account active"') do (
         if /I "%%b"=="Yes" (
             set "userGuestState=Enabled"
             set "userGuestStateOpp=Disable"
