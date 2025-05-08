@@ -95,6 +95,7 @@ set "userGuest=Guest"
 set "userDefault0=defaultuser0"
 set "userGuestState=Enabled"
 set "userGuestStateOpp=Disable"
+set "debugMode=true"
 
 :: colors
 set "u=[0m"
@@ -517,21 +518,21 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
 
     :: option > (3) Backup Registry
     if /I "%q_mnu_main%" equ "3" (
-        goto :taskBackupRegistry
+        goto :taskRegistryBackup
     )
 
     :: option > (4) Clean windows update dist folder
     if /I "%q_mnu_main%" equ "4" (
-        goto :taskStartErase
+        goto :menuUpdatesCleanFiles
     )
 
     :: option > (5) Manage Update Services
     if /I "%q_mnu_main%" equ "5" (
-        goto :menuServices
+        goto :menuServicesUpdates
     )
 
-    :: option > (A) Advanced
-    if /I "!q_mnu_main!" equ "A" (
+    :: option > (A) Debloat / Advanced
+    if /I "!q_mnu_main!" equ "D" (
         goto :menuAdvanced
     )
 
@@ -540,6 +541,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         goto :sessQuit
     ) else (
         echo   %red% Error   %u%         Unrecognized Option %yellowl%%q_mnu_main%%u%
+        pause > nul
 
         goto :main
     )
@@ -549,15 +551,15 @@ goto :EOF
 
 :: # #
 ::  @desc           Menu > Install Apps
+::                  allows us to install / uninstall applications; list of apps dynamically generated
 ::
-::      set "apps[index]=name|package"
-:: 
-::          Index ............. %%~v
-::          Name .............. %%~w
-::          Package ........... %%~x
+::                  set "apps[index]=name|package"
+::                      Index ............. %%~v
+::                      Name .............. %%~w
+::                      Package ........... %%~x
 :: # #
 
-:menuInstall
+:menuAppsManage
     setlocal enabledelayedexpansion
     cls
 
@@ -568,7 +570,7 @@ goto :EOF
     if "!appsInitialized!" == "true" (
         echo   %blue% Status   %u%        Please wait while we determine what apps are installed.
         
-        if NOT exist "%dir_cache%" (
+        if not exist "%dir_cache%" (
             md "%dir_cache%"
         )
 
@@ -582,7 +584,7 @@ goto :EOF
         pause > nul
 
         set "appsInitialized=true"
-        goto :menuInstall
+        goto :menuAppsManage
     )
 
     echo:
@@ -594,11 +596,11 @@ goto :EOF
         ) else (
             set appStatus=%redl%Uninstall%u%
         )
-        echo      %yellowd%^(%%~v^)%u%   !appStatus! %%~w
+        echo     %yellowd%^(%%~v^)%u%   !appStatus! %%~w
     ) 
 
     echo:
-    echo      %redl%^(R^)%redl%    Return
+    echo     %redl%^(R^)%redl%    Return
     echo:
     echo:
     set /p q_mnu_install="%goldm%    Pick Option » %u%"
@@ -622,11 +624,11 @@ goto :EOF
             echo:
             echo   %purplel% Status  %u%        Starting !appStatus! - %green%%%~w %grayd%^(%%~x^)%u%
 
-            if /I "!appStatus!"=="Install" call :installAppPrompt "winget" "%%~x"
-            if /I "!appStatus!"=="Uninstall" call :uninstallAppPrompt "winget" "%%~x"
+            if /I "!appStatus!"=="Install" call :promptAppsInstall "winget" "%%~x"
+            if /I "!appStatus!"=="Uninstall" call :promptAppsUninstall "winget" "%%~x"
             set "appsInitialized=true"
 
-            goto :menuInstall
+            goto :menuAppsManage
         )
     ) 
 
@@ -634,13 +636,13 @@ goto :EOF
     if /I "%q_mnu_install%" equ "R" (
         del "%dir_cache%\%~n0.out" /f > nul 2>&1
         set "appsInitialized=true"
-        goto :main
+        goto :menuAdvanced
     ) else (
         echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_install%%u%, press any key and try again.
         pause > nul
 
         set "appsInitialized=false"
-        goto :menuInstall
+        goto :menuAppsManage
     )
 
     endlocal
@@ -1118,15 +1120,15 @@ goto :EOF
         goto :taskTelemetryDisable
     )
 
-    :: option > (2) Disable Cortana
+    :: option > (2) > Debloat > Enable/Disable Cortana
     if /I "%q_mnu_adv%" equ "2" (
-        call :taskToggleCortana %stateCortanaOpp%
+        call :taskCortanaToggle %stateCortanaOpp%
         goto :menuAdvanced
     )
 
-    :: option > (3) Uninstall Crapware
+    :: option > (3) > Debloat > Remove Crapware
     if /I "%q_mnu_adv%" equ "3" (
-        call :taskUninstallCrapware
+        call :taskCrapwareUninstall
         goto :menuAdvanced
     )
 
@@ -1163,18 +1165,18 @@ goto :EOF
 ::                  user can control windows update services
 :: # #
 
-:menuServices
+:menuServicesUpdates
     setlocal enabledelayedexpansion
     cls
 
     set q_mnu_serv=
 
     echo:
-    echo       %yellowd%^(1^)%u%   View Status
-    echo       %yellowd%^(2^)%u%   Enable All Update Services
-    echo       %yellowd%^(3^)%u%   Disable All Update Services
+    echo     %yellowd%^(1^)%u%   View Status
+    echo     %yellowd%^(2^)%u%   Enable All Update Services
+    echo     %yellowd%^(3^)%u%   Disable All Update Services
     echo:
-    echo       %redl%^(R^)%redl%   Return
+    echo     %redl%^(R^)%redl%   Return
     echo:
     echo:
     set /p q_mnu_serv="%goldm%    Pick Option » %u%"
@@ -1202,7 +1204,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
 
-        goto :menuServices
+        goto :menuServicesUpdates
     )
 
     :: option > (2) Enable Update Services
@@ -1221,7 +1223,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
-        goto :menuServices
+        goto :menuServicesUpdates
     )
 
     :: option > (3) Disable Update Services
@@ -1241,7 +1243,7 @@ goto :EOF
         echo   %cyand% Notice  %u%        Operation complete. Press any key
         pause > nul
     
-        goto :menuServices
+        goto :menuServicesUpdates
     )
 
     :: option > (R) Return
@@ -1251,7 +1253,7 @@ goto :EOF
         echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
         pause > nul
 
-        goto :menuServices
+        goto :menuServicesUpdates
     )
     endlocal
 goto :EOF
@@ -1327,7 +1329,7 @@ goto :EOF
 ::  @arg            str state    "Enable" || "Disable"
 :: # #
 
-:taskToggleCortana
+:taskCortanaToggle
     setlocal
     set state=%1
     set setToIng=!state:~0,-1!ing
@@ -1363,7 +1365,7 @@ goto :EOF
 ::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
-:installApp
+:taskAppsInstall
     setlocal
 
     call :helperUnquote manager %1
@@ -1403,7 +1405,7 @@ goto :EOF
 ::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
-:uninstallApp
+:taskAppsUninstall
     setlocal
 
     call :helperUnquote manager %1
@@ -1444,7 +1446,7 @@ goto :EOF
 ::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
-:installAppPrompt
+:promptAppsInstall
     setlocal
 
     call :helperUnquote manager %1
@@ -1460,10 +1462,10 @@ goto :EOF
     set /p confirm="%goldm%    Install %package%? %graym%(y/n)%goldm% » %u%"
     echo:
 
-    If "%confirm%"=="Y"         call :installApp %manager% %package%
-    If "%Confirm%"=="y"         call :installApp %manager% %package%
-    If "%Confirm%"=="Yes"       call :installApp %manager% %package%
-    If "%Confirm%"=="yes"       call :installApp %manager% %package%
+    If "%confirm%"=="Y"         call :taskAppsInstall %manager% %package%
+    If "%Confirm%"=="y"         call :taskAppsInstall %manager% %package%
+    If "%Confirm%"=="Yes"       call :taskAppsInstall %manager% %package%
+    If "%Confirm%"=="yes"       call :taskAppsInstall %manager% %package%
 
     If "%Confirm%"=="A"         goto :main
     If "%Confirm%"=="a"         goto :main
@@ -1481,7 +1483,7 @@ goto :EOF
 ::  @arg            str package    "Microsoft.Package.Example"
 :: # #
 
-:uninstallAppPrompt
+:promptAppsUninstall
     setlocal
 
     call :helperUnquote manager %1
@@ -1497,10 +1499,10 @@ goto :EOF
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n)%goldm% » %u%"
     echo:
 
-    If "%confirm%"=="Y"         call :uninstallApp %manager% %package%
-    If "%Confirm%"=="y"         call :uninstallApp %manager% %package%
-    If "%Confirm%"=="Yes"       call :uninstallApp %manager% %package%
-    If "%Confirm%"=="yes"       call :uninstallApp %manager% %package%
+    If "%confirm%"=="Y"         call :taskAppsUninstall %manager% %package%
+    If "%Confirm%"=="y"         call :taskAppsUninstall %manager% %package%
+    If "%Confirm%"=="Yes"       call :taskAppsUninstall %manager% %package%
+    If "%Confirm%"=="yes"       call :taskAppsUninstall %manager% %package%
 
     If "%Confirm%"=="A"         goto :main
     If "%Confirm%"=="a"         goto :main
@@ -1510,7 +1512,6 @@ goto :EOF
     endlocal
 goto :EOF
 
-
 :: # #
 ::  @desc           Toggle > Uninstall Crapware
 ::                  gives the user a series of dialog confirmation prompts as to which apps they want to
@@ -1519,20 +1520,20 @@ goto :EOF
 ::                  these are apps that Microsoft includes with Windows that nobody asked for
 :: # #
 
-:taskUninstallCrapware
+:taskCrapwareUninstall
     setlocal
 
     set crapwareProg=0
     set crapwareNow=1
 
     set /A crapwareTotal=%crapwareIndexMax%+1
-    call :progressUpdate 0 "Uninstall Crapware [1/!crapwareTotal!]"
+    call :actionProgUpdate 0 "Uninstall Crapware [1/!crapwareTotal!]"
 
     for /l %%n in (0,1,!crapwareIndexMax!) do (
         set package=!crapware[%%n]!
         set /a crapwareNow+=1
-        call :uninstallAppPrompt "powershell" "!package!"
-        call :progressUpdate !crapwareProg! "Uninstall Crapware [!crapwareNow!/!crapwareTotal!]"
+        call :promptAppsUninstall "powershell" "!package!"
+        call :actionProgUpdate !crapwareProg! "Uninstall Crapware [!crapwareNow!/!crapwareTotal!]"
 
         :: stupid workaround for batch not supporting floating points
         If !crapwareNow! gtr 30 (
@@ -1542,7 +1543,7 @@ goto :EOF
         )
     )
 
-    call :progressUpdate 100 "Crapware Uninstall Complete"
+    call :actionProgUpdate 100 "Crapware Uninstall Complete"
     echo   %cyand% Notice  %u%        Operation complete. Press any key
     pause > nul
     endlocal
@@ -1553,14 +1554,14 @@ goto :EOF
 ::                  backs up the registry before any major changes are made
 :: # #
 
-:taskBackupRegistry
+:taskRegistryBackup
     setlocal disabledelayedexpansion
 
     echo   %purplel% Status  %u%        Starting registry backup, this may take a few moments%u%
 
-    call :progressUpdate 10 "Creating new file %dir_reg%"
+    call :actionProgUpdate 10 "Creating new file %dir_reg%"
 
-    if NOT exist "%dir_reg%" (
+    if not exist "%dir_reg%" (
         md "%dir_reg%"
     )
 
@@ -1572,7 +1573,7 @@ goto :EOF
 
         echo   %purplel% Status  %u%        Backing up %purplel%%%~w%u% to file %goldm%"%%~x"%u%
 
-        call :progressUpdate !registryProg! "Export %%~w from registry to file %%~x"
+        call :actionProgUpdate !registryProg! "Export %%~w from registry to file %%~x"
         reg export HKLM "%dir_reg%\%%~x" > nul
     
         set /a registryProg+=20
@@ -1585,10 +1586,10 @@ goto :EOF
             setlocal disabledelayedexpansion
         )
 
-        call :progressUpdate !registryProg! "Completed %%~w"
+        call :actionProgUpdate !registryProg! "Completed %%~w"
     ) 
 
-    call :progressUpdate 100 "Export Complete"
+    call :actionProgUpdate 100 "Export Complete"
     echo   %greenl% Success %u%        Registry backuped up to %goldm%"%dir_reg%"%u%
 
     endlocal
@@ -1599,7 +1600,7 @@ goto :sessFinish
 ::                  removes any lingering files left over from previous windows update runs
 :: # #
 
-:taskStartErase
+:menuUpdatesCleanFiles
     setlocal
 
     echo:
@@ -1635,10 +1636,10 @@ goto :sessFinish
 
     set /p confirm="%goldm%    Delete files? %graym%(y/n)%goldm% » %u%"
 
-    If "%confirm%"=="Y" goto taskFilesErase
-    If "%Confirm%"=="y" goto taskFilesErase
-    If "%Confirm%"=="Yes" goto taskFilesErase
-    If "%Confirm%"=="yes" goto taskFilesErase
+    If "%confirm%"=="Y" goto taskUpdatesCleanFiles
+    If "%Confirm%"=="y" goto taskUpdatesCleanFiles
+    If "%Confirm%"=="Yes" goto taskUpdatesCleanFiles
+    If "%Confirm%"=="yes" goto taskUpdatesCleanFiles
     If "%Confirm%"=="N" goto main
     If "%Confirm%"=="n" goto main
     If "%Confirm%"=="No" goto main
@@ -1665,7 +1666,7 @@ goto :EOF
 ::  @ref            https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/erase
 :: # #
 
-:taskFilesErase
+:taskUpdatesCleanFiles
     setlocal
 
     if exist %folder_distrb%\ (
@@ -1682,7 +1683,6 @@ goto :EOF
     )
 
     :: windows update dist folder found
-
     if exist %folder_distrb%\ (
         echo   %red% Error   %u%         Something went wrong, folder still exists: %grayd%%folder_distrb%%u%
 
@@ -1692,7 +1692,7 @@ goto :EOF
             set /A cnt_files+=1
         )
 
-        If NOT "!cnt_files!"=="0" (
+        If not "!cnt_files!"=="0" (
             echo   %red% Error   %u%         Something went wrong, files still exist in %grayd%%folder_distrb%%u%
             echo   %yellowd%                  Try navigating to the folder and manually deleting all files and folders.
             goto sessError
@@ -1702,7 +1702,7 @@ goto :EOF
             set /A cnt_dirs+=1
         )
 
-        If NOT "!cnt_dirs!"=="0" (
+        If not "!cnt_dirs!"=="0" (
             echo   %red% Error   %u%        Something went wrong, folders still exist in %grayd%%folder_distrb%%u%
             echo   %yellowd%                 Try navigating to the folder and manually deleting all files and folders.
             goto sessError
@@ -1792,7 +1792,7 @@ goto :EOF
         echo   %greenl% Success %u%        Registry has been modified, updates are disabled.
     )
 
-    goto taskFilesErase
+    goto taskUpdatesCleanFiles
     endlocal
 goto :EOF
 
@@ -1859,7 +1859,7 @@ goto :EOF
 ::  @desc           Disables Windows Telemetry Reporting
 :: # #
 
-:taskDisableTelemetry
+:taskTelemetryDisable
     setlocal
 
     echo   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
@@ -1903,7 +1903,6 @@ goto :EOF
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowCommercialDataPipeline" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowDeviceNameInTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DoNotShowFeedbackNotifications" /t REG_DWORD /d "0x00000001" /f > nul
-    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "DoReport" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableTailoredExperiencesWithDiagnosticData" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\Experience\AllowTailoredExperiencesWithDiagnosticData" /v "value" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\System\LimitDiagnosticLogCollection" /v "value" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1986,6 +1985,12 @@ goto :EOF
     reg add "HKCU\Software\Microsoft\InputPersonalization" /v "RestrictImplicitTextCollection " /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKCU\Software\Microsoft\InputPersonalization\TrainedDataStore" /v "HarvestContacts " /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Microsoft\Personalization\Settings" /v "AcceptedPrivacyPolicy  " /t REG_DWORD /d "0x00000000" /f > nul
+
+    echo   %purplel% Status  %u%        Stopping Microsoft from seeing what we type%u%
+    reg add "HKCU\Software\Microsoft\Input" /v "IsInputAppPreloadEnabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\Software\Microsoft\Input\Settings" /v "VoiceTypingEnabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\Software\Microsoft\Input\TIPC" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
+    reg add "HKCU\Software\Microsoft\Input\Settings" /v "InsightsEnabled" /t REG_DWORD /d "0x00000000" /f > nul
 
     echo   %purplel% Status  %u%        Disabling automatic cloud configuration downloads%u%
     reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "DisableOneSettingsDownloads" /t "REG_DWORD" /d "0x00000001" /f > nul
@@ -2172,7 +2177,7 @@ goto :EOF
 ::  @desc           Progress bar
 :: # #
 
-:progressUpdate
+:actionProgUpdate
     setlocal enabledelayedexpansion
 
     set progPercent=%1
@@ -2192,5 +2197,5 @@ goto :EOF
 :: # #
 
 :helperUnquote
-    set %1=%~2
+    set "%1=%~2"
 goto :EOF
