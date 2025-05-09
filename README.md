@@ -28,6 +28,8 @@
 <br />
 
 - [About](#about)
+  - [Option 1: WP Utility:](#option-1-wp-utility)
+  - [Option 2: Registry Scripts](#option-2-registry-scripts)
 - [Notice](#notice)
 - [Install](#install)
   - [WP Utility](#wp-utility)
@@ -37,6 +39,7 @@
   - [Option 1 (unpause.reg)](#option-1-unpausereg)
   - [Option 2 (manual)](#option-2-manual)
   - [Option 3 (batch utility)](#option-3-batch-utility)
+- [WPU Menu Options:](#wpu-menu-options)
 - [Frequently Asked Questions](#frequently-asked-questions)
   - [Is It Safe?](#is-it-safe)
   - [Is It Free?](#is-it-free)
@@ -59,48 +62,45 @@ Formerly known as a simply registry tweak to disable Microsoft Windows updates, 
 
 <br />
 
-If you are here to simply disable Windows Updates; this repository provides two different options you can pick from:
+If you are here to simply disable Windows Updates; this repository provides two different options you can pick from below.
 
-[Option 1: WP Utility](#wp-utility):
+<br />
 
+### [Option 1: WP Utility](#wp-utility):
+
+<br />
+
+Full Feature List:
+- [View](#wpu-menu-options)
+
+Partial Feature List:
 - Disable / Enable Windows Updates
 - Delete / clean up lingering Windows Update files to increase disk-space
 - Backup your entire system registry
 - Remove Windows telemetry and tracking
-- Uninstall Windows "crapware / bloatware" applications
-  - Microsoft.Teams
-  - Microsoft.BingSearch
-  - Microsoft.BingHealthAndFitness
-  - Microsoft.BingFoodAndDrink
-  - Microsoft.WindowsFeedback
-  - Microsoft.BingTranslator
-  - Microsoft.BingTravel
-  - Microsoft.Copilot
-  - Microsoft.Edge
-  - <sup><sub>**Many more**</sub></sup>
-- Install / Uninstall apps such as:
-  - Chrome
-  - Cortana
-  - DuckDuckGo
-  - Firefox
-  - Microsoft .NET SDK
-  - Microsoft Edge
-  - Microsoft IronPython
-  - Microsoft OneDrive
-  - Microsoft OpenSSH
-  - Microsoft Visual C++
-  - Opera
-  - Powershell 7
-  - Tor Browser
-  - <sup><sub>**Many more**</sub></sup>
+- Scan & Repair System
+- Remove Privacy Threats:
+  - Windows Copilot
+  - Windows Recall
+  - Windows Cortana
+- Enable/Disable/Delete windows users:
+  - `defaultuser0`
+  - `Default Account`
+  - `Guest`
+  - `Administrator`
+- Manage Windows Bloatware Services
+  - 15+ apps
+- Manage Windows Bloatware Apps
+   - 40+ apps
+- Install / Uninstall Apps
+   - 50+ apps
 - Requires elevated admin permissions to run
 - Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `wputility.bat`
 
-
 <br />
 
-[Option 2: Registry Scripts](#registry-scripts)
+### [Option 2: Registry Scripts](#registry-scripts)
 
 - Disable / Enable Windows Updates
 - Requires no elevated permissions
@@ -164,32 +164,7 @@ Head over to this repo's [Releases](https://github.com/Aetherinox/Windows-Update
 <br />
 
 - You will be prompted to give the script permission so that it can modify your registry, select **Yes**.
-- Read the options in the menu, and select the option you want. You will be presented and numerous options that you can choose from:
-  1. Enable Windows Updates
-  2. Disable Windows Updates
-  3. Disable Microsoft Telemetry
-  4. Remove Cached Update Files
-  5. Manage Update Services
-      1. View Services Status
-      2. Enable Services
-      3. Disable Services
-  6. Backup Registry
-  7. Advanced
-    - Enable/Disable Cortana
-    - Uninstall Crapware
-      - Microsoft.Teams
-      - Microsoft.BingSearch
-      - Microsoft.BingHealthAndFitness
-      - Microsoft.BingFoodAndDrink
-      - Microsoft.WindowsFeedback
-      - Microsoft.BingTranslator
-      - Microsoft.BingTravel
-      - Microsoft.Copilot
-      - Microsoft.Edge
-      - <sup><sub>**Many more**</sub></sup>
-    - Install Apps
-      - Install Powershell 7.x
-      - Install PowerToys
+- Read the options in the menu, and select the option you want. You will be presented and numerous options that you can choose from.
 
 <br />
 
@@ -321,6 +296,104 @@ When the options appear, select option `(2)   Enable Updates`
 </p>
 
 </div>
+
+<br />
+
+---
+
+<br />
+
+## WPU Menu Options:
+
+The following is an outline of the options available within the [Windows Personalization Utility](#wp-utility). These are not available within the [registry scripts](#registry-scripts)
+
+  1. **Enable Windows Updates**
+  2. **Disable Windows Updates**
+  3. **Backup Registry**
+  4. **Remove Cached Update Files**
+  5. **Manage Update Services**
+     - View Services Status
+     - Enable Services
+     - Disable Services
+  6. **Scan & Fix Errors**
+  6. **Debloat (Advanced)**
+     - **Disable Microsoft Telemetry**
+     - **Manage Cortana, Copilot, Recall**
+     - **Remove Crapware**
+       - Microsoft.BingFoodAndDrink
+       - Microsoft.BingHealthAndFitness
+       - Microsoft.BingSearch
+       - Microsoft.BingTranslator
+       - Microsoft.BingTravel
+       - Microsoft.Copilot
+       - Microsoft.Edge
+       - Microsoft.GamingApp
+       - Microsoft.Gettingstarted
+       - Microsoft.Messaging
+       - Microsoft.People
+       - Microsoft.Teams
+       - Microsoft.WindowsFeedback
+       - Microsoft.XboxGamingOverlay
+       - Microsoft.XboxIdentityProvider
+       - Microsoft.ZuneMusic & Video
+       - <sup><sub>**Many more**</sub></sup>
+     - **Manage Apps**
+       - 7zip
+       - Bitwarden
+       - DuckDuckGo Browser
+       - GNU Privacy Guard (GPG)
+       - Google Chrome Browser
+       - jq
+       - Microsoft .NET SDK
+       - Microsoft AppInstaller
+       - Microsoft DevHome
+       - Microsoft Edge Browser
+       - Microsoft IronPython
+       - Microsoft OneDrive
+       - Microsoft OpenSSH
+       - Microsoft Visual C++ 2005 Redistributable
+       - Microsoft Visual C++ 2008 Redistributable
+       - Microsoft Visual C++ 2010 Redistributable
+       - Microsoft Visual C++ 2012 Redistributable
+       - Microsoft Visual C++ 2013 Redistributable
+       - Microsoft Visual C++ 2015-2022 Redistributable
+       - Microsoft Visual C++ 2015 UWP Desktop Runtime
+       - Microsoft Visual Studio Code (Stable)
+       - Microsoft Visual Studio Code (Insiders)
+       - Mozilla Firefox Browser
+       - NMap
+       - Opera Browser
+       - Opera GX Browser
+       - PeaZip
+       - Tor Browser
+       - Windows Terminal
+       - WinRAR
+     - **Manage Services**
+       - **View Service Status**
+       - **Enable All Bloat Services**
+       - **Disable All Bloat Services**
+       - **Manual Service Control**
+         - Microsoft Diagnostics Hub Collector
+         - Connected User Experiences & Telemetry
+         - Device Management WAP Push Message
+         - Geolocation
+         - Downloaded Maps Manager
+         - Net.Tcp Port Sharing
+         - Routing & Remote Access
+         - Internet Connection Sharing
+         - Distributed Link Tracking Client
+         - Windows Biometric
+         - Windows Media Player Network Sharing
+         - Xbox Live Auth Manager
+         - Xbox Live Game Save
+         - Xbox Live Networking
+         - Windows Network Data Usage Monitoring
+     - **Manage Users**
+         - Delete user `defaultuser0`
+         - Enable/Disable user `Guest`
+         - Enable/Disable user `Administrator`
+         - Enable/Disable user `Default Account`
+
 
 <br />
 
