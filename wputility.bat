@@ -1940,6 +1940,7 @@ goto :EOF
 
     call :helperUnquote manager %1
     call :helperUnquote package %2
+    call :helperUnquote source %3
 
     if /i "%manager%" == "powershell" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
@@ -1981,6 +1982,7 @@ goto :EOF
 
     call :helperUnquote manager %1
     call :helperUnquote package %2
+    call :helperUnquote source %3
 
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo:
@@ -1992,7 +1994,7 @@ goto :EOF
     set /p confirm="%goldm%    Install %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If /I "%confirm%" == "y"    call :taskAppsInstall %manager% %package%
+    If /I "%confirm%" == "y"    call :taskAppsInstall %manager% %package% %source%
     If /I "%confirm%" == "a"    goto :menuAdvanced
 
     endlocal
@@ -2011,6 +2013,7 @@ goto :EOF
 
     call :helperUnquote manager %1
     call :helperUnquote package %2
+    call :helperUnquote source %3
 
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo:
@@ -2022,7 +2025,7 @@ goto :EOF
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If /I "%confirm%" == "y"    call :taskAppsUninstall %manager% %package%
+    If /I "%confirm%" == "y"    call :taskAppsUninstall %manager% %package% %source%
     If /I "%confirm%" == "a"    goto :menuAdvanced
 
     endlocal
