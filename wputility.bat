@@ -1657,6 +1657,19 @@ goto :EOF
     endlocal
 goto :EOF
 
+:: #
+::  @desc           Copilot > Uninstall
+::  @arg            null
+:: #
+
+:taskCopilotUninstall
+    setlocal
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCopilotButton" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
+    endlocal
+goto :EOF
+
 
 :taskCortanaToggle
     setlocal
