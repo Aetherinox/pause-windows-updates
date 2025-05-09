@@ -271,7 +271,7 @@ set schtasksDisable[16]=\Microsoft\Office\OfficeTelemetryAgentFallBack
 set schtasksDisable[17]=\Microsoft\Office\OfficeTelemetryAgentLogOn
 
 :: Crapware
-set crapwareIndexMax=39
+set crapwareIndexMax=40
 set crapware[0]=Microsoft.Getstarted
 set crapware[1]=Microsoft.XboxGamingOverlay
 set crapware[2]=Microsoft.XboxGameOverlay
@@ -314,6 +314,7 @@ set crapware[38]=Microsoft.XboxApp
 set crapware[39]=Microsoft.Xbox.TCUI
 set crapware[39]=Microsoft.3dbuilder
 set crapware[40]=Microsoft.WindowsAlarms
+set crapware[41]=Microsoft.YourPhone
 
 :: #
 ::  @desc           registry
@@ -599,7 +600,8 @@ echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%
     echo     %goldm%^(5^)%u%   Manage Update Services
     echo     %goldm%^(6^)%u%   Scan and Repair
     echo:
-    echo     %goldm%^(D^)%u%   Debloat (Advanced)
+    echo     %goldm%^(C^)%u%   Customize ^(Tweaks^)
+    echo     %goldm%^(D^)%u%   Debloat ^(Advanced^)
     echo:
     echo     %greenm%^(H^)%greenm%   Help
     echo     %blueb%^(S^)%blueb%   Supporters
@@ -651,6 +653,18 @@ echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%
         echo             %grayd%This option allows you to view Windows Update's current status, as well as 
         echo             %grayd%enable or disable Windows Update system services.
         echo             %grayd%This task is automatically performed if you select option 1%u%
+        echo:
+        echo       %goldm%^(6^)%greenm%   Scan and Repair%u%
+        echo             %grayd%Run system-wide scans which can detect errors related to your operating
+        echo             %grayd%system. Any detected errors may be fixed on the spot with little interaction
+        echo             %grayd%on the users end%u%
+        echo:
+        echo       %goldm%^(C^)%greenm%   Customize ^(Tweaks^)%u%
+        echo             %grayd%Change the way Windows behaves on-the-fly.
+        echo:
+        echo       %goldm%^(D^)%greenm%   Debloat ^(Advanced^)%u%
+        echo             %grayd%Uninstall unwanted apps/bloat such as Copilot, Cortana, and Recall.
+        echo             %grayd%Manage system users. Manage and shut down bloat Windows services.
         echo:
         echo       %goldm%^(S^)%greenm%   Supporters%u%
         echo             %grayd%A list of people who have donated to this project.
@@ -724,7 +738,12 @@ echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%
         goto :menuScanFix
     )
 
-    :: option > (A) Debloat / Advanced
+    :: option > (C) Customize / Tweaks / Mods
+    if /I "!q_mnu_main!" equ "C" (
+        goto :menuCustomize
+    )
+
+    :: option > (D) Debloat / Advanced
     if /I "!q_mnu_main!" equ "D" (
         goto :menuAdvanced
     )
@@ -1341,6 +1360,47 @@ goto :EOF
 goto :EOF
 
 :: #
+::  @desc           Menu > Customize (Tweaks)
+:: #
+
+:menuCustomize
+    setlocal enabledelayedexpansion
+    cls
+    title WPU (Windows Personalization Utility) Customization Options
+
+    :: set states
+    set q_mnu_cus=
+
+    echo:
+    echo:
+    echo     %goldm%^(1^)%u%   Coming Soon
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_cus="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1)
+    if /I "%q_mnu_cus%" equ "1" (
+        goto :menuCustomize
+    )
+
+    :: option > (R) > Debloat > Return
+    if /I "%q_mnu_cus%" equ "R" (
+        goto :main
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_cus%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuCustomize
+    )
+
+    endlocal
+goto :EOF
+
+:: #
 ::  @desc           Menu > Services > Scan and Fix Errors
 ::                  runs sfc and dism resoration
 :: #
@@ -1681,6 +1741,7 @@ goto :EOF
 
 :taskCopilotInstall
     setlocal
+        call :taskAppsInstall winget 9NHT9RB2F4HD
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCopilotButton" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000000" /f > nul
