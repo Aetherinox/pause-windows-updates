@@ -43,10 +43,39 @@ goto        comment_end
 
     Windows Packages / Apps
         Powershell:
+            @ref                            https://hahndorf.eu/blog/windowsfeatureviacmd
+
             Install Calculator:             Get-AppxPackage -AllUsers *windowscalculator* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register “$($_.InstallLocation)\AppXManifest.xml”}
-            Remove Calculator:              Get-AppxPackage *calculator* | Remove-AppxPackage
+            Remove Calculator:              Get-AppxPackage *calculator* | Remove-AppxPackage -AllUsers
             Install Alternative:            Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like "*3dbuilder*"} | Remove-AppxProvisionedPackage -Online
-            Uninstall All But MSStore       Get-AppxPackage -AllUsers | Where-Object {$_.name –notlike "*store*"} | Remove-AppxPackage
+            Uninstall All But MSStore       Get-AppxPackage -AllUsers | Where-Object {$_.name –notlike "*store*"} | Remove-AppxPackage -AllUsers
+            List Packages:                  Get-AppxPackage -AllUsers | Select-Object Name, PackageFullName
+                                            Get-AppXPackage -AllUsers | Where-Object {$_.InstallLocation -like "*SystemApps*"} | Select-Object Name, PackageFullName
+                                            Get-AppXPackage -AllUsers | Where-Object {$_.NonRemovable -eq $False} | Select-Object Name, PackageFullName
+                                            Get-AppXPackage -AllUsers | Where-Object {$_.NonRemovable -eq $False} | Select-Object Name, PackageFullName | out-file 'cache.pkg' -encoding utf8
+            Search for Package:             Get-AppXPackage -AllUsers | Where-Object {$_.NonRemovable -eq $False} | Select-Object Name, PackageFullName |  findstr /I 549981C3F5F10
+                                            Get-AppxPackage -Name *Copilot* | Select-Object Name, InstallLocation, Status | Format-List
+            Get Users With App:             (Get-AppxPackage -AllUsers Microsoft.549981C3F5F10).PackageUserInformation | Where-Object {$_.InstallState -eq "Installed"}
+            Get Windows Features:           Get-WindowsOptionalFeature -Online
+            Get Windows Packages:           Get-WindowsPackage -Online
+
+        Winget:
+            Search Installable Packages:    winget search --name copilot
+                                            winget search -q 9NHT9RB2F4HD                                           (Copilot)
+            Search Installed Packages:      winget list -q "Microsoft.PowerShell"                                   (Powershell 7.x)
+            Install Package:                winget install --id 9NHT9RB2F4HD                                        (Copilot)
+                                            winget install --id MartiCliment.UniGetUI --silent                      (UniGetUI)
+                                            winget install --id MartiCliment.UniGetUI --exact --source winget       (UniGetUI)
+            Uninstall Package:              winget uninstall --id 9PJVPMSB6GVH                                      (Interviewer Copilot)
+                                            winget uninstall --id MartiCliment.UniGetUI                             (UniGetUI)
+
+        DISM ()
+            Get Packages:                   dism /online /get-packages /format:table
+            Get Features:                   dism /online /get-features /format:table
+            Get Package Info:               dism /online /get-featureinfo /featurename:Recall
+            Add Package:                    dism /online /add-package /PackagePath:C:\Cortana
+            Disable Package:                dism /online /disable-feature /featurename:Recall
+            Enable Package:                 dism /online /enable-Feature /featurename:Recall
 
 :comment_end
 
@@ -101,6 +130,10 @@ set "userGuest=Guest"
 set "userDefault0=defaultuser0"
 set "userGuestState=Enabled"
 set "userGuestStateOpp=Disable"
+set "osBuild="
+set "osCodename="
+set "osMajor="
+set "osMinor="
 set "debugMode=true"
 
 :: colors
@@ -159,7 +192,7 @@ set "redz=[38;5;88m"
 :: add spaces so that service names are in columns
 set "spaces=                                       "
 
-:: # #
+:: #
 ::  define services
 ::      uhssvc                                      Microsoft Update Health Service
 ::                                                  Maintains Update Health
@@ -180,7 +213,7 @@ set "spaces=                                       "
 ::      dmwappushservice                            Device Management Wireless Application Protocol (WAP) Push message Routing Service
 ::      diagsvc                                     Diagnostic Execution Service
 ::      diagnosticshub.standardcollector.service    Microsoft (R) Diagnostics Hub Standard Collector Service
-:: # #
+:: #
 
 :: Windows Update Services
 set "servicesUpdates[uhssvc]=Microsoft Update Health Service|uhssvc"
@@ -282,10 +315,10 @@ set crapware[39]=Microsoft.Xbox.TCUI
 set crapware[39]=Microsoft.3dbuilder
 set crapware[40]=Microsoft.WindowsAlarms
 
-:: # #
+:: #
 ::  @desc           registry
 ::                  list of registry classes for backing up the registry
-:: # #
+:: #
 
 set "registry[1]=HKLM|hklm.reg"
 set "registry[2]=HKCU|hkcu.reg"
@@ -293,10 +326,10 @@ set "registry[3]=HKCR|hkcr.reg"
 set "registry[4]=HKU|hku.reg"
 set "registry[5]=HKCC|hkcc.reg"
 
-:: # #
+:: #
 ::  @desc           manageable packages
 ::                  list of packages which can be added/removed
-:: # #
+:: #
 
 set "apps[01]=7zip|7zip.7zip|winget"
 set "apps[02]=Bitwarden|Bitwarden.Bitwarden|winget"
@@ -351,21 +384,167 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         set "%%A"&set "%%B"&set "%%C"&set "%%D"
 )
 
-:: # #
+:: #
+::  @desc           get version display name (codename)
+::  @output         osCodename      24H2
+:: #
+
+set "osCodename="
+FOR /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "DisplayVersion"') do (
+    set "osCodename=%%b"
+)
+
+:: #
+::  @desc           get build number from ver command
+::  @output         osMajor         10
+::                  osMinor         0
+::                  osBuild         22631
+:: #
+
+for /f "tokens=4-6 delims=. " %%a in ('ver') do (
+    set "osMajor=%%a"
+    set "osMinor=%%b"
+    set "osBuild=%%c"
+)
+
+:: #
+::  @desc           get build number from registry as an alternative source
+::  @output         osBuildBackup   26100
+:: #
+
+set "osBuildBackup="
+FOR /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuildNumber"') do (
+    set "osBuildBackup=%%b"
+)
+
+:: #
+::  @desc           in the off chance that we get a nul os build value, assign the backup
+::  @output         osBuild         26100
+:: #
+
+IF "%osBuild%" == "" (
+    echo   %blue% Status   %u%        Assigning backup value to os build%u%
+    set "osBuild=%osBuildBackup%"
+)
+
+:: #
+::  @desc           build numbers dont match, use the most probable
+:: #
+
+if "%osBuild%" neq "%osBuildBackup%" (
+    echo:
+    echo:
+    echo   %red% Error   %u%        There are inconsistencies in your operating system build number. Because some features heavily
+    echo   %red%         %u%        rely on this build number, we will use the most probable value.
+    echo:
+    echo   %red%         %u%        This is usually caused by manipulation of the registry windows updates which failed
+    echo   %red%         %u%        to install properly.
+    echo:
+    echo   %red%         %u%        %goldm%Press any key to continue ...%u%
+    echo:
+    pause > nul
+) else (
+    echo   %blue% Status   %u%        Identified os build %goldm%%osBuild%%u%
+)
+
+:: #
+::  @desc           os is older than windows 10; abort
+:: #
+
+if %osMajor% lss 10 (
+    echo:
+    echo:
+    echo   %red% Error   %u%        This utility is only for Windows 10 and 11 users. You are using a version older than the
+    echo   %red%         %u%        requirement allows. Utility will now abort.
+    echo:
+    pause > nul
+    goto :EOF
+)
+
+:: #
+::  @desc           since its important to get the version and build display name right; add some redundancy.
+::                  we dont need to go any further back than Windows 10 since all others are discontinued
+:: #
+
+set "osCodenameBackup="
+if %osBuild% geq 26100 (
+    set "osCodenameBackup=24H2"
+    set "osName=11"
+) else if %osBuild% geq 22631 (
+    set "osCodenameBackup=23H2"
+    set "osName=11"
+) else if %osBuild% geq 22621 (
+    set "osCodenameBackup=22H2"
+    set "osName=11"
+) else if %osBuild% geq 22000 (
+    set "osCodenameBackup=21H2"
+    set "osName=11"
+) else if %osBuild% geq 19044 (
+    set "osCodenameBackup=21H2"
+    set "osName=10"
+) else if %osBuild% geq 19043 (
+    set "osCodenameBackup=21H1"
+    set "osName=10"
+) else if %osBuild% geq 19042 (
+    set "osCodenameBackup=20H2"
+    set "osName=10"
+) else if %osBuild% geq 19041 (
+    set "osCodenameBackup=2004"
+    set "osName=10"
+) else if %osBuild% geq 18363 (
+    set "osCodenameBackup=1909"
+    set "osName=10"
+) else if %osBuild% geq 18362 (
+    set "osCodenameBackup=1903"
+    set "osName=10"
+) else if %osBuild% geq 17763 (
+    set "osCodenameBackup=1809"
+    set "osName=10"
+) else if %osBuild% geq 17134 (
+    set "osCodenameBackup=1803"
+    set "osName=10"
+) else if %osBuild% geq 16299 (
+    set "osCodenameBackup=1709"
+    set "osName=10"
+) else if %osBuild% geq 15063 (
+    set "osCodenameBackup=1703"
+    set "osName=10"
+) else if %osBuild% geq 14393 (
+    set "osCodenameBackup=1607"
+    set "osName=10"
+) else if %osBuild% geq 10586 (
+    set "osCodenameBackup=1511"
+    set "osName=10"
+) else if %osBuild% geq 10240 (
+    set "osCodenameBackup=FE"
+    set "osName=10"
+) else (
+    set "osCodenameBackup=NA"
+    set "osName=NA"
+)
+
+IF "%osCodename%" == "" (
+    echo   %blue% Status   %u%        Assigning backup codename %goldm%%osCodenameBackup%%u%
+    set "osCodename=%osCodenameBackup%"
+)
+
+echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%u%
+
+:: #
 ::  @desc           Main
 ::                  Main initial inteface
-:: # #
+:: #
 
 :main
     setlocal enabledelayedexpansion
     title WPU (Windows Personalization Utility)
 
-    :: # #
+    :: #
     ::  @desc           Check user registry to see if automatic updates are currently enabled or disabled
     ::                  registry will return the following for auto update status
     ::                      0x0         updates are enabled
     :                       0x1         updates are disabled
-    :: # #
+    :: #
 
     for /F "usebackq tokens=3*" %%A in (`REG QUERY "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate`) do (
         set "noUpdatesState=%%A"
@@ -401,7 +580,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
     echo    %cyand% Author  %grayb%       %repo_author%%u%
     echo    %cyand% Repo    %grayb%       %repo_url%
-    echo    %cyand% OS      %grayb%       %version% %graym%(%name% %osarchitecture%)%u%
+    echo    %cyand% OS      %grayb%       %osCodename% (%version%) %graym%%name% %osarchitecture%%u%
     echo    %cyand% Uptime  %grayb%       %d% %graym%days%u% %h% %graym%hours%u% %n% %graym%minutes%u% %s% %graym%seconds
     echo    %cyand% Status  %grayb%       Windows Updates %AutoUpdateBool%%u%
     echo %grayd%   ────────────────────────────────────────────────────────────────────────────────────────────────────────── %u%
@@ -428,10 +607,10 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     set /p q_mnu_main="%goldm%    Pick Option » %u%"
     echo:
 
-    :: # #
+    :: #
     ::  @desc           Menu > Help
     ::                  Shows help menu
-    :: # #
+    :: #
 
     if /I "!q_mnu_main!" equ "H" (
 
@@ -481,10 +660,10 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
         echo:
     )
 
-    :: # #
+    :: #
     ::  @desc           Menu > Sponsors
     ::                  Shows a list of sponsors
-    :: # #
+    :: #
 
     if /I "!q_mnu_main!" equ "S" (
 
@@ -556,7 +735,7 @@ for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSyste
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Install Apps
 ::                  allows us to install / uninstall applications; list of apps dynamically generated
 ::
@@ -564,7 +743,7 @@ goto :EOF
 ::                      Index ............. %%~v
 ::                      Name .............. %%~w
 ::                      Package ........... %%~x
-:: # #
+:: #
 
 :menuAppsManage
     setlocal enabledelayedexpansion
@@ -613,9 +792,9 @@ goto :EOF
     set /p q_mnu_install="%goldm%    Pick Option » %u%"
     echo:
 
-    :: # #
+    :: #
     ::  Apps > generate list of selectable options
-    :: # #
+    :: #
 
     for /f "tokens=2-4* delims=[]|=" %%v in ('set apps[ 2^>nul') do (
         if /I "%q_mnu_install%" equ "%%~v" (
@@ -656,14 +835,14 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Debloat > Services
 ::
 ::                  set "apps[index]=name|package"
 ::                      Index ............. %%~v
 ::                      Name .............. %%~w
 ::                      Package ........... %%~x
-:: # #
+:: #
 
 :menuServicesDebloat
     setlocal enabledelayedexpansion
@@ -771,9 +950,9 @@ goto :EOF
         goto :menuServicesDebloat
     )
 
-    :: # #
+    :: #
     ::  Apps > generate list of selectable options; enable / disable each service
-    :: # #
+    :: #
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesUseless[ 2^>nul') do (
         if /I "%q_mnu_serv%" equ "%%~v" (
@@ -804,9 +983,9 @@ goto :EOF
         )
     ) 
 
-    :: # #
+    :: #
     ::  Apps > generate list of selectable options
-    :: # #
+    :: #
 
     :: option > (R) Return
     if /I "%q_mnu_serv%" equ "R" (
@@ -824,9 +1003,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Manage Users
-:: # #
+:: #
 
 :menuUsersManage
     setlocal enabledelayedexpansion
@@ -884,10 +1063,10 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Users > Get Account Status
 ::                  returns the active state of a user
-:: # #
+:: #
 
 :taskUserGetStatus
     call :helperUnquote userName %1
@@ -904,13 +1083,13 @@ goto :EOF
     )
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Users > Delete
 ::  @ref            https://superuser.com/a/1152800
 ::                  https://windowsreport.com/anniversary-update-defaultuser0/
 ::  
 ::  @arg            str user    "Default Account"
-:: # #
+:: #
 
 :menuDeleteUser
     setlocal enabledelayedexpansion
@@ -985,13 +1164,13 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Users > Disable
 ::  
 ::  @arg            str userName    "Default Account"
 ::  @arg            str userId      "DefaultAccount"
 ::  @arg            str toState     "Enable" || "Disable"
-:: # #
+:: #
 
 :taskUserEnableDisable
     setlocal enabledelayedexpansion
@@ -1062,9 +1241,9 @@ goto :EOF
         goto :menuUsersManage
     )
 
-    :: # #
+    :: #
     ::  defaultuser0 > return
-    :: # #
+    :: #
 
     :: option > (R) Return
     if /I "%q_mnu_user%" equ "R" (
@@ -1082,9 +1261,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Menu > Debloat / Advanced
-:: # #
+:: #
 
 :menuAdvanced
     setlocal enabledelayedexpansion
@@ -1294,12 +1473,15 @@ goto :EOF
 goto :EOF
 
 :: # #
+
+:: #
 ::  @desc           Toggle > App > Install
 ::                  This func directly installs a package, should not be called directly, call using prompt func promptAppsInstall
 ::
-::  @arg            str manager    "powershell" || "winget"
-::  @arg            str package    "Microsoft.Package.Example"
-:: # #
+::  @arg            str manager     "powershell" || "winget"
+::  @arg            str package     "Microsoft.Package.Example"
+::  @arg            str source      "winget"
+:: #
 
 :taskAppsInstall
     setlocal
@@ -1333,13 +1515,13 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Toggle > App > Uninstall
 ::                  This func directly uninstalls a package, should not be called directly, call using prompt func taskAppsUninstall
 ::
 ::  @arg            str manager    "powershell" || "winget"
 ::  @arg            str package    "Microsoft.Package.Example"
-:: # #
+:: #
 
 :taskAppsUninstall
     setlocal
@@ -1374,13 +1556,13 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Toggle > App > Install Prompt
 ::                  provides the prompt for installing a new package, does not actually install unless user presses Y
 ::
 ::  @arg            str manager    "powershell" || "winget"
 ::  @arg            str package    "Microsoft.Package.Example"
-:: # #
+:: #
 
 :promptAppsInstall
     setlocal
@@ -1411,13 +1593,13 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Toggle > App > Uninstall Prompt
 ::                  provides the prompt for uninstalling a package, does not actually uninstall unless user presses Y
 ::
 ::  @arg            str manager    "powershell" || "winget"
 ::  @arg            str package    "Microsoft.Package.Example"
-:: # #
+:: #
 
 :promptAppsUninstall
     setlocal
@@ -1448,13 +1630,13 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Toggle > Uninstall Crapware
 ::                  gives the user a series of dialog confirmation prompts as to which apps they want to
 ::                  keep and remove.
 ::
 ::                  these are apps that Microsoft includes with Windows that nobody asked for
-:: # #
+:: #
 
 :taskCrapwareUninstall
     setlocal
@@ -1485,10 +1667,10 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Backup Registry
 ::                  backs up the registry before any major changes are made
-:: # #
+:: #
 
 :taskRegistryBackup
     setlocal disabledelayedexpansion
@@ -1531,10 +1713,10 @@ goto :EOF
     endlocal
 goto :sessFinish
 
-:: # #
+:: #
 ::  @desc           Start Erase Task
 ::                  removes any lingering files left over from previous windows update runs
-:: # #
+:: #
 
 :menuUpdatesCleanFiles
     setlocal
@@ -1585,7 +1767,7 @@ goto :sessFinish
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Removes all downloaded windows update files
 ::  @args               /p                      Prompts for confirmation before deleting the specified file.
 ::                      /f                      Forces deletion of read-only files.
@@ -1601,7 +1783,7 @@ goto :EOF
 ::                                                  l Reparse points
 ::                                                  - Used as a prefix meaning 'not'
 ::  @ref            https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/erase
-:: # #
+:: #
 
 :taskUpdatesCleanFiles
     setlocal
@@ -1655,7 +1837,7 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Windows Updates > Disable
 ::  @usage          [ QUERY | ADD | DELETE | COPY | SAVE | LOAD | UNLOAD | RESTORE | COMPARE | EXPORT | IMPORT | FLAGS ]
 ::
@@ -1674,7 +1856,7 @@ goto :EOF
 ::                      /f                      Force overwriting the existing registry entry without prompt.
 ::                      /reg:32                 Specifies the key should be accessed using the 32-bit registry view.
 ::                      /reg:64                 Specifies the key should be accessed using the 64-bit registry view.
-:: # #
+:: #
 
 :taskUpdatesDisable
     setlocal
@@ -1733,9 +1915,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Windows Updates > Enable
-:: # #
+:: #
 
 :taskUpdatesEnable
     setlocal
@@ -1792,9 +1974,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Disables Windows Telemetry Reporting
-:: # #
+:: #
 
 :taskTelemetryDisable
     setlocal
@@ -1958,9 +2140,9 @@ goto :EOF
 
 	echo "" > "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\AutoLogger-Diagtrack-Listener.etl"
 
-    :: # #
+    :: #
     ::  Windows Media Player Usage Telemetry
-    :: # #
+    :: #
 
     echo   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
 	reg add "HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences" /v "UsageTracking" /t REG_DWORD /d "0x00000000" /f > nul
@@ -1970,7 +2152,7 @@ goto :EOF
         goto sessError
     )
 
-    :: # #
+    :: #
     ::  disable diagnostics and telemetry apps
     ::  
     ::  schtasks parameter List:
@@ -1988,7 +2170,7 @@ goto :EOF
     ::      /DISABLE                Disables the scheduled task.
     ::  
     ::      /Z                      Marks the task for deletion after its final run.
-    :: # #
+    :: #
 
     for /l %%n in (0,1,11) do (
         set task=!schtasksDisable[%%n]!
@@ -1996,17 +2178,17 @@ goto :EOF
 	    schtasks /Change /TN "!task!" /DISABLE > nul 2>&1
     )
 
-    :: # #
+    :: #
     ::  disable compat telemetry runner
     ::  This process connects to Microsoft's servers to share diagnostics and feedback about how you use Microsoft Windows
-    :: # #
+    :: #
 
     echo   %purplel% Status  %u%        Disable process %blue%%windir%\System32\CompatTelRunner.exe %u%
 	takeown /F %windir%\System32\CompatTelRunner.exe > nul 2>&1
 	icacls %windir%\System32\CompatTelRunner.exe /grant %username%:F > nul 2>&1
 	del %windir%\System32\CompatTelRunner.exe /f > nul 2>&1
 
-    :: # #
+    :: #
     ::  Disable Telemetry Services
     :: 
     ::  DiagTrack (Connected User Experiences and Telemetry)
@@ -2017,7 +2199,7 @@ goto :EOF
     ::  
     ::  dmwappushservice
     ::      Routes Wireless Application Protocol (WAP) Push messages received by the device and synchronizes Device Management sessions
-    :: # #
+    :: #
 
     for /f "tokens=2-3* delims=[]|=" %%v in ('set servicesTelemetry[ 2^>nul') do (
         set "service=%u%%%~w %pink%[%%~x] !spaces!%u%"
@@ -2033,9 +2215,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Disables Useless Windows Services
-:: # #
+:: #
 
 :taskDebloatServices
     setlocal
@@ -2078,9 +2260,9 @@ exit /B 0
     endlocal
 goto :main
 
-:: # #
+:: #
 ::  @desc           Finish and Return to Advanced
-:: # #
+:: #
 
 :sessAdvanced
     setlocal
@@ -2089,9 +2271,9 @@ goto :main
     endlocal
 goto :menuAdvanced
 
-:: # #
+:: #
 ::  @desc           Finish with error and Exit
-:: # #
+:: #
 
 :sessError
     setlocal
@@ -2100,9 +2282,9 @@ goto :menuAdvanced
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Finish with error and Exit
-:: # #
+:: #
 
 :forceQuit
 	(goto) 2>nul || (
@@ -2110,9 +2292,9 @@ goto :EOF
 		exit /B %~1
 	)
 
-:: # #
+:: #
 ::  @desc           Progress bar
-:: # #
+:: #
 
 :actionProgUpdate
     setlocal enabledelayedexpansion
@@ -2129,9 +2311,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Removes quotation marks from strings
-:: # #
+:: #
 
 :helperUnquote
     set "%1=%~2"
