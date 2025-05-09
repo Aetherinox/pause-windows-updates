@@ -371,6 +371,7 @@ set "apps[37]=Tor Browser|TorProject.TorBrowser|winget"
 set "apps[38]=Windows Calculator|windowscalculator|powershell"
 set "apps[39]=Windows Terminal|Microsoft.WindowsTerminal|winget"
 set "apps[40]=WinRAR|RARLab.WinRAR|winget"
+set "apps[41]=UnigetUI (WinGetUI)|MartiCliment.UniGetUI|winget"
 
 :: #
 ::  @desc           define os ver and name
