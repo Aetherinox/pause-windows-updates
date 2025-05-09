@@ -1800,7 +1800,7 @@ goto :EOF
 
     if /i "%manager%" == "powershell" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
-        powershell -command "Get-AppxPackage *%package%* | Remove-AppxPackage"
+        powershell -command "Get-AppxPackage *%package%* | Remove-AppxPackage -AllUsers"
     ) else if /i "%manager%" == "winget" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Uninstalling app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo:
 
