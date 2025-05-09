@@ -1736,6 +1736,39 @@ goto :EOF
     endlocal
 goto :EOF
 
+:: #
+::  @desc           Cortana > Install
+::  @arg            null
+:: #
+
+:taskCortanaInstall
+    setlocal
+
+        echo:
+        echo   %red% Error   %u%        Windows Cortana was discontinued in late 2023 and is not available to install
+        echo   %red%         %u%        via the normal methods. You are only able to uninstall Cortana from this utility.
+        echo:
+        echo   %red%         %u%        Windows Cortana has been replaced by Microsoft Copilot.
+        echo:
+        echo   %red%         %u%        %goldm%Press any key to continue ...%u%
+        echo:
+        pause > nul
+
+        goto :menuServicesAi
+
+        :: Cortana replaced by Microsoft Copilot in 2023
+        :: nothing below this line will be called anymore
+        call :taskAppsInstall powershell Microsoft.549981C3F5F10
+
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000001" /f> nul
+    endlocal
+goto :EOF
+
+
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000001" /f > nul
