@@ -1752,6 +1752,7 @@ goto :EOF
 
     call :helperUnquote manager %1
     call :helperUnquote package %2
+    call :helperUnquote source %3
 
     if /i "%manager%" == "powershell" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
@@ -1762,7 +1763,11 @@ goto :EOF
         winget list | findstr /i %package% >nul
         if errorlevel 1 (
             echo   %cyand% Notice  %u%        Package %yellowl%%package%%u% not installed, now installing%u%
-            winget install --id %package% --accept-source-agreements --accept-package-agreements --silent
+            if "%source%" == "" (
+                winget install --id %package% --accept-source-agreements --accept-package-agreements --silent
+            ) else (
+                winget install --id %package% --source %source% --accept-source-agreements --accept-package-agreements --silent
+            )
             if errorlevel 1 (
                 echo   %red% Error   %u%         Failed to install %yellowl%%package%%u%, you will need to install it manually.
                 pause > nul
