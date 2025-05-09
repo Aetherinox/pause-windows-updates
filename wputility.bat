@@ -1768,19 +1768,49 @@ goto :EOF
     endlocal
 goto :EOF
 
+:: #
+::  @desc           Cortana > Uninstall
+::  @arg            null
+:: #
 
-        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000001" /f > nul
-        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000001" /f > nul
-        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000001" /f > nul
-        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000001" /f > nul
-        reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000001" /f> nul
-    ) else (
-        powershell -command "Get-AppxPackage *Microsoft.549981C3F5F10* | Remove-AppxPackage"
+:taskCortanaUninstall
+    setlocal
+
+        if not exist "C:\Windows\System32\takeown.exe" (
+            echo   %red% Error   %u%        Cannot take ownership of path %goldm%"C:\Program Files\WindowsApps"%u% because %goldm%sfc / takeown.exe%u% is missing
+        ) else (
+            echo   %purplel% Status  %u%        Running %goldm%takedown%u% on folder%goldm% "C:\Program Files\WindowsApps"%u%
+            %windir%\System32\takeown.exe /F "C:\Program Files\WindowsApps" /A > nul
+        )
+
+        if not exist "C:\Windows\System32\icacls.exe" (
+            echo   %red% Error   %u%        Cannot take ownership of path %goldm%"C:\Program Files\WindowsApps"%u% because %goldm%sfc / icacls.exe%u% is missing
+        ) else (
+            echo   %purplel% Status  %u%        Running %goldm%icacls /remove[:g] %Username%%u% on folder%goldm% "C:\Program Files\WindowsApps" %u%
+            %windir%\System32\icacls.exe "C:\Program Files\WindowsApps" /remove[:g] %Username% > nul
+
+            echo   %purplel% Status  %u%        Running %goldm%icacls /grant[:r] %Username%%u% on folder%goldm% "C:\Program Files\WindowsApps" %u%
+            %windir%\System32\icacls.exe "C:\Program Files\WindowsApps" /grant[:r] %Username%:"(OI)(CI)F" > nul
+        )
+
+        :: *Microsoft.549981C3F5F10*
+        :: Get-AppXPackage -AllUsers | Select-Object Name, PackageFullName | findstr /I "Microsoft.549981C3F5F10"
+        call :taskAppsUninstall powershell Microsoft.549981C3F5F10
+        call :taskAppsUninstall powershell Microsoft.549981C3F5F10_4.2308.1005.0_x64__8wekyb3d8bbwe
+        call :taskAppsUninstall winget Microsoft.549981C3F5F10
+        call :taskAppsUninstall winget Microsoft.549981C3F5F10_8wekyb3d8bbwe 
+        call :taskAppsUninstall winget 9NFFX4SZZ23L
+
+        powershell -command "Get-AppxPackage *Microsoft.549981C3F5F10* | Remove-AppxPackage -AllUsers"
+        powershell -command "Get-AppxPackage Microsoft.549981C3F5F10_4.2308.1005.0_x64__8wekyb3d8bbwe | Remove-AppxPackage -AllUsers"
+
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000000" /f> nul
+    endlocal
+goto :EOF
 
 :: #
 ::  @desc           Recall > Toggle
