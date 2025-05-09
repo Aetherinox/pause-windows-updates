@@ -1279,17 +1279,11 @@ goto :EOF
 
     :: set states
     set q_mnu_adv=
-    set stateCortanaDword=0x0
-    set stateCortanaOpp=Disable
-    for /F "usebackq tokens=3*" %%A in (`reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" 2^>nul`) do (
-        set stateCortanaDword=%%A
-    )
-    if /I "%stateCortanaDword%"=="0x0" set stateCortanaOpp=Enable
 
     echo:
     echo:
     echo     %goldm%^(1^)%u%   Disable Microsoft Telemetry
-    echo     %goldm%^(2^)%u%   %stateCortanaOpp% Cortana
+    echo     %goldm%^(2^)%u%   Manage Cortana, Copilot, Recall
     echo     %goldm%^(3^)%u%   Remove Crapware
     echo     %goldm%^(4^)%u%   Manage Apps
     echo     %goldm%^(5^)%u%   Manage Services
@@ -1309,8 +1303,7 @@ goto :EOF
 
     :: option > (2) > Debloat > Enable/Disable Cortana
     if /I "%q_mnu_adv%" equ "2" (
-        call :taskCortanaToggle %stateCortanaOpp%
-        goto :menuAdvanced
+        goto :menuServicesAi
     )
 
     :: option > (3) > Debloat > Remove Crapware
@@ -1538,10 +1531,17 @@ goto :EOF
     :: ----------------------------------------------------------------------------------------------------
     findstr /I "Microsoft.549981C3F5F10" "%dir_cache%\%~n0.pkg" >nul
     set "appStatusCortana=Install"
+    set "appStatusCortanaMenu="
     if errorlevel 1 (
         set appStatusCortana=Install
     ) else (
         set appStatusCortana=Uninstall
+    )
+
+    if /I "%appStatusCortana%" == "Install" (
+        set "appStatusCortanaMenu=%graym%%appStatusCortana% Cortana %redl%^(Discontinued^)%u%"
+    ) else (
+        set "appStatusCortanaMenu=%appStatusCortana% Cortana%u%"
     )
 
     :: ----------------------------------------------------------------------------------------------------
@@ -1577,7 +1577,7 @@ goto :EOF
 
     echo:
     echo     %goldm%^(1^)%u%   %appStatusCopilot% Copilot
-    echo     %goldm%^(2^)%u%   %appStatusCortana% Cortana
+    echo     %goldm%^(2^)%u%   %appStatusCortanaMenu%
     echo     %goldm%^(3^)%u%   %appStatusRecallMenu%%u%
     echo:
     echo     %redl%^(R^)%redl%   Return
@@ -1601,15 +1601,18 @@ goto :EOF
     )
 
     :: option > (2) > AI > Cortana
-    if /I "%q_mnu_serv%" equ "2" (
+    if /I "!q_mnu_serv!" equ "2" (
         echo   %cyand% Notice  %u%        Starting Windows Cortana Wizard%u%
 
         call :taskCortanaToggle %appStatusCortana%
-        goto :menuAdvanced
+        goto :menuServicesAi
+    )
 
-        echo   %cyand% Notice  %u%        Operation complete. Press any key%u%
-        pause > nul
-    
+    :: option > (2) > AI > Cortana (Force)
+    if /I "!q_mnu_serv!" == "2^!" (
+        echo   %cyand% Notice  %u%        Forcing Windows Cortana Wizard to uninstall%u%
+
+        call :taskCortanaToggle uninstall
         goto :menuServicesAi
     )
 
@@ -1702,16 +1705,37 @@ goto :EOF
     endlocal
 goto :EOF
 
+:: #
+::  @desc           Cortana > Toggle
+::                  decides whether cortana should be installed or uninstalled
+::  
+::  @arg            str action    "Enable", "Install" || "Disable", "Uninstall"
+:: #
 
 :taskCortanaToggle
     setlocal
-    set state=%1
-    set setToIng=!state:~0,-1!ing
+    set action=%1
+    set actionLabel=!action:~0!ing
 
-    echo   %cyand% Notice  %u%        !setToIng! Cortana
+    echo   %cyand% Notice  %u%        !actionLabel! Windows Cortana
 
-    If "!state!"=="Enable" (
-        powershell -command "Get-AppXPackage -AllUsers -Name Microsoft.549981C3F5F10 | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
+    If /I "!action!" == "Enable" (
+        call :taskCortanaInstall
+    ) else if /I "!action!" == "Install" (
+        call :taskCortanaInstall
+    ) else if /I "!action!" == "Disable" (
+        call :taskCortanaUninstall
+    ) else if /I "!action!" == "Uninstall" (
+        call :taskCortanaUninstall
+    ) else (
+        echo   %red% Error   %u%        Unknown action %yellowl%!action!%u%; nothing will be done to Windows Cortana
+    )
+
+    echo   %cyand% Notice  %u%        Operation complete. Press any key
+    pause > nul
+    endlocal
+goto :EOF
+
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortana" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v "AllowCortanaAboveLock" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1838,7 +1862,6 @@ goto :EOF
             timeout /t 3 > nul
         )
     )
-
     endlocal
 goto :EOF
 
