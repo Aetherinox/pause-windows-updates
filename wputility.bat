@@ -1644,6 +1644,38 @@ goto :EOF
     )
     endlocal
 goto :EOF
+
+:: #
+::  @desc           Copilot > Toggle
+::                  decides whether copilot should be installed or uninstalled
+::  
+::  @arg            str action    "Enable", "Install" || "Disable", "Uninstall"
+:: #
+
+:taskCopilotToggle
+    setlocal
+    set action=%1
+    set actionLabel=!action:~0!ing
+
+    echo   %cyand% Notice  %u%        !actionLabel! Windows Copilot
+
+    If /I "!action!" == "Enable" (
+        call :taskCopilotInstall
+    ) else if /I "!action!" == "Install" (
+        call :taskCopilotInstall
+    ) else if /I "!action!" == "Disable" (
+        call :taskCopilotUninstall
+    ) else if /I "!action!" == "Uninstall" (
+        call :taskCopilotUninstall
+    ) else (
+        echo   %red% Error   %u%        Unknown action %yellowl%!action!%u%; nothing will be done to Windows Copilot
+    )
+
+    echo   %cyand% Notice  %u%        Operation complete. Press any key
+    pause > nul
+    endlocal
+goto :EOF
+
 :: #
 ::  @desc           Copilot > Install
 ::  @arg            null
