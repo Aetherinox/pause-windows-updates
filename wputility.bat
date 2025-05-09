@@ -1536,7 +1536,32 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
+::  @desc           Recall > Install
+::  @arg            null
+:: #
+
+:taskRecallInstall
+    setlocal
+        dism.exe /online /enable-feature /featurename:Recall /all /norestart >nul 2>&1
+        if %errorlevel% neq 0 (
+            echo:
+            echo   %red% Error   %u%        Windows Recall could not be enabled and this operation will now
+            echo   %red%         %u%        abort. Please ensure that you are running Windows 11 24H2.
+            echo:
+            echo   %red%         %u%        %goldm%Press any key to continue ...%u%
+            echo:
+            pause > nul
+
+            goto :menuServicesAi
+        )
+
+        reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsAI" /v "AllowRecallEnablement" /t REG_DWORD /d "0x00000001" /f> nul
+        reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" /v "DisableAIDataAnalysis" /t REG_DWORD /d "0x00000000" /f> nul
+        reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" /v "TurnOffSavingSnapshots" /t REG_DWORD /d "0x00000000" /f> nul
+    endlocal
+goto :EOF
+
 
 :: #
 ::  @desc           Toggle > App > Install
