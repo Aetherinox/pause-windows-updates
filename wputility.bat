@@ -1502,11 +1502,148 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
-::  @desc           Toggle > Cortana
-::  
-::  @arg            str state    "Enable" || "Disable"
-:: # #
+:: #
+::  @desc           Menu > Services > Manage AI
+:: #
+
+:menuServicesAi
+    setlocal enabledelayedexpansion
+    cls
+
+    echo:
+
+    set q_mnu_serv=
+
+    echo   %cyand% Notice  %u%        Checking which apps you currently have installed%u%
+
+    :: generate powershell AppXPackage List
+    powershell -c "Get-AppXPackage -AllUsers | Where-Object {$_.NonRemovable -eq $False} | Select-Object Name, PackageFullName | out-file '%dir_cache%\%~n0.pkg' -encoding utf8"
+
+    :: ----------------------------------------------------------------------------------------------------
+    :: Get Status > Copilot
+    :: run powershell command to get list of apps and send to /cache/ file
+    :: must append -encoding utf8 to the powershell out-file; otherwise findstr will not work properly
+    :: ----------------------------------------------------------------------------------------------------
+    findstr /I "Microsoft.Copilot" "%dir_cache%\%~n0.pkg" >nul
+    set "appStatusCopilot=Install"
+    if errorlevel 1 (
+        set appStatusCopilot=Install
+    ) else (
+        set appStatusCopilot=Uninstall
+    )
+
+    :: ----------------------------------------------------------------------------------------------------
+    :: Get Status > Cortana
+    :: Get-AppXPackage -AllUsers | Where-Object {$_.NonRemovable -eq $False} | Select-Object Name, PackageFullName | findstr /I "549981C3F5F10"
+    :: ----------------------------------------------------------------------------------------------------
+    findstr /I "Microsoft.549981C3F5F10" "%dir_cache%\%~n0.pkg" >nul
+    set "appStatusCortana=Install"
+    if errorlevel 1 (
+        set appStatusCortana=Install
+    ) else (
+        set appStatusCortana=Uninstall
+    )
+
+    :: ----------------------------------------------------------------------------------------------------
+    :: Get Status > Recall
+    :: ----------------------------------------------------------------------------------------------------
+    set "appStatusRecall=Install"
+    set "appStatusRecallMenu="
+    for /f "tokens=2 delims=: " %%b in ('DISM /Online /Get-FeatureInfo /FeatureName:Recall ^| findstr State') do (
+        if /I "%%b" neq "Disabled" (
+            set "appStatusRecall=Uninstall"
+        )
+    )
+
+    if %osBuild% lss 26100 (
+        set "appStatusRecallMenu=%graym%%appStatusRecall% Recall %redl%^(Requires 24H2^)%u%"
+    ) else (
+        set "appStatusRecallMenu=%appStatusRecall% Recall%u%"
+    )
+
+    echo:
+    echo %graym%    This %blue%AI / Automation%graym% menu allows you to install and uninstall Windows features 
+    echo %graym%    that have been deemed to utilize a lot of system resources, invade privacy, or the user
+    echo %graym%    generally decides to not want these installed.
+    echo:
+    echo %graym%    The menu will auto-detect if you already have these features installed. If so, you will
+    echo %graym%    be given an uninstall option. If each item in the menu says that you can install it; then
+    echo %graym%    you currently do not have the package on your system.
+    echo:
+    echo %graym%    The options below are very aggressive when it comes to uninstalling. This means that
+    echo %graym%    you may see your start menu disappear briefly as this utility restarts processes
+    echo %graym%    such as explorer.exe. None of your core system files will be modified.
+    echo:
+
+    echo:
+    echo     %goldm%^(1^)%u%   %appStatusCopilot% Copilot
+    echo     %goldm%^(2^)%u%   %appStatusCortana% Cortana
+    echo     %goldm%^(3^)%u%   %appStatusRecallMenu%%u%
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_serv="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    :: option > (1) > AI > Copilot
+    if /I "%q_mnu_serv%" equ "1" (
+        echo   %cyand% Notice  %u%        Starting Windows Copilot Wizard%u%
+
+
+
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key%u%
+        pause > nul
+
+        goto :menuServicesAi
+    )
+
+    :: option > (2) > AI > Cortana
+    if /I "%q_mnu_serv%" equ "2" (
+        echo   %cyand% Notice  %u%        Starting Windows Cortana Wizard%u%
+
+        call :taskCortanaToggle %appStatusCortana%
+        goto :menuAdvanced
+
+        echo   %cyand% Notice  %u%        Operation complete. Press any key%u%
+        pause > nul
+    
+        goto :menuServicesAi
+    )
+
+    :: option > (3) > AI > Recall
+    if /I "%q_mnu_serv%" equ "3" (
+        echo   %cyand% Notice  %u%        Starting Windows Recall Wizard%u%
+
+        if %osBuild% lss 26100 (
+            echo:
+            echo   %red% Error   %u%        You are not running a compatible version of Windows and do not require this option.
+            echo   %red%         %u%        You must be running at least %goldm%Windows 11 24H2 ^(26100^)%u%
+            echo:
+            echo   %red%         %u%        %goldm%Press any key to continue ...%u%
+            echo:
+            pause > nul
+        ) else (
+            call :taskRecallToggle %appStatusRecall%
+            goto :menuServicesAi
+        )
+    
+        goto :menuServicesAi
+    )
+
+    :: option > (R) > AI > Return
+    if /I "%q_mnu_serv%" equ "R" (
+        goto :menuAdvanced
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuServicesAi
+    )
+    endlocal
+goto :EOF
 
 :taskCortanaToggle
     setlocal
