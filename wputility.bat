@@ -1529,6 +1529,31 @@ goto :EOF
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaEnabled" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "CortanaConsent" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCortanaButton" /t REG_DWORD /d "0x00000000" /f> nul
+
+:: #
+::  @desc           Recall > Toggle
+::                  decides whether Recall should be installed or uninstalled
+::  
+::  @arg            str action    "Enable", "Install" || "Disable", "Uninstall"
+:: #
+
+:taskRecallToggle
+    setlocal
+    set action=%1
+    set actionLabel=!action:~0!ing
+
+    echo   %cyand% Notice  %u%        !actionLabel! Windows Recall
+
+    If /I "!action!" == "Enable" (
+        call :taskRecallInstall
+    ) else if /I "!action!" == "Install" (
+        call :taskRecallInstall
+    ) else if /I "!action!" == "Disable" (
+        call :taskRecallUninstall
+    ) else if /I "!action!" == "Uninstall" (
+        call :taskRecallUninstall
+    ) else (
+        echo   %red% Error   %u%        Unknown action %yellowl%!action!%u%; nothing will be done to Windows Recall
     )
 
     echo   %cyand% Notice  %u%        Operation complete. Press any key
