@@ -79,10 +79,10 @@ goto        comment_end
 
 :comment_end
 
-:: # #
+:: #
 ::  @desc           To perform registry edits, we need admin permissions.
 ::                  Re-launch powershell with admin, and close existing command prompt window
-:: # #
+:: #
 
 if not "%1"=="admin" (powershell start -verb runas '%0' admin & exit /b)
 
@@ -92,9 +92,9 @@ if %errorlevel% neq 0 (
 	goto :sessError
 )
 
-:: # #
+:: #
 ::  @desc           resize the batch window and adjust the buffer so that text does not get cut off.
-:: # #
+:: #
 
 set cols=125
 set lines=40
@@ -104,9 +104,9 @@ set linesbuff=500
 mode con: cols=%cols% lines=%lines%
 powershell -command "&{$H=get-host;$W=$H.ui.rawui;$B=$W.buffersize;$B.width=%colsbuff%;$B.height=%linesbuff%;$W.buffersize=$B;}"
 
-:: # #
+:: #
 ::  @desc           define vars
-:: # #
+:: #
 
 :variables
 set "dir_home=%~dp0"
@@ -372,10 +372,10 @@ set "apps[38]=Windows Calculator|windowscalculator|powershell"
 set "apps[39]=Windows Terminal|Microsoft.WindowsTerminal|winget"
 set "apps[40]=WinRAR|RARLab.WinRAR|winget"
 
-:: # #
+:: #
 ::  @desc           define os ver and name
 ::                  get information about the device operating system
-:: # #
+:: #
 
 for /f "usebackq tokens=1,2 delims==|" %%I in (`wmic os get osarchitecture^,name^,version /format:list`) do 2> nul set "%%I=%%J"
 for /f "UseBackQ Tokens=1-4" %%A In ( `powershell "$OS=GWmi Win32_OperatingSystem;$UP=(Get-Date)-"^
@@ -596,6 +596,7 @@ echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%
     echo     %goldm%^(3^)%u%   Backup Registry
     echo     %goldm%^(4^)%u%   Remove Update Files
     echo     %goldm%^(5^)%u%   Manage Update Services
+    echo     %goldm%^(6^)%u%   Scan and Repair
     echo:
     echo     %goldm%^(D^)%u%   Debloat (Advanced)
     echo:
@@ -715,6 +716,11 @@ echo   %blue% Status   %u%        Identified os codename %goldm%%osCodename%%u%%
     :: option > (5) Manage Update Services
     if /I "%q_mnu_main%" equ "5" (
         goto :menuServicesUpdates
+    )
+
+    :: option > (6) Scan and Fix Errors
+    if /I "%q_mnu_main%" equ "6" (
+        goto :menuScanFix
     )
 
     :: option > (A) Debloat / Advanced
@@ -1340,10 +1346,67 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
+::  @desc           Menu > Services > Scan and Fix Errors
+::                  runs sfc and dism resoration
+:: #
+
+:menuScanFix
+    setlocal enabledelayedexpansion
+    cls
+
+    set q_mnu_clean=
+
+    echo:
+    echo %graym%    This process will take a few moments to complete. The following actions will be
+    echo %graym%    performed on your system:
+    echo:
+    echo %goldm%          - dism /Online /Cleanup-Image /RestoreHealth
+    echo %goldm%          - sfc /scannow
+    echo:
+    echo:
+    echo     %goldm%^(y^)%u%   Start Repair%u%
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_clean="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    if /I "%q_mnu_clean%" equ "y" (
+        echo   %purplel% Status  %u%        Starting command %goldm%dism /Online /Cleanup-Image /RestoreHealth%u%
+        dism /Online /Cleanup-Image /RestoreHealth /NoRestart
+
+        echo    Status          Starting command sfc /scannow, please wait
+        sfc /scannow
+
+        echo:
+        echo:
+        echo    Status          Process has been completed. Press any key to continue ...
+        echo:
+        echo:
+        pause > nul
+
+        goto :main
+    )
+
+    :: option > (R) > Windows Update Services > Return
+    if /I "%q_mnu_clean%" equ "R" (
+        goto :main
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_clean%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuScanFix
+    )
+    endlocal
+goto :EOF
+
+:: #
 ::  @desc           Menu > Services > Update
 ::                  user can control windows update services
-:: # #
+:: #
 
 :menuServicesUpdates
     setlocal enabledelayedexpansion
@@ -2238,9 +2301,9 @@ goto :EOF
     endlocal
 goto :EOF
 
-:: # #
+:: #
 ::  @desc           Quit
-:: # #
+:: #
 
 :sessQuit
     setlocal
@@ -2249,9 +2312,9 @@ goto :EOF
     endlocal
 exit /B 0
 
-:: # #
+:: #
 ::  @desc           Finish and Exit
-:: # #
+:: #
 
 :sessFinish
     setlocal
