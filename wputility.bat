@@ -1992,8 +1992,8 @@ goto :EOF
     set /p confirm="%goldm%    Install %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If /I "%confirm%"=="y"         call :taskAppsInstall %manager% %package%
-    If /I "%Confirm%"=="a"         goto :menuAdvanced
+    If /I "%confirm%" == "y"    call :taskAppsInstall %manager% %package%
+    If /I "%confirm%" == "a"    goto :menuAdvanced
 
     endlocal
 goto :EOF
@@ -2022,8 +2022,8 @@ goto :EOF
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If /I "%confirm%"=="y"         call :taskAppsUninstall %manager% %package%
-    If /I "%Confirm%"=="a"         goto :menuAdvanced
+    If /I "%confirm%" == "y"    call :taskAppsUninstall %manager% %package%
+    If /I "%confirm%" == "a"    goto :menuAdvanced
 
     endlocal
 goto :EOF
@@ -2152,15 +2152,11 @@ goto :sessFinish
 
     set /p confirm="%goldm%    Delete files? %graym%(y/n)%goldm% » %u%"
 
-    If "%confirm%"=="Y" goto taskUpdatesCleanFiles
-    If "%Confirm%"=="y" goto taskUpdatesCleanFiles
-    If "%Confirm%"=="Yes" goto taskUpdatesCleanFiles
-    If "%Confirm%"=="yes" goto taskUpdatesCleanFiles
+    If /I "%confirm%" == "y" goto taskUpdatesCleanFiles
+    If /I "%confirm%" == "yes" goto taskUpdatesCleanFiles
 
-    If "%Confirm%"=="N" goto main
-    If "%Confirm%"=="n" goto main
-    If "%Confirm%"=="No" goto main
-    If "%Confirm%"=="no" goto main
+    If /I "%confirm%" == "n" goto main
+    If /I "%confirm%" == "no" goto main
 
     endlocal
 goto :EOF
