@@ -1849,15 +1849,8 @@ goto :EOF
     set /p confirm="%goldm%    Install %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If "%confirm%"=="Y"         call :taskAppsInstall %manager% %package%
-    If "%Confirm%"=="y"         call :taskAppsInstall %manager% %package%
-    If "%Confirm%"=="Yes"       call :taskAppsInstall %manager% %package%
-    If "%Confirm%"=="yes"       call :taskAppsInstall %manager% %package%
-
-    If "%Confirm%"=="A"         goto :menuAdvanced
-    If "%Confirm%"=="a"         goto :menuAdvanced
-    If "%Confirm%"=="abort"     goto :menuAdvanced
-    If "%Confirm%"=="Abort"     goto :menuAdvanced
+    If /I "%confirm%"=="y"         call :taskAppsInstall %manager% %package%
+    If /I "%Confirm%"=="a"         goto :menuAdvanced
 
     endlocal
 goto :EOF
@@ -1886,15 +1879,8 @@ goto :EOF
     set /p confirm="%goldm%    Uninstall %package%? %graym%(y/n/abort)%goldm% » %u%"
     echo:
 
-    If "%confirm%"=="Y"         call :taskAppsUninstall %manager% %package%
-    If "%Confirm%"=="y"         call :taskAppsUninstall %manager% %package%
-    If "%Confirm%"=="Yes"       call :taskAppsUninstall %manager% %package%
-    If "%Confirm%"=="yes"       call :taskAppsUninstall %manager% %package%
-
-    If "%Confirm%"=="A"         goto :menuAdvanced
-    If "%Confirm%"=="a"         goto :menuAdvanced
-    If "%Confirm%"=="abort"     goto :menuAdvanced
-    If "%Confirm%"=="Abort"     goto :menuAdvanced
+    If /I "%confirm%"=="y"         call :taskAppsUninstall %manager% %package%
+    If /I "%Confirm%"=="a"         goto :menuAdvanced
 
     endlocal
 goto :EOF
