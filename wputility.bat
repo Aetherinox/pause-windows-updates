@@ -1562,6 +1562,19 @@ goto :EOF
     endlocal
 goto :EOF
 
+:: #
+::  @desc           Recall > Uninstall
+::  @arg            null
+:: #
+
+:taskRecallUninstall
+    setlocal
+        "%WINDIR%\system32\Dism.exe" /Online /Disable-Feature /FeatureName:Recall /Quiet /Remove /NoRestart
+        reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsAI" /v "AllowRecallEnablement" /t REG_DWORD /d "0x00000000" /f> nul
+        reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" /v "DisableAIDataAnalysis" /t REG_DWORD /d "0x00000001" /f> nul
+        reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" /v "TurnOffSavingSnapshots" /t REG_DWORD /d "0x00000001" /f> nul
+    endlocal
+goto :EOF
 
 :: #
 ::  @desc           Toggle > App > Install
