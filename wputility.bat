@@ -1517,7 +1517,7 @@ goto :EOF
     :: run powershell command to get list of apps and send to /cache/ file
     :: must append -encoding utf8 to the powershell out-file; otherwise findstr will not work properly
     :: ----------------------------------------------------------------------------------------------------
-    findstr /I "Microsoft.Copilot" "%dir_cache%\%~n0.pkg" >nul
+    findstr /I "Copilot" "%dir_cache%\%~n0.pkg" >nul
     set "appStatusCopilot=Install"
     if errorlevel 1 (
         set appStatusCopilot=Install
@@ -1696,6 +1696,7 @@ goto :EOF
 
 :taskCopilotUninstall
     setlocal
+        call :taskAppsUninstall powershell copilot
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCopilotButton" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
@@ -1898,10 +1899,10 @@ goto :EOF
     call :helperUnquote package %2
     call :helperUnquote source %3
 
-    if /i "%manager%" == "powershell" (
+    if /I "%manager%" == "powershell" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Powershell%u% & echo:
         powershell -command "Get-AppXPackage -AllUsers -Name *%package%* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register ($_.InstallLocation + '\AppXManifest.xml')}"
-    ) else if /i "%manager%" == "winget" (
+    ) else if /I "%manager%" == "winget" (
         if /I "%debugMode%" equ "true" echo   %debug% Debug   %graym%        Installing app %goldd%%package%%graym% with package manager %goldd%Winget%u% & echo:
 
         winget list | findstr /i %package% >nul
