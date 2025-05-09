@@ -1588,15 +1588,10 @@ goto :EOF
     echo:
 
     :: option > (1) > AI > Copilot
-    if /I "%q_mnu_serv%" equ "1" (
+    if /I "!q_mnu_serv!" equ "1" (
         echo   %cyand% Notice  %u%        Starting Windows Copilot Wizard%u%
 
-
-
-
-        echo   %cyand% Notice  %u%        Operation complete. Press any key%u%
-        pause > nul
-
+        call :taskCopilotToggle %appStatusCopilot%
         goto :menuServicesAi
     )
 
@@ -1617,7 +1612,7 @@ goto :EOF
     )
 
     :: option > (3) > AI > Recall
-    if /I "%q_mnu_serv%" equ "3" (
+    if /I "!q_mnu_serv!" equ "3" (
         echo   %cyand% Notice  %u%        Starting Windows Recall Wizard%u%
 
         if %osBuild% lss 26100 (
@@ -1637,10 +1632,10 @@ goto :EOF
     )
 
     :: option > (R) > AI > Return
-    if /I "%q_mnu_serv%" equ "R" (
+    if /I "!q_mnu_serv!" equ "R" (
         goto :menuAdvanced
     ) else (
-        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_serv%%u%, press any key and try again.
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%!q_mnu_serv!%u%, press any key and try again.
         pause > nul
 
         goto :menuServicesAi
@@ -1689,6 +1684,8 @@ goto :EOF
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCopilotButton" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "SearchboxTaskbarMode" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d "0x00000001" /f > nul
     endlocal
 goto :EOF
 
@@ -1702,6 +1699,8 @@ goto :EOF
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowCopilotButton" /t REG_DWORD /d "0x00000000" /f > nul
         reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
         reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "0x00000001" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "SearchboxTaskbarMode" /t REG_DWORD /d "0x00000000" /f > nul
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d "0x00000000" /f > nul
     endlocal
 goto :EOF
 
