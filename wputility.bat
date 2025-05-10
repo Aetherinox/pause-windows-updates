@@ -317,8 +317,54 @@ set crapware[40]=Microsoft.WindowsAlarms
 set crapware[41]=Microsoft.YourPhone
 
 :: #
+::  @desc           registry tweaks
+::                  set "rTweaksGeneral[index]=group_id | name | reg_path | reg_key | reg_type | reg_val_enable | reg_val_disabled | is_secondary"
+::                      index id .................. %%~a
+::                      group id .................. %%~b
+::                      name ...................... %%~c
+::                      reg path .................. %%~d
+::                      reg key ................... %%~e
+::                      reg type .................. %%~f
+::                      reg val enabled ........... %%~g
+::                      reg val disabled .......... %%~h
+::                      is secondary .............. %%~i
+::
+::                  if a single setting requires multiple rules to complete; create all of the rules line by line, but ensure the group id is the same
+::                  for all of the joined rules. set the first rule's secondary option to false, set all sub rules as true
+::                      [index]=group_id | name | reg_path | reg_key | reg_type | reg_val_enable | reg_val_disabled | is_secondary
+::  
+::                      [01]=0001 | Single Rule | HKLM\ | MyKey | REG_DWORD | 0x0 | 0x1 | false
+::                      [02]=0002 | Double Rule #1 | HKLM\ | MyKey | REG_DWORD | 0x0 | 0x1 | false
+::                      [03]=0002 | Double Rule #2 | HKLM\ | MyKey | REG_DWORD | 0x0 | 0x1 | true
+::  
+::                  - title of the second rule doesnt matter since they are grouped. only the title from the first rule will show in menu
+::                  - index number MUST be different for each rule, even if the rules are grouped. Use the group id to group them.
+::                  - group id number is what will show in menu for user to select a tweak
+:: #
+
+set "rTweaksGeneral[01]=01|Automatic Maintenance|HKLM\Software\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance|MaintenanceDisabled|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[02]=02|Bypass Windows TPM/CPU Requirements|HKLM\System\Setup|AllowUpgradesWithUnsupportedTPMOrCPU|REG_DWORD|0x1|0x0|false"
+set "rTweaksGeneral[03]=03|Power Throttling (Battery Save)|HKLM\System\CurrentControlSet\Control\Power\PowerThrottling|PowerThrottlingOff|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[04]=04|Remove Recommended Section from Start Menu|HKLM\Software\Policies\Microsoft\Windows\Explorer|HideRecommendedSection|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[05]=04|Remove Recommended Section from Start Menu|HKCU\Software\Policies\Microsoft\Windows\Explorer|HideRecommendedSection|REG_SZ|-|-|true"
+set "rTweaksGeneral[06]=05|Search: Bing Discover Button|HKLM\Software\Policies\Microsoft\Edge|HubsSidebarEnabled|REG_DWORD|0x1|0x0|false"
+set "rTweaksGeneral[07]=06|Search: Bing Suggestions|HKCU\Software\Policies\Microsoft\Windows|DisableSearchBoxSuggestions|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[08]=07|Search: Dynamic Highlights|HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings|IsDynamicSearchBoxEnabled|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[09]=08|Show System Files and Folders|HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced|Hidden|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[10]=09|Show File Extensions|HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced|HideFileExt|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[11]=10|Show Clock Seconds|HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced|ShowSecondsInSystemClock|REG_DWORD|0x1|0x0|false"
+set "rTweaksGeneral[12]=11|Verbose Service Messages|HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System|VerboseStatus|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[13]=12|Windows Error Reporting|HKCU\Software\Microsoft\Windows\Windows Error Reporting|Disabled|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[14]=13|Windows App Tracking (MFU)|HKCU\Software\Policies\Microsoft\Windows\EdgeUI|DisableMFUTracking|REG_DWORD|0x0|0x1|false"
+set "rTweaksGeneral[15]=14|Weather/News icon in Taskbar|HKLM\Software\Policies\Microsoft\Dsh|AllowNewsAndInterests|REG_DWORD|0x1|0x0|false"
+set "rTweaksGeneral[16]=15|Show Shortcuts Icon|HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons|29|REG_SZ|%%windir%%\System32\shell32.dll,-30|C:\\Windows\\blank.ico|false"
+
+:: #
 ::  @desc           registry
 ::                  list of registry classes for backing up the registry
+::                      index ..................... %%~v .......... 1
+::                      abbrev .................... %%~w .......... HKLM
+::                      reg file .................. %%~x .......... hklm.reg
 :: #
 
 set "registry[1]=HKLM|hklm.reg"
@@ -330,6 +376,10 @@ set "registry[5]=HKCC|hkcc.reg"
 :: #
 ::  @desc           manageable packages
 ::                  list of packages which can be added/removed
+::                      pkg index ................. %%~v .......... 37
+::                      pkg name .................. %%~w .......... Tor Browser
+::                      pkg name .................. %%~x .......... TorProject.TorBrowser
+::                      pkg manager ............... %%~y .......... winget
 :: #
 
 set "apps[01]=7zip|7zip.7zip|winget"
