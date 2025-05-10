@@ -2573,7 +2573,10 @@ goto :EOF
     echo   %purplel% Status  %u%        Disabling automatic cloud configuration downloads%u%
     reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "DisableOneSettingsDownloads" /t "REG_DWORD" /d "0x00000001" /f > nul
 
-    echo   %purplel% Status  %u%        Disabling Windows Error Reporting%u%
+    echo   %purplel% Status  %u%        Disable %goldm%Windows App%u% Tracking
+    reg add "HKCU\Software\Policies\Microsoft\Windows\EdgeUI" /v "DisableMFUTracking" /t "REG_DWORD" /d "0x00000001" /f > nul
+
+    echo   %purplel% Status  %u%        Disable %goldm%Windows Error Reporting%u% Data Collection
     reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting" /v "LoggingDisabled" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting" /v "Disabled" /t "REG_DWORD" /d "0x00000001" /f > nul
     reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting" /v "ChangeDumpTypeByTelemetryLevel" /t "REG_DWORD" /d "0x00000000" /f > nul
