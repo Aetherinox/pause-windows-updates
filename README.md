@@ -79,6 +79,16 @@ Partial Feature List:
 - Backup your entire system registry
 - Remove Windows telemetry and tracking
 - Scan & Repair System
+- Registry Tweaks
+  - Bypass TPM / CPU Requirement
+  - Power Throttling
+  - Remove Recommended from Start Menu
+  - Search: Bing Discover Button
+  - Show System Files and Folders
+  - Show File Extensions
+  - Show Clock Seconds
+  - Show Shortcut Icons
+  - Dozens More
 - Remove Privacy Threats:
   - Windows Copilot
   - Windows Recall
@@ -88,12 +98,9 @@ Partial Feature List:
   - `Default Account`
   - `Guest`
   - `Administrator`
-- Manage Windows Bloatware Services
-  - 15+ apps
-- Manage Windows Bloatware Apps
-   - 40+ apps
-- Install / Uninstall Apps
-   - 50+ apps
+- Manage Windows Bloatware Services (15+)
+- Manage Windows Bloatware Apps (40+)
+- Install / Uninstall Apps (50+)
 - Requires elevated admin permissions to run
 - Available by downloading the files on our [Releases](https://github.com/Aetherinox/pause-windows-updates/releases/latest) page:
     - `wputility.bat`
@@ -316,7 +323,24 @@ The following is an outline of the options available within the [Windows Persona
      - Enable Services
      - Disable Services
   6. **Scan & Fix Errors**
-  6. **Debloat (Advanced)**
+  7. **Customize (Tweaks)**
+     - **General**
+       - Automatic Maintenance
+       - Bypass Windows TPM/CPU Requirements
+       - Power Throttling
+       - Remove Recommended Section from Start Menu
+       - Search: Bing Discover Button
+       - Search: Bing Suggestions
+       - Search: Dynamic Highlights
+       - Show System Files and Folders
+       - Show File Extensions
+       - Show Clock Seconds
+       - Verbose Mode
+       - Windows Error Reporting
+       - Windows App Tracking
+       - Weather/News Icon in Taskbar
+       - Show Shortcuts Icon
+  8. **Debloat (Advanced)**
      - **Disable Microsoft Telemetry**
      - **Manage Cortana, Copilot, Recall**
      - **Remove Crapware**
