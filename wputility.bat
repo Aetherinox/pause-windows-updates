@@ -1401,6 +1401,103 @@ goto :EOF
 goto :EOF
 
 :: #
+::  @desc           Menu > Customize (Tweaks) > General
+:: #
+
+:menuCustomizeGeneral
+    setlocal enabledelayedexpansion
+    cls
+    title WPU (Windows Personalization Utility) Tweaks > General
+
+    :: set states
+    set q_mnu_cus=
+
+    echo:
+    echo:
+
+    :: #
+    ::  @desc           registry tweaks
+    ::                  set "rTweaksGeneral[index]=name|reg_path|reg_value|reg_type|enable_value"
+    ::                      index id .................. %%~a
+    ::                      group id .................. %%~b
+    ::                      name ...................... %%~c
+    ::                      reg path .................. %%~d
+    ::                      reg key ................... %%~e
+    ::                      reg type .................. %%~f
+    ::                      reg val enabled ........... %%~g
+    ::                      reg val disabled .......... %%~h
+    ::                      is secondary .............. %%~i
+    ::
+    ::                  set "rTweaksGeneral[13]=Remove Recommended Section from Start Menu|HKLM\Software\Policies\Microsoft\Windows\Explorer|HideRecommendedSection|REG_DWORD|0x0|0x1|true"
+    :: #
+
+    for /f "tokens=2-9* delims=[]|=" %%a in ('set rTweaksGeneral[ 2^>nul') do (
+        set "GetStatus="
+        set "GetColor="
+
+        :: dont show in menu if registry entry is secondary / related to previous setting
+        if /I "%%~i" == "false" (
+            reg query "%%~d" /v "%%~e" 2>NUL | find "%%~g" > nul 2>&1
+            if "!errorlevel!" == "0" ( (set "GetStatus=On") & (set "GetColor=%greenm%") ) else ( (set "GetStatus=Off") & (set "GetColor=%redl%") )
+
+            set "service=%u% %%~c !spaces!%u%"
+            set "service=!service:~0,60!"
+
+            echo     %goldm%^(%%~b^)%u% !service! !GetColor!!GetStatus!%u%
+        )
+    )
+
+    echo:
+    echo:
+    echo     %redl%^(R^)%redl%   Return
+    echo:
+    echo:
+    set /p q_mnu_cus="%goldm%    Pick Option » %u%"
+    echo:
+    echo:
+
+    for /f "tokens=2-9* delims=[]|=" %%a in ('set rTweaksGeneral[ 2^>nul') do (
+        set "GetStatus="
+        set "GetColor="
+
+        if /I "%q_mnu_cus%" equ "%%~b" (
+            if /I "%%~i" == "false" (
+
+                reg query "%%~d" /v "%%~e" 2>NUL | find "%%~g" > nul 2>&1
+                if "!errorlevel!" == "0" (
+                    ( set "GetStatus=On" ) & ( set "GetColor=%greenm%" )
+                ) else (
+                    ( set "GetStatus=Off" ) & ( set "GetColor=%redl%" )
+                )
+
+                if /I "!GetStatus!" == "on" (
+                    reg add "%%~d" /v "%%~e" /t %%~f /d "%%~h" /f > nul
+                ) else (
+                    reg add "%%~d" /v "%%~e" /t %%~f /d "%%~g" /f > nul
+                )
+
+            ) else (
+                reg add "%%~d" /v "%%~e" /t %%~f /d "%%~g" /f > nul
+            )
+
+            goto :menuCustomize
+        )
+    )
+
+    :: option > (R) > Customize > Return
+    if /I "%q_mnu_cus%" equ "R" (
+        goto :menuCustomize
+    ) else (
+        echo   %red% Error   %u%        Unrecognized Option %yellowl%%q_mnu_cus%%u%, press any key and try again.
+        pause > nul
+
+        goto :menuCustomizeGeneral
+    )
+
+    endlocal
+goto :EOF
+
+:: #
 ::  @desc           Menu > Services > Scan and Fix Errors
 ::                  runs sfc and dism resoration
 :: #
