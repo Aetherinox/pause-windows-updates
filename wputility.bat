@@ -2440,8 +2440,7 @@ goto :EOF
 :taskTelemetryDisable
     setlocal
 
-    echo   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
-
+    echo   %cyand% Motice  %u%        Disable %goldm%Microsoft Windows%u% telemetry and tracking%u%
     reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d "0x00000000" /f > nul
@@ -2537,8 +2536,7 @@ goto :EOF
         goto sessError
     )
 
-    echo   %cyand% Motice  %u%        Modifying registry to disable %goldm%Microsoft Office%u% telemetry settings%u%
-
+    echo   %cyand% Motice  %u%        Disable %goldm%Microsoft Office%u% Telemetry Settings
 	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common" /v "QMEnable" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Common\Feedback" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Microsoft\Office\15.0\Outlook\Options\Calendar" /v "EnableCalendarLogging" /t REG_DWORD /d "0x00000000" /f > nul
@@ -2558,19 +2556,19 @@ goto :EOF
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableLogging" /t REG_DWORD /d "0x00000000" /f > nul
 	reg add "HKCU\SOFTWARE\Policies\Microsoft\Office\16.0\OSM" /v "EnableUpload" /t REG_DWORD /d "0x00000000" /f > nul
 
-    echo   %purplel% Status  %u%        Modifying Inking / Typing Personalization%u%
+    echo   %purplel% Status  %u%        Disable %goldm%Inking / Typing Personalization%u%
     reg add "HKCU\Software\Microsoft\InputPersonalization" /v "RestrictImplicitInkCollection" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKCU\Software\Microsoft\InputPersonalization" /v "RestrictImplicitTextCollection " /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKCU\Software\Microsoft\InputPersonalization\TrainedDataStore" /v "HarvestContacts " /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Microsoft\Personalization\Settings" /v "AcceptedPrivacyPolicy  " /t REG_DWORD /d "0x00000000" /f > nul
 
-    echo   %purplel% Status  %u%        Stopping Microsoft from seeing what we type%u%
+    echo   %purplel% Status  %u%        Disable %goldm%Input  Typing Personalization%u% Telemetry
     reg add "HKCU\Software\Microsoft\Input" /v "IsInputAppPreloadEnabled" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Microsoft\Input\Settings" /v "VoiceTypingEnabled" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Microsoft\Input\TIPC" /v "Enabled" /t REG_DWORD /d "0x00000000" /f > nul
     reg add "HKCU\Software\Microsoft\Input\Settings" /v "InsightsEnabled" /t REG_DWORD /d "0x00000000" /f > nul
 
-    echo   %purplel% Status  %u%        Disabling automatic cloud configuration downloads%u%
+    echo   %purplel% Status  %u%        Disable %goldm%Automatic Cloud%u% Telemetry
     reg add "HKLM\Software\Policies\Microsoft\Windows\DataCollection" /v "DisableOneSettingsDownloads" /t "REG_DWORD" /d "0x00000001" /f > nul
 
     echo   %purplel% Status  %u%        Disable %goldm%Windows App%u% Tracking
@@ -2586,31 +2584,29 @@ goto :EOF
     reg add "HKLM\Software\Policies\Microsoft\Windows\Windows Error Reporting" /v "Disabled" /t REG_DWORD /d "0x00000001" /f > nul
     reg add "HKLM\Software\Policies\Microsoft\Windows\Windows Error Reporting" /v "DoReport" /t REG_DWORD /d "0x00000000" /f > nul
 
-    echo   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+    echo   %purplel% Status  %u%        Erasing %goldm%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
 	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl" > nul 2>&1
-
     if %errorlevel% neq 0 (
-        echo   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
+        echo   %red% Error   %u%        Error occurred deleting the files %redl%%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\*.etl%u%
     )
 
-    echo   %purplel% Status  %u%        Erasing %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
-	erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl" > nul 2>&1
-
+    echo   %purplel% Status  %u%        Erasing %goldm%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+    erase "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl" > nul 2>&1
     if %errorlevel% neq 0 (
-        echo   %red% Error   %u%        Error occurred deleting the files %blue%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
+        echo   %red% Error   %u%        Error occurred deleting the files %redl%%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\*.etl%u%
     )
 
+    echo   %purplel% Status  %u%        Clearing %goldm%Autologger Diagtrack Listener%u%
 	echo "" > "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\AutoLogger-Diagtrack-Listener.etl"
 
     :: #
     ::  Windows Media Player Usage Telemetry
     :: #
 
-    echo   %purplel% Status  %u%        Disable telemetry for %goldm%Windows Media Player%u%
+    echo   %purplel% Status  %u%        Disable %goldm%Windows Media Player%u% Telemetry
 	reg add "HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences" /v "UsageTracking" /t REG_DWORD /d "0x00000000" /f > nul
-
     if %errorlevel% neq 0 (
-        echo   %red% Error   %u%        Error occurred trying to edit your registry%blue%UsageTracking%u%
+        echo   %red% Error   %u%        Error trying to edit registry entry %redl%HKCU\SOFTWARE\Microsoft\MediaPlayer\Preferences\UsageTracking%u%
         goto sessError
     )
 
@@ -2636,7 +2632,7 @@ goto :EOF
 
     for /l %%n in (0,1,11) do (
         set task=!schtasksDisable[%%n]!
-        echo   %purplel% Status  %u%        Disable task %blue%!task! %u%
+        echo   %purplel% Status  %u%        Disable task %goldm%!task! %u%
 	    schtasks /Change /TN "!task!" /DISABLE > nul 2>&1
     )
 
