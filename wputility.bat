@@ -1093,6 +1093,7 @@ goto :EOF
     set "userGuestStateOpp=Disable"
 
     echo:
+    echo:
     echo %graym%    This section allows you to manage various user accounts within your system.
     echo:
     echo:
@@ -1176,7 +1177,7 @@ goto :EOF
     set q_mnu_user=
 
     echo:
-
+    echo:
     If "!userId!"=="!userDefault0!" (
         echo %graym%    The %blue%!userId!%graym% account bug has been haunting Windows users for a long time. Nobody 
         echo %graym%    knows exactly why this account is being created or how users can prevent its creation. The 
@@ -1259,7 +1260,7 @@ goto :EOF
     set q_mnu_user=
 
     echo:
-
+    echo:
     If "!user!"=="!userId!" (
         echo %graym%    The %blue%!userName!%graym% account bug has been haunting Windows users for a long time. Nobody 
         echo %graym%    knows exactly why this account is being created or how users can prevent its creation. The 
@@ -1423,6 +1424,13 @@ goto :EOF
 
     echo:
     echo:
+    echo %graym%    This section allows you to apply registry tweaks to your system in order to change the
+    echo %graym%    behavior and performance of certain Windows features.
+    echo:
+    echo %graym%    Some of these changes will require the process explorer.exe to be restarted in order 
+    echo %graym%    for changes to take effect.
+    echo:
+    echo:
     echo     %goldm%^(1^)%u%   General
     echo     %goldm%^(2^)%u%   %grayd%Appearance                (Coming Soon)%u%
     echo     %goldm%^(3^)%u%   %grayd%Backups                   (Coming Soon)%u%
@@ -1469,6 +1477,10 @@ goto :EOF
     :: set states
     set q_mnu_cus=
 
+    echo:
+    echo:
+    echo %graym%    Some of these changes will require the process explorer.exe to be restarted in order 
+    echo %graym%    for changes to take effect.
     echo:
     echo:
 
@@ -1565,6 +1577,7 @@ goto :EOF
 
     set q_mnu_clean=
 
+    echo:
     echo:
     echo %graym%    This process will take a few moments to complete. The following actions will be
     echo %graym%    performed on your system:
@@ -1776,6 +1789,7 @@ goto :EOF
     )
 
     echo:
+    echo:
     echo %graym%    This %blue%AI / Automation%graym% menu allows you to install and uninstall Windows features 
     echo %graym%    that have been deemed to utilize a lot of system resources, invade privacy, or the user
     echo %graym%    generally decides to not want these installed.
@@ -1788,7 +1802,6 @@ goto :EOF
     echo %graym%    you may see your start menu disappear briefly as this utility restarts processes
     echo %graym%    such as explorer.exe. None of your core system files will be modified.
     echo:
-
     echo:
     echo     %goldm%^(1^)%u%   %appStatusCopilot% Copilot
     echo     %goldm%^(2^)%u%   %appStatusCortanaMenu%
