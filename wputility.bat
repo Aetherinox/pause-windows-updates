@@ -1373,7 +1373,14 @@ goto :EOF
 
     echo:
     echo:
-    echo     %goldm%^(1^)%u%   Coming Soon
+    echo     %goldm%^(1^)%u%   General
+    echo     %goldm%^(2^)%u%   %grayd%Appearance                (Coming Soon)%u%
+    echo     %goldm%^(3^)%u%   %grayd%Backups                   (Coming Soon)%u%
+    echo     %goldm%^(4^)%u%   %grayd%Context Menus             (Coming Soon)%u%
+    echo     %goldm%^(5^)%u%   %grayd%Delete Files and Folders  (Coming Soon)%u%
+    echo     %goldm%^(6^)%u%   %grayd%Disable Features          (Coming Soon)%u%
+    echo     %goldm%^(7^)%u%   %grayd%Drives                    (Coming Soon)%u%
+    echo     %goldm%^(8^)%u%   %grayd%File Explorer             (Coming Soon)%u%
     echo:
     echo     %redl%^(R^)%redl%   Return
     echo:
@@ -1382,9 +1389,9 @@ goto :EOF
     echo:
     echo:
 
-    :: option > (1)
+    :: option > (1) > Customize / Tweaks > General
     if /I "%q_mnu_cus%" equ "1" (
-        goto :menuCustomize
+        goto :menuCustomizeGeneral
     )
 
     :: option > (R) > Debloat > Return
