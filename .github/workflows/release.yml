@@ -465,8 +465,8 @@ jobs:
             # #
 
             - name: '🏳️ Post › Stable'
-              id: task_release_bundle_st
               uses: softprops/action-gh-release@v2
+              id: task_release_bundle_st
               if: |
                   startsWith( inputs.PRERELEASE, false ) ||
                   startsWith( env.PRERELEASE, false )
@@ -504,9 +504,9 @@ jobs:
                   startsWith( inputs.PRERELEASE, true ) ||
                   startsWith( env.PRERELEASE, true )
               env:
-                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.ADMINSERV_TOKEN_CL }}
               with:
-                  token: ${{ secrets.ADMINSERV_TOKEN }}
+                  token: ${{ secrets.ADMINSERV_TOKEN_CL }}
                   name: v${{ env.PROJECT_VERSION }}
                   tag_name: ${{ env.PROJECT_VERSION }}
                   target_commitish: ${{ github.event.inputs.branch }}
