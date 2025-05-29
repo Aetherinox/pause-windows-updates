@@ -219,7 +219,7 @@ set "spaces=                                       "
 set "servicesUpdates[uhssvc]=Microsoft Update Health Service|uhssvc"
 set "servicesUpdates[UsoSvc]=Update Orchestrator Service|UsoSvc"
 set "servicesUpdates[WaaSMedicSvc]=Windows Update Medic Service|WaaSMedicSvc"
-set "servicesUpdates[wuauserv]=Windows Update Service|WaaSMedicSvc"
+set "servicesUpdates[wuauserv]=Windows Update Service|wuauserv"
 
 :: Windows Telemetry Services
 set "servicesTelemetry[DiagTrack]=Connected User Experiences and Telemetry|DiagTrack"
