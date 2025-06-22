@@ -16,11 +16,16 @@
 #                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
 #                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
 #                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.CODECOV_TOKEN                                       codecov upload token for nodejs projects
+#                       secrets.MAXMIND_GELITE_TOKEN                                maxmind API token
+#                       secrets.CF_ACCOUNT_ID                                       cloudflare account id
+#                       secrets.CF_ACCOUNT_TOKEN                                    cloudflare account token
 #                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
 #                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
 #                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
 #                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
 #                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_KEY_B64                                     bot gpg private key (binary) converted to base64
 #                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
@@ -64,6 +69,7 @@ env:
     LABEL_TYPE_PR:                  Type › Pull Request
     LABEL_TYPE_DEPENDENCY:          Type › Dependency
     LABEL_TYPE_GITACTION:           Type › Git Action
+    LABEL_TYPE_MAINTENANCE:         Type › Lock Maintenance
 
     ASSIGN_USER:                    Aetherinox
     BOT_NAME_1:                     EuropaServ
@@ -95,6 +101,7 @@ env:
           { "name": "Status › Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
           { "name": "Type › Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
           { "name": "Type › Dependency",            "color": "243759", "description": "Item is associated to dependency" },
+          { "name": "Type › Lock Maintenance",      "color": "FBCA04", "description": "Sync package-lock.json" },
           { "name": "Type › Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
           { "name": "Type › Feature",               "color": "3c4e93", "description": "Feature request" },
           { "name": "Type › Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
@@ -141,7 +148,7 @@ jobs:
 
     # #
     #   Job › PR Scan
-    # 
+    #
     #   automatically scan a pull request once it is submitted
     # #
 
@@ -159,24 +166,128 @@ jobs:
         steps:
 
             # #
-            #   PR Scan › Set Env Variables
+            #   PR › Scan › Checkout
+            # #
+
+            - name: '☑️ Checkout'
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
+            #   PR › Scan › Job Information
             # #
 
             - name: >-
-                  🕛 Get Timestamp
-              id: task_prscan_set_timestamp
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   PR › Scan › Start
+            # #
+
+            - name: >-
+                  ✅ Start
               run: |
-                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
-                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
-                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
+
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
+
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
+
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
+
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
+
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
+
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
+
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
+
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... ${{ github.run_number }}"
+                  echo " Ref ................. ${{ github.ref }}"
+                  echo " Ref Name ............ ${{ github.ref_name }}"
+                  echo " Event Name .......... ${{ github.event_name }}"
+                  echo " Repo ................ ${{ github.repository }}"
+                  echo " Repo Owner .......... ${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  tree -I node_modules -I .git
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
 
             # #
             #   PR Scan › Labels › Verify Existing
-            #   
+            #
             #   check if repo has all of the needed issue / pr labels; create label if not exists
-            #   
+            #
             #   action needed if using 'pull_request' and 'issue_comment'
             #   to get the pull request, you would normally use ${{ github.event.number }}
             #   however this isnt available for 'issue_comment'
@@ -184,7 +295,6 @@ jobs:
 
             - name: >-
                   🎫 Labels › Verify Existing
-              id: task_prscan_labels_verify
               uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
@@ -218,7 +328,7 @@ jobs:
 
             # #
             #   PR Scan › Assign Pull Request ID to variable
-            #   
+            #
             #   get id (number) for pr when submitted
             # #
 
@@ -255,13 +365,12 @@ jobs:
 
             # #
             #   PR Scan › Pull-Request ID › Print
-            #   
+            #
             #   prints the pr number detected
             # #
 
             - name: >-
                   #️⃣ Pull-Request ID › Print
-              id: task_prscan_issue_num_get
               run: |
                   echo '${{ steps.task_prscan_issue_num_set.outputs.result }}'
 
@@ -271,7 +380,6 @@ jobs:
 
             - name: >-
                   ☑️ Checkout
-              id: task_prscan_checkout
               uses: actions/checkout@v4
               if: |
                   ( github.event_name == 'pull_request_target' ) || ( github.event_name == 'pull_request' ) || ( github.event_name == 'issue_comment' && contains( github.event.comment.html_url, '/pull/' ) && contains( github.event.comment.body, '/rescan' ) )
@@ -286,12 +394,11 @@ jobs:
 
             - name: >-
                   ⚙️ Setup Node
-              id: task_prscan_nodejs
               uses: actions/setup-node@v4
 
             # #
             #     PR Scan › Get List of Changed Files
-            #   
+            #
             #     Effortlessly track all changed files and directories relative to a target branch,
             #     the current branch (preceding commit or the last remote commit), multiple branches,
             #     or custom commits returning relative paths from the project root using this
@@ -332,7 +439,6 @@ jobs:
 
             - name: >-
                   📂 List Directories
-              id: task_prscan_dirs_list
               run: |
                   ls
 
@@ -342,7 +448,6 @@ jobs:
 
             - name: >-
                   ☑️ Run Autocheck
-              id: task_prscan_run
               uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL }}
@@ -355,7 +460,7 @@ jobs:
                         /*  #
                         #    Example PR used for local act testing
                         #    Uncomment to use in local env
-                        #   
+                        #
                         #       can be tested using act:
                         #           - https://github.com/nektos/act
                         #       command:
@@ -554,13 +659,32 @@ jobs:
                       const type_dependency =
                       [
                           "dependabot/npm_and_yarn",
-                          "renovate/github_actions"
+                          "renovate/github_actions",
+                          "renovate/testing-library",
+                          "renovate/electron",
+                          "renovate/aetherinox/noxenv",
+                          "renovate/playwright",
+                          "renovate/types",
+                          "renovate/@types",
+                          "renovate/eslint",
+                          "renovate/stylistic",
+                          "renovate/jimp",
+                          "renovate/custom-electron-prompt",
+                          "renovate/moment",
+                          "renovate/semver",
+                          "renovate/toasted",
+                          "renovate/uuid"
                       ];
 
                       const type_gitaction =
                       [
                           "dependabot/github_actions",
                           "renovate/github_actions"
+                      ];
+
+                      const type_maint =
+                      [
+                          "renovate/lock-file-maintenance"
                       ];
 
                       const files_skipList =
@@ -919,11 +1043,14 @@ jobs:
 
                       const bGitaction    = type_gitaction.some( s => s.includes( branch_ref ) || branch_ref.includes( s ) );
                       const bDependency   = type_dependency.some( s => s.includes( branch_ref ) || branch_ref.includes( s ) );
+                      const bMaintenance  = type_maint.some( s => s.includes( branch_ref ) || branch_ref.includes( s ) );
 
                       if ( actor ==  "${{ env.BOT_NAME_DEPENDABOT }}" && bDependency || actor ==  "${{ env.BOT_NAME_RENOVATE }}" && bDependency )
                           labels.push( "${{ env.LABEL_TYPE_DEPENDENCY }}" );
                       else if ( actor ==  "${{ env.BOT_NAME_DEPENDABOT }}" && bGitaction || actor ==  "${{ env.BOT_NAME_RENOVATE }}" && bGitaction )
                           labels.push( "${{ env.LABEL_TYPE_GITACTION }}" );
+                      else if ( actor ==  "${{ env.BOT_NAME_DEPENDABOT }}" && bMaintenance || actor ==  "${{ env.BOT_NAME_RENOVATE }}" && bMaintenance )
+                          labels.push( "${{ env.LABEL_TYPE_MAINTENANCE }}" );
 
                       if ( ct.payload.pull_request.labels.filter( label => label.name === "${{ env.LABEL_CHECK_CHANGES_REQ }}" ).length > 0 )
                           labels.push( "${{ env.LABEL_CHECK_CHANGES_REQ }}" );
@@ -972,7 +1099,6 @@ jobs:
 
             - name: >-
                 🕛 Get Weekly Commit List
-              id: task_prscan_set_weekly_commit_list
               run: |
                   echo 'WEEKLY_COMMITS<<EOF' >> $GITHUB_ENV
                   git log --format="[\`%h\`](${{ github.server_url }}/${{ github.repository }}/commit/%H) %s - %an" --since=7.days >> $GITHUB_ENV

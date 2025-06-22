@@ -1,0 +1,366 @@
+# #
+#   @type               github workflow
+#   @author             Aetherinox
+#   @url                https://github.com/Aetherinox
+#   @usage              tests gpg keys
+#
+#   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
+#                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
+#                       secrets.NPM_TOKEN                                           self npmjs access token
+#                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
+#                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
+#                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.CODECOV_TOKEN                                       codecov upload token for nodejs projects
+#                       secrets.MAXMIND_GELITE_TOKEN                                maxmind API token
+#                       secrets.CF_ACCOUNT_ID                                       cloudflare account id
+#                       secrets.CF_ACCOUNT_TOKEN                                    cloudflare account token
+#                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
+#                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
+#                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
+#                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
+#                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_KEY_B64                                     bot gpg private key (binary) converted to base64
+#                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
+#                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
+#
+#   @local              these workflows can be tested locally through the use of `act`
+#                           https://github.com/nektos/act
+#                       Extract act to folder
+#                       Add system env var with path to act.exe
+#                       Run the commands:
+#                           git pull https://github.com/username/repo
+#                           act -W .github/workflows/gpg-tests.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/gpg-tests.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
+# #
+
+name: '🔑 GPG › Tests'
+run-name: '🔑 GPG › Tests'
+
+# #
+#   triggers
+# #
+
+on:
+    workflow_dispatch:
+        inputs:
+
+            # #
+            #   Name of the plugin to use when creating the release zip filename
+            #     e.g: ntfy-desktop-v1.0.0.zip
+            # #
+
+            PROJECT_NAME:
+                description:          '📦 Name of App'
+                required:             true
+                default:              'ntfy-desktop'
+                type:                 string
+
+# #
+#   environment variables
+# #
+
+env:
+    PROJECT_NAME:                   ${{ github.event.inputs.PROJECT_NAME || 'ntfy-desktop' }}
+    ASSIGN_USER:                    Aetherinox
+    BOT_NAME_1:                     EuropaServ
+    BOT_NAME_2:                     BinaryServ
+    BOT_NAME_DEPENDABOT:            dependabot[bot]
+    BOT_NAME_RENOVATE:              renovate[bot]
+    GPG_KEY_BASE64:                 ${{ secrets.ADMINSERV_GPG_KEY_B64 }}
+    GPG_KEY_PASSPHRASE:             ${{ secrets.ADMINSERV_GPG_PASSPHRASE }}
+
+# #
+#   Jobs
+# #
+
+jobs:
+
+    # #
+    #   JOB > INITIALIZE
+    # #
+
+    job-initialize:
+        name: >-
+            🔑 GPG › Tests
+        runs-on: ubuntu-latest
+      # runs-on: apollo-x64
+        timeout-minutes: 5
+        outputs:
+            package_version: ${{ steps.task_initialize_package_getversion.outputs.PACKAGE_VERSION }}
+        permissions:
+            contents: write
+            packages: write
+        steps:
+
+            # #
+            #   GPG › Checkout
+            # #
+
+            - name: '☑️ Checkout'
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # #
+            #   GPG › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   GPG › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
+
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
+
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
+
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
+
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
+
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
+
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
+
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
+
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... ${{ github.run_number }}"
+                  echo " Ref ................. ${{ github.ref }}"
+                  echo " Ref Name ............ ${{ github.ref_name }}"
+                  echo " Event Name .......... ${{ github.event_name }}"
+                  echo " Repo ................ ${{ github.repository }}"
+                  echo " Repo Owner .......... ${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  tree -I node_modules -I .git
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+
+            # #
+            #   GPG › Get version from package.json VERSION value
+            # #
+
+            - name: '👁️‍🗨️ Get Package Version'
+              id: task_initialize_package_getversion
+              run: |
+                  VER=$(cat package.json | jq -r '.version')
+                  echo "PACKAGE_VERSION=$VER" >> $GITHUB_OUTPUT
+
+            - name: '👁️‍🗨️ Get Package Version › Print'
+              id: task_initialize_package_getversion_debug
+              run: |
+                  echo "VERSION: ${{ steps.task_initialize_package_getversion.outputs.PACKAGE_VERSION }}"
+
+            # #
+            #   GPG › Import Key (No Passphrase)
+            #
+            #   requires your GPG private key, converted to base64 binary .gpg (not armored .asc)
+            # #
+
+            - name: '🪪 GPG › Import Signing Key › W/o Passphrase'
+              if: env.GPG_KEY_BASE64 != '' && env.GPG_KEY_PASSPHRASE == ''
+              run: |
+                  echo "$GPG_KEY_BASE64" | base64 -di | gpg --import
+
+            # #
+            #   GPG › Import Key (With Passphrase)
+            #
+            #   requires your GPG private key, converted to base64 binary .gpg (not armored .asc)
+            # #
+
+            - name: '🪪 GPG › Import Signing Key › w/ Passphrase'
+              if: env.GPG_KEY_BASE64 != '' && env.GPG_KEY_PASSPHRASE != ''
+              run: |
+                  echo "$GPG_KEY_BASE64" | base64 -di > /tmp/signing-key.gpg
+                  echo "$GPG_KEY_PASSPHRASE" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg
+                  (echo "$GPG_KEY_PASSPHRASE"; echo; echo) | gpg --command-fd 0 --pinentry-mode loopback --change-passphrase $(gpg --list-secret-keys --with-colons 2> /dev/null | grep '^sec:' | cut --delimiter ':' --fields 5 | tail -n 1)
+
+            # #
+            #   GPG › Checksum › Stable
+            # #
+
+            - name: '🆔 Checksum › Stable'
+              run: |
+                  #  windows
+                  file_1_example="package.json"
+                  file_2_example="package-lock.json"
+
+
+                  #  get sha1 and sha256 for .json
+                  find . -maxdepth 1 \( -name '*.json' -o -name '*.gz' \) -printf '%P\n' | xargs -r sha1sum | gpg --digest-algo sha256 --clearsign > sha1sum.txt.asc
+                  find . -maxdepth 1 \( -name '*.json' -o -name '*.gz' \) -printf '%P\n' | xargs -r sha256sum | gpg --digest-algo sha256 --clearsign > sha256sum.txt.asc
+
+
+                  #  SHA1SUM
+                  sha1sum_file_1="$(shasum --algorithm 1 ${file_1_example} | awk '{ print $1 }')"
+                  echo "SHA1SUM_FILE_1=${sha1sum_file_1}" >> $GITHUB_ENV
+
+                  sha1sum_file_2="$(shasum --algorithm 1 ${file_2_example} | awk '{ print $1 }')"
+                  echo "SHA1SUM_FILE_2=${sha1sum_file_2}" >> $GITHUB_ENV
+
+
+                  #  SHA256SUM
+                  sha256sum_file_1="$(shasum --algorithm 256 ${file_1_example} | awk '{ print $1 }')"
+                  echo "SHA256SUM_FILE_1=${sha256sum_file_1}" >> $GITHUB_ENV
+
+                  sha256sum_file_2="$(shasum --algorithm 256 ${file_2_example} | awk '{ print $1 }')"
+                  echo "SHA256SUM_FILE_2=${sha256sum_file_2}" >> $GITHUB_ENV
+
+
+                  #  no longer needed, replaced by find . command
+                  #  shasum --algorithm 256 ${file_file_1} > SHA256SUMS.txt
+                  echo "FILE_1_EXAMPLE=${file_1_example}" >> $GITHUB_ENV
+                  echo "FILE_2_EXAMPLE=${file_2_example}" >> $GITHUB_ENV
+
+
+                  #  generate sha256sum.sig from sha256sum.txt.asc file
+                  gpg --batch --yes --quiet --armor --detach-sig --sign --output sha256sum.sig sha256sum.txt.asc
+
+            # #
+            #   GPG › Verbose › Print Results
+            # #
+
+            - name: '⚙️ Verbose › Print Results'
+              run: |
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " 🌲 Tree"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  tree -I node_modules
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " 📄 sha256sum.txt.asc"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  cat sha256sum.txt.asc
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " 📄 sha1sum.txt.asc"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  cat sha1sum.txt.asc
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " 📄 sha256sum.sig"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  cat sha256sum.sig
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "Running command gpg --verify sha256sum.sig sha256sum.txt.asc"
+                  echo "‎"
+                  gpg --verify sha256sum.sig sha256sum.txt.asc
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo -e " 🔑 List GPG Keys"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  gpg --list-keys --keyid-format=long --fingerprint --with-fingerprint
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo "‎"
+
+            # #
+            #   GPG › Checksum › Print
+            # #
+
+            - name: '🆔 Checksum › Print'
+              run: |
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Checksums"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo " ${{ env.FILE_1_EXAMPLE }}                 ${{ env.SHA256SUM_FILE_1 }}"
+                  echo " ${{ env.FILE_2_EXAMPLE }}            ${{ env.SHA256SUM_FILE_2 }}"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"

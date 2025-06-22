@@ -27,11 +27,16 @@
 #                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
 #                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
 #                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.CODECOV_TOKEN                                       codecov upload token for nodejs projects
+#                       secrets.MAXMIND_GELITE_TOKEN                                maxmind API token
+#                       secrets.CF_ACCOUNT_ID                                       cloudflare account id
+#                       secrets.CF_ACCOUNT_TOKEN                                    cloudflare account token
 #                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
 #                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
 #                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
 #                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
 #                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_KEY_B64                                     bot gpg private key (binary) converted to base64
 #                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
@@ -121,6 +126,7 @@ env:
           { "name": "Status › Stale",               "color": "928282", "description": "Has not had any activity in over 30 days" },
           { "name": "Type › Bug",                   "color": "9a2c2c", "description": "Something isn't working" },
           { "name": "Type › Dependency",            "color": "243759", "description": "Item is associated to dependency" },
+          { "name": "Type › Lock Maintenance",      "color": "FBCA04", "description": "Sync package-lock.json" },
           { "name": "Type › Docs",                  "color": "0e588d", "description": "Improvements or modifications to docs" },
           { "name": "Type › Feature",               "color": "3c4e93", "description": "Feature request" },
           { "name": "Type › Git Action",            "color": "030406", "description": "GitHub Action / workflow" },
@@ -181,45 +187,128 @@ jobs:
         steps:
 
             # #
-            #   Issues (Stale) › Labels › Create › Start
+            #   Labels › Create › Checkout
             # #
 
-            - name: >-
-                  ✅ Start
-              id: task_labels_create_start
-              run: |
-                  echo "Assigning labels and assignees"
-
-            # #
-            #   Issues (Stale) › Labels › Create › Set Env Variables
-            # #
-
-            - name: >-
-                  🕛 Get Timestamp
-              id: task_labels_create_set_timestamp
-              run: |
-                  echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
-                  echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
-                  echo "NOW_SHORT=$(date +'%m-%d-%Y')" >> $GITHUB_ENV
-                  echo "NOW_LONG=$(date +'%m-%d-%Y %H:%M')" >> $GITHUB_ENV
-                  echo "NOW_DOCKER_LABEL=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-            # #
-            #   Issues (Stale) › Labels › Create › Checkout
-            # #
-
-            - name: >-
-                  ☑️ Checkout
-              id: task_labels_create_checkout
+            - name: '☑️ Checkout'
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
+            #   Labels › Create › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   Labels › Create › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
+
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
+
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
+
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
+
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
+
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
+
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
+
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
+
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... ${{ github.run_number }}"
+                  echo " Ref ................. ${{ github.ref }}"
+                  echo " Ref Name ............ ${{ github.ref_name }}"
+                  echo " Event Name .......... ${{ github.event_name }}"
+                  echo " Repo ................ ${{ github.repository }}"
+                  echo " Repo Owner .......... ${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  tree -I node_modules -I .git
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+
+            # #
             #   Issues (Stale) › Labels › Create › Verify Existing
-            #   
+            #
             #   check if repo has all of the needed issue / pr labels; create label if not exists
-            #   
+            #
             #   action needed if using 'pull_request' and 'issue_comment'
             #   to get the pull request, you would normally use ${{ github.event.number }}
             #   however this isnt available for 'issue_comment'
@@ -227,7 +316,6 @@ jobs:
 
             - name: >-
                   🎫 Labels › Verify Existing
-              id: task_labels_create_verify
               uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
@@ -278,26 +366,131 @@ jobs:
         steps:
 
             # #
-            #   Issues (Stale) › Labels › Assign Missing › Checkout
+            #   Labels › Assign › Checkout
             # #
 
-
-            - name: >-
-                  ☑️ Checkout
-              id: task_issues_nolabel_prepare
+            - name: '☑️ Checkout'
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
             # #
-            #   Issues (Stale) › Labels › Assign Missing › Check
-            #   
+            #   Labels › Assign › Job Information
+            # #
+
+            - name: >-
+                  🔄 Load Job
+              uses: qoomon/actions--context@v4
+              id: 'context'
+
+            # #
+            #   Labels › Assign › Start
+            # #
+
+            - name: >-
+                  ✅ Start
+              run: |
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo " Starting Job ${{ steps.context.outputs.job_name }}"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+
+                  YEAR="$(date +'%Y')"
+                  echo "YEAR=${YEAR}" >> $GITHUB_ENV
+
+                  NOW="$(date +'%m-%d-%Y %H:%M:%S')"                                                #  02-25-2025 12:49:48
+                  echo "NOW=${NOW}" >> $GITHUB_ENV
+
+                  NOW_SHORT="$(date +'%m-%d-%Y')"                                                   #  02-25-2025
+                  echo "NOW_SHORT=${NOW_SHORT}" >> $GITHUB_ENV
+
+                  NOW_LONG="$(date +'%m-%d-%Y %H:%M')"                                              #  02-25-2025 12:49
+                  echo "NOW_LONG=${NOW_LONG}" >> $GITHUB_ENV
+
+                  NOW_DOCKER="$(date +'%Y%m%d')"                                                    #  20250225
+                  echo "NOW_DOCKER=${NOW_DOCKER}" >> $GITHUB_ENV
+
+                  NOW_DOCKER_TS="$(date -u +'%FT%T.%3NZ')"                                          #  2025-02-25T12:50:11.569Z
+                  echo "NOW_DOCKER_TS=${NOW_DOCKER_TS}" >> $GITHUB_ENV
+
+                  SHA1="$(git rev-parse HEAD)"                                                      #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1=${SHA1}" >> $GITHUB_ENV
+
+                  SHA1_GH="$(echo ${GITHUB_SHA})"                                                   #  71fad013cfce9116ec62779e4a7e627fe4c33627
+                  echo "SHA1_GH=${SHA1_GH}" >> $GITHUB_ENV
+
+                  PKG_VER_1DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -d '.' -f1-1)"              #  3.22 > 3
+                  echo "PKG_VER_1DIGIT=${PKG_VER_1DIGIT}" >> $GITHUB_ENV
+
+                  PKG_VER_2DIGIT="$(echo ${{ env.IMAGE_VERSION }} | cut -f2 -d ":" | cut -c1-3)"    #  3.22 > 3.2
+                  echo "PKG_VER_2DIGIT=${PKG_VER_2DIGIT}" >> $GITHUB_ENV
+
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  sudo apt -qq update
+                  sudo apt -qq install tree
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  echo " Runner .............. ${{ runner.name }}"
+                  echo " Workflow ............ ${{ github.workflow }} (#${{ github.workflow_ref }})"
+                  echo " Run Number .......... ${{ github.run_number }}"
+                  echo " Ref ................. ${{ github.ref }}"
+                  echo " Ref Name ............ ${{ github.ref_name }}"
+                  echo " Event Name .......... ${{ github.event_name }}"
+                  echo " Repo ................ ${{ github.repository }}"
+                  echo " Repo Owner .......... ${{ github.repository_owner }}"
+                  echo " Run ID .............. https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  echo " Triggered By ........ ${{ github.actor }}"
+                  echo " SHA 1 (GITHUB_SHA) .. ${GITHUB_SHA}"
+                  echo " SHA 2 (github.sha) .. ${{ github.sha }}"
+                  echo " SHA 3 (env.SHA1) .... ${SHA1}"
+                  echo " SHA 4 (env.SHA1_GH) . ${SHA1_GH}"
+                  echo " Workspace ........... ${{ github.workspace }}"
+                  echo " PWD ................. ${PWD}"
+                  echo " Job Name ............ ${{ steps.context.outputs.job_name }}"
+                  echo " Job ID .............. ${{ steps.context.outputs.job_id }}"
+                  echo " Job URL ............. ${{ steps.context.outputs.job_url }}"
+                  echo " Run ID .............. ${{ steps.context.outputs.run_id }}"
+                  echo " Run Attempt ......... ${{ steps.context.outputs.run_attempt }}"
+                  echo " Run Number .......... ${{ steps.context.outputs.run_number }}"
+                  echo " Run URL ............. ${{ steps.context.outputs.run_url }}"
+                  echo " Run Env ............. ${{ steps.context.outputs.environment }}"
+                  echo " Run Env URL ......... ${{ steps.context.outputs.environment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Deployment URL .. ${{ steps.context.outputs.deployment_url }}"
+                  echo " Run Deployment ...... ${{ steps.context.outputs.deployment_id }}"
+                  echo " Run Runner Name ..... ${{ steps.context.outputs.runner_name }}"
+                  echo " Run Runner ID ....... ${{ steps.context.outputs.runner_id }}"
+                  echo " Year ................ ${YEAR}"
+                  echo " Now ................. ${NOW}"
+                  echo " Now (Short) ......... ${NOW_SHORT}"
+                  echo " Now (Long) .......... ${NOW_LONG}"
+                  echo " Now (Docker) ........ ${NOW_DOCKER}"
+                  echo " Now (Docker TS) ..... ${NOW_DOCKER_TS}"
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+                  tree -I node_modules -I .git
+                  echo "‎"
+                  echo "‎"
+                  echo "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
+                  echo "‎"
+                  echo "‎"
+
+            # #
+            #   Labels › Assign › Check
+            #
             #   Check if repo has labels to use
             # #
 
             - name: >-
                   🎫 Labels › Check
-              id: task_issues_nolabel_run
               uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
@@ -779,13 +972,12 @@ jobs:
             pull-requests: write
         steps:
 
-              # #
-              #   Stale › Check Condition
-              # #
-              
+            # #
+            #   Labels › Stale › Check
+            # #
+
             - name: >-
                   💤 Stale › Check Condition
-              id: task_issues_inactive_stale
               uses: actions/stale@v9
               with:
                   repo-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}
@@ -821,12 +1013,11 @@ jobs:
         steps:
 
             # #
-            #   Inactive › Lock
+            #   Labels › Inactive › Lock
             # #
 
             - name: >-
                   🔒 Inactive › Lock
-              id: task_issues_inactive_lock
               uses: dessant/lock-threads@v5
               with:
                   github-token: ${{ secrets.ADMINSERV_TOKEN_CL || github.token }}

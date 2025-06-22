@@ -18,11 +18,16 @@
 #                       secrets.PYPI_API_TOKEN                                      self Pypi API token (production site) - https://pypi.org/
 #                       secrets.PYPI_API_TEST_TOKEN                                 self Pypi API token (test site) - https://test.pypi.org/
 #                       secrets.SELF_DOCKERHUB_TOKEN                                self Dockerhub token
+#                       secrets.CODECOV_TOKEN                                       codecov upload token for nodejs projects
+#                       secrets.MAXMIND_GELITE_TOKEN                                maxmind API token
+#                       secrets.CF_ACCOUNT_ID                                       cloudflare account id
+#                       secrets.CF_ACCOUNT_TOKEN                                    cloudflare account token
 #                       secrets.ORG_TOKEN                                           org github personal access token (fine-grained)
 #                       secrets.ORG_TOKEN_CL                                        org github personal access token (classic)
 #                       secrets.ORG_DOCKERHUB_TOKEN                                 org dockerhub secret
 #                       secrets.ORG_GITEA_TOKEN                                     org gitea personal access token (classic) with package:write permission
 #                       secrets.BOT_GPG_KEY_ASC                                     bot gpg private key (armored) | BEGIN PGP PRIVATE KEY BLOCK
+#                       secrets.BOT_GPG_KEY_B64                                     bot gpg private key (binary) converted to base64
 #                       secrets.BOT_GPG_PASSPHRASE                                  bot gpg private key passphrase
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord

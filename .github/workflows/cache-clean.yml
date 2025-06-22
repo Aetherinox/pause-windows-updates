@@ -2,10 +2,25 @@
 #   @type               github workflow
 #   @author             Aetherinox
 #   @url                https://github.com/Aetherinox
-#   @usage              cleans all commit history for a repository
-#                       edit the 'environment:' to determine which deployment to keep clean
-#                           - can be ran manually
-#
+#   @usage              cleans up the cache for a repository.
+#   
+#   
+#   You can view your current cached items by going to Github and going to the page:
+#       https://github.com/USERNAME/REPO/actions/caches
+#   
+#   Caches have branch scope restrictions in place, which means some caches have limited usage options. For more information
+#   on cache scope restrictions, see Restrictions for accessing a cache, earlier in this article. If caches limited to a specific
+#   branch are using a lot of storage quota, it may cause caches from the default branch to be created and deleted at a high frequency.
+#   
+#   For example, a repository could have many new pull requests opened, each with their own caches that are restricted to that branch.
+#   These caches could take up the majority of the cache storage for that repository. Once a repository has reached its maximum cache
+#   storage, the cache eviction policy will create space by deleting the caches in order of last access date, from oldest to most
+#   recent. In order to prevent cache thrashing when this happens, you can set up workflows to delete caches on a faster cadence than
+#   the cache eviction policy will. You can use the GitHub CLI to delete caches for specific branches.
+#   
+#   @reference          https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
+#   
+#   
 #   @secrets            secrets.SELF_TOKEN                                          self github personal access token (fine-grained)
 #                       secrets.SELF_TOKEN_CL                                       self github personal access token (classic)
 #                       secrets.NPM_TOKEN                                           self npmjs access token
@@ -26,7 +41,7 @@
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_RELEASES                discord webhook to report release notifications from github to discord
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_WORKFLOWS               discord webhook to report workflow notifications from github to discord
 #                       secrets.DISCORD_WEBHOOK_CHAN_GITHUB_UPDATES                 discord webhook to report activity notifications from github to discord
-#
+#   
 #
 #   @local              these workflows can be tested locally through the use of `act`
 #                           https://github.com/nektos/act
@@ -34,12 +49,14 @@
 #                       Add system env var with path to act.exe
 #                       Run the commands:
 #                           git pull https://github.com/username/repo
-#                           act -W .github/workflows/history-clean.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
-#                           act -W .github/workflows/history-clean.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
+#                           act -W .github/workflows/cache-clean.yml -P ubuntu-latest=catthehacker/ubuntu:full-22.04
+#                           act -W .github/workflows/cache-clean.yml -s TOKEN_CL=XXXXXXXXXX --pull=false
 # #
 
-name: '🧹 History › Clean'
-run-name: '🧹 History › Clean'
+# #
+
+name: '🧹 Cache › Clean'
+run-name: '🧹 Cache › Clean'
 
 # #
 #   triggers
@@ -48,35 +65,22 @@ run-name: '🧹 History › Clean'
 on:
 
     # #
-    #   Trigger > Workflow Dispatch
+    #   Trigger › Workflow Dispatch
     # #
 
     workflow_dispatch:
         inputs:
 
             # #
-            #   Commit Label
-            #
-            #   the label to use when repository is cleaned
+            #   Cache › Num Per Page
+            #   
+            #   this is the number of cached items to fetch per page.
             # #
 
-            COMMIT_LABEL:
-                description:    '🏷️ Commit Label'
+            NUM_PER_PAGE:
+                description:    '📦 Number Per Page'
                 required:       true
-                default:        'cleanup'
-                type:           string
-
-            # #
-            #   Branch
-            #
-            #   select branch to clean
-            #   you must also run the workflow from that branch
-            # #
-
-            BRANCH:
-                description:    '🌳 Branch'
-                required:       true
-                default:        'main'
+                default:        '100'
                 type:           string
 
 # #
@@ -84,8 +88,7 @@ on:
 # #
 
 env:
-    COMMIT_LABEL:               ${{ github.event.inputs.COMMIT_LABEL || 'cleanup' }}
-    BRANCH:                     ${{ github.event.inputs.BRANCH || 'main' }}
+    NUM_PER_PAGE:               ${{ github.event.inputs.NUM_PER_PAGE || '100' }}
     BOT_NAME_1:                 EuropaServ
     BOT_NAME_2:                 BinaryServ
     BOT_NAME_DEPENDABOT:        dependabot[bot]
@@ -96,27 +99,27 @@ env:
 # #
 
 jobs:
-    history-clean:
+    cleanup:
         name: >-
-            🧹 History › Clean
+            🧹 Cache › Clean
         runs-on: ubuntu-latest
       # runs-on: apollo-x64
-        timeout-minutes: 15
-        permissions:
-            contents: write
+        timeout-minutes: 5
+        permissions: write-all
+
         steps:
 
             # #
-            #   History › Clean › Checkout
+            #   Cache › Clean › Checkout
             # #
 
             - name: '☑️ Checkout'
               uses: actions/checkout@v4
               with:
-                  ref: ${{ env.BRANCH }}
+                  fetch-depth: 0
 
             # #
-            #   History › Clean › Job Information
+            #   Cache › Clean › Job Information
             # #
 
             - name: >-
@@ -125,7 +128,7 @@ jobs:
               id: 'context'
 
             # #
-            #   History › Clean › Start
+            #   Cache › Clean › Start
             # #
 
             - name: >-
@@ -225,89 +228,75 @@ jobs:
                   echo "‎"
 
             # #
-            #   History › Clean › Git Identify
+            #   Cache › Clean › Start
+            #   
+            #   You can view your current cached items by going to Github and going to the page:
+            #       https://github.com/USERNAME/REPO/actions/caches
+            #   
+            #   Caches have branch scope restrictions in place, which means some caches have limited usage options. For more information
+            #   on cache scope restrictions, see Restrictions for accessing a cache, earlier in this article. If caches limited to a specific
+            #   branch are using a lot of storage quota, it may cause caches from the default branch to be created and deleted at a high frequency.
+            #   
+            #   For example, a repository could have many new pull requests opened, each with their own caches that are restricted to that branch.
+            #   These caches could take up the majority of the cache storage for that repository. Once a repository has reached its maximum cache
+            #   storage, the cache eviction policy will create space by deleting the caches in order of last access date, from oldest to most
+            #   recent. In order to prevent cache thrashing when this happens, you can set up workflows to delete caches on a faster cadence than
+            #   the cache eviction policy will. You can use the GitHub CLI to delete caches for specific branches.
+            #   
+            #   @reference      https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
             # #
 
             - name: >-
-                  🪪 Configure Git Identity
-              run: |
-                    git config --local user.email "github-actions[bot]@users.noreply.github.com"
-                    git config --local user.name "github-actions[bot]"
-
-            # #
-            #   History › Clean › Pre-Commit
-            # #
-
-            - name: >-
-                  📦 Commit › Pre-commit
-              run: |
-                  now=$(date -u '+%m/%d/%Y %H:%M')
-                  commit_label="${{ env.COMMIT_LABEL }}" >> $GITHUB_ENV
-                  echo -e "$commit_label"
-                  commit_message="chore(maint): \\\`️️🧹 $commit_label 🧹\\\` \\\`$now UTC\\\`" >> $GITHUB_ENV
-                  echo -e "$commit_message"
-                  echo "COMMIT_MESSAGE=$(echo $commit_message)" >> $GITHUB_ENV
-                  echo "NOW=$(echo $now)" >> $GITHUB_ENV
-
-            # #
-            #   History › Clean › Pre-Commit › Debug
-            # #
-
-            - name: >-
-                  📦 Commit › Pre-commit › Debug
-              run: |
-                  echo -e "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e " Printing Values"
-                  echo -e "―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――"
-                  echo -e " env.COMMIT_LABEL .................... ${{ env.COMMIT_LABEL }}"
-                  echo -e " env.COMMIT_MESSAGE .................. ${{ env.COMMIT_MESSAGE }}"
-                  echo -e " env.NOW ............................. ${{ env.NOW }}"
-
-            # #
-            #   History › Clean › Start
-            # #
-
-            - name: >-
-                  🧹 Clean Repo History
-              run: |
-                    # Create a new orphan branch
-                    git checkout --orphan temp-branch
-
-                    # Add all files to the new branch
-                    git add -A
-
-                    # Commit the files to the new branch
-                    git commit -m "${{ env.COMMIT_MESSAGE }}"
-
-                    # Delete the old main branch
-                    git branch -D ${{ env.BRANCH }}
-
-                    # Rename the new orphan branch to main
-                    git branch -m ${{ env.BRANCH }}
-
-                    # Force push the new main branch to the remote repository
-                    git push -f origin ${{ env.BRANCH }}
-
-            # #
-            #   History › Clean › References
-            # #
-
-            - name: >-
-                  🗑️ Garbage Collection (Aggressive)
-              run: |
-                    # Remove remote-tracking references to deleted branches (optional)
-                    git fetch origin --prune
-                    git repack
-                    git prune-packed
-                    git reflog expire --expire=now --all
-                    git gc --prune=now --aggressive
-
-            # #
-            #   History › Clean › Commit
-            # #
-
-            - name: >-
-                  📦 Commit › Execute
-              uses: stefanzweifel/git-auto-commit-action@v5
+                🪣 Cache › Clean
+              uses: actions/github-script@v7
               with:
-                  commit_message: ${{ env.COMMIT_MESSAGE }}
+                  script: |
+                          try
+                          {
+                              const cacheConf =
+                              {
+                                  owner: context.repo.owner,
+                                  repo: context.repo.repo,
+                                  per_page: ${{ env.NUM_PER_PAGE }},
+                              };
+
+                              console.log( `✅ Starting to clean cache; showing ${{ env.NUM_PER_PAGE }} cached items per page` )
+                              const caches = await github.rest.actions.getActionsCacheList( cacheConf )
+
+                              while( caches.data.actions_caches.length )
+                              {
+                                  for ( const cache of caches.data.actions_caches )
+                                  {
+                                      console.log( `⚠️ Clearing cache id: ${cache.key} (${cache.id})` )
+                                      const res = await github.rest.actions.deleteActionsCacheById(
+                                      {
+                                          owner: context.repo.owner,
+                                          repo: context.repo.repo,
+                                          cache_id: cache.id,
+                                      });
+
+                                      console.log( `✔️ Cache item ${cache.key} (${cache.id}) cleared at ${new Date().toISOString()}` )
+                                  }
+
+                                  caches = await github.rest.actions.getActionsCacheList(congif);
+                                  console.log( `Getting another ${caches.data.actions_caches.length} caches from github ...` );
+                              }
+
+                              console.log( `✔️ Finished cleaning the cache` );
+                          }
+                          catch( e )
+                          {
+                              console.log( `❌ The workflow has terminated with an error:`, e )
+                              return;
+                          }
+
+            # #
+            #   Cache › Clean › Get Weekly Commits
+            # #
+
+            - name: >-
+                🕛 Get Weekly Commit List
+              run: |
+                  echo 'WEEKLY_COMMITS<<EOF' >> $GITHUB_ENV
+                  git log --format="[\`%h\`](${{ github.server_url }}/${{ github.repository }}/commit/%H) %s - %an" --since=7.days >> $GITHUB_ENV
+                  echo 'EOF' >> $GITHUB_ENV
