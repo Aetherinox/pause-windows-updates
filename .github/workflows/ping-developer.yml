@@ -210,7 +210,7 @@ jobs:
             - name: >-
                   📨 Send mail
               id: task_ping_developer_mail
-              uses: dawidd6/action-send-mail@v5
+              uses: dawidd6/action-send-mail@v6
               with:
                   server_address: ${{ secrets.EMAIL_SMTP }}
                   server_port: 465
