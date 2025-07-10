@@ -358,6 +358,7 @@ set "rTweaksGeneral[13]=12|Windows Error Reporting|HKCU\Software\Microsoft\Windo
 set "rTweaksGeneral[14]=13|Windows App Tracking (MFU)|HKCU\Software\Policies\Microsoft\Windows\EdgeUI|DisableMFUTracking|REG_DWORD|0x0|0x1|false"
 set "rTweaksGeneral[15]=14|Weather/News icon in Taskbar|HKLM\Software\Policies\Microsoft\Dsh|AllowNewsAndInterests|REG_DWORD|0x1|0x0|false"
 set "rTweaksGeneral[16]=15|Show Shortcuts Icon|HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons|29|REG_SZ|%%windir%%\System32\shell32.dll,-30|C:\\Windows\\blank.ico|false"
+set "rTweaksGeneral[17]=16|Disable Automatic Bitlocker Encryption|HKLM\SYSTEM\CurrentControlSet\Control\BitLocker|PreventDeviceEncryption|REG_DWORD|0x1|0x0|false"
 
 :: #
 ::  @desc           registry
