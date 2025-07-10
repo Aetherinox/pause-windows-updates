@@ -28,7 +28,7 @@
 <br />
 
 - [About](#about)
-  - [Option 1: WP Utility:](#option-1-wp-utility)
+  - [Option 1: WP Utility](#option-1-wp-utility)
   - [Option 2: Registry Scripts](#option-2-registry-scripts)
 - [Notice](#notice)
 - [Install](#install)
@@ -66,7 +66,7 @@ If you are here to simply disable Windows Updates; this repository provides two 
 
 <br />
 
-### [Option 1: WP Utility](#wp-utility):
+### [Option 1: WP Utility](#wp-utility)
 
 <br />
 
