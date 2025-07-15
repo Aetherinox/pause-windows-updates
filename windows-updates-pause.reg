@@ -31,7 +31,18 @@ Windows Registry Editor Version 5.00
 "FailureActions"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
   00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 
+; AUOptions
+;
+; @ref        https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry
+; @options    1: Keep my computer up to date is disabled in Automatic Updates.
+;             2: Notify of download and installation.
+;             3: Automatically download and notify of installation.
+;             4: Automatically download and scheduled installation.
+;             5: Allow local admin to select the configuration mode. This option isn't available for Windows 10 or later versions.
+;             7: Notify for install and notify for restart. (Windows Server 2016 and later only)
+
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU]
+"AUOptions"=dword:00000001
 "NoAutoUpdate"=dword:00000001
 "NoAUShutdownOption"=dword:00000001
 "AlwaysAutoRebootAtScheduledTime"=dword:00000000
