@@ -32,11 +32,11 @@ Windows Registry Editor Version 5.00
 ; @desc       Disable Service - Windows Update Medic Service (WaaSMedicSvc)
 ; 
 ; Start
-; @options    0 	Boot	Loaded by the boot loader (very early in boot)
-;             1 	System	Loaded by the I/O subsystem (early in boot)
-;             2 	Automatic	Starts automatically during system startup
-;             3 	Manual	Starts only when triggered manually or by a dependent service
-;             4 	Disabled	Service is disabled and will not start
+; @options    0 	Boot        Loaded by the boot loader (very early in boot)
+;             1 	System      Loaded by the I/O subsystem (early in boot)
+;             2 	Automatic   Starts automatically during system startup
+;             3 	Manual      Starts only when triggered manually or by a dependent service
+;             4 	Disabled    Service is disabled and will not start
 ; 
 ; FailureActions
 ; @desc       determines what happens when Failure occurs
