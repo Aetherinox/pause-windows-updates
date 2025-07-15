@@ -1,5 +1,6 @@
 Windows Registry Editor Version 5.00
 
+; --------------------------------------------------------------------------------------------------
 ;   @script       windows-updates-pause.reg
 ;   @author       Aetherinox
 ;   @url          https://github.com/Aetherinox/pause-windows-updates
@@ -14,6 +15,7 @@ Windows Registry Editor Version 5.00
 ;   You can also re-enable updates by executing the other file included
 ;   in the repo URL above:
 ;       windows-updates-unpause.reg
+; --------------------------------------------------------------------------------------------------
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
 "PauseFeatureUpdatesStartTime"="2025-01-01T00:00:00Z"
@@ -26,20 +28,97 @@ Windows Registry Editor Version 5.00
 "ActiveHoursEnd"=dword:00000007
 "FlightSettingsMaxPauseDays"=dword:00002727
 
+; --------------------------------------------------------------------------------------------------
+; @desc       Disable Service - Windows Update Medic Service (WaaSMedicSvc)
+; 
+; Start
+; @options    0 	Boot	Loaded by the boot loader (very early in boot)
+;             1 	System	Loaded by the I/O subsystem (early in boot)
+;             2 	Automatic	Starts automatically during system startup
+;             3 	Manual	Starts only when triggered manually or by a dependent service
+;             4 	Disabled	Service is disabled and will not start
+; 
+; FailureActions
+; @desc       determines what happens when Failure occurs
+;             - 	No automatic recovery actions are configured for WaaSMedicSvc if it fails.
+;             - 	Windows will not try to restart the service, run any commands, or reboot the computer on failure.
+;             - 	Combined with "Start"=4, the service is disabled and there is no recovery configured.
+;             - 	Reset period: 0 (no reset time for failure count)
+;             - 	No reboot message
+;             - 	No command to run on failure
+;             - 	Count of failure actions: 0 (meaning no actions configured)
+;             - 	No failure action entries
+; --------------------------------------------------------------------------------------------------
+
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc]
 "Start"=dword:00000004
 "FailureActions"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
   00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 
+; --------------------------------------------------------------------------------------------------
+; Disable Windows Update service (wuauserv)
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\wuauserv]
+; "Start"=dword:00000004
+; "FailureActions"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
+;  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
+; --------------------------------------------------------------------------------------------------
+; Disable Windows Update Orchestrator Service (UsoSvc)
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\UsoSvc]
+; "Start"=dword:00000004
+; "FailureActions"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
+;  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
+; --------------------------------------------------------------------------------------------------
+; Disable Update Orchestrator Scheduled Tasks
+; These tasks may be re-created by the system, manual removal may be needed
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{ce7fb776-4f88-40a9-bf23-32c4b7e510d1}]
+; "Enabled"=dword:00000000
+; 
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{7919ab71-7a01-4b21-bf41-2d1e580e5045}]
+; "Enabled"=dword:00000000
+
+; --------------------------------------------------------------------------------------------------
 ; AUOptions
-;
 ; @ref        https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry
-; @options    1: Keep my computer up to date is disabled in Automatic Updates.
-;             2: Notify of download and installation.
-;             3: Automatically download and notify of installation.
-;             4: Automatically download and scheduled installation.
-;             5: Allow local admin to select the configuration mode. This option isn't available for Windows 10 or later versions.
-;             7: Notify for install and notify for restart. (Windows Server 2016 and later only)
+; @options    1 	Keep my computer up to date is disabled in Automatic Updates.
+;             2 	Notify of download and installation.
+;             3 	Automatically download and notify of installation.
+;             4 	Automatically download and scheduled installation.
+;             5 	Allow local admin to select the configuration mode. This option isn't available for Windows 10 or later versions.
+;             7 	Notify for install and notify for restart. (Windows Server 2016 and later only)
+; 
+; NoAutoUpdate
+; @options    0 	Automatic Updates are enabled (default).
+; @options    1 	Automatic Updates are disabled.
+;
+; NoAUShutdownOption
+; @options    0 	Install Updates and Shut Down option is displayed when updates are ready to install
+;             1 	Install Updates and Shut Down option is not displayed in the shutdown dialog
+;
+; AlwaysAutoRebootAtScheduledTime
+; @options    0 	Disabled (default). If a user is logged on when the scheduled install time arrives, Windows will wait until the user logs off to restart.
+;             1 	Enabled. Windows will automatically restart at the scheduled time even if a user is logged on, potentially causing data loss if work is unsaved.
+;
+; NoAutoRebootWithLoggedOnUsers
+; @options    0 	Disabled (default): Windows Update can automatically restart if a user is logged on.
+;             1 	Enabled: Windows Update will not automatically restart the computer while a user is logged on.
+;
+; AutoInstallMinorUpdates
+; @options    0 	Disabled (default): Minor updates are installed according to the normal update schedule.
+;             1 	Enabled: Minor updates are installed immediately and silently, outside the schedule.
+;
+; UseWUServer
+; @options    0 	Do not use WSUS — Windows Update connects directly to Microsoft Update servers.
+;             1 	Use WSUS — Windows Update connects to a WSUS server specified in other WSUS policies.
+;
+; --------------------------------------------------------------------------------------------------
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU]
 "AUOptions"=dword:00000001
@@ -48,6 +127,30 @@ Windows Registry Editor Version 5.00
 "AlwaysAutoRebootAtScheduledTime"=dword:00000000
 "NoAutoRebootWithLoggedOnUsers"=dword:00000001
 "AutoInstallMinorUpdates"=dword:00000000
+"UseWUServer"=dword:00000000
+
+; --------------------------------------------------------------------------------------------------
+; PausedFeatureStatus && PausedQualityStatus
+; @ref        https://learn.microsoft.com/en-us/windows/deployment/update/waas-configure-wufb
+; @options    0 	feature updates not paused
+;             1 	feature updates paused
+;             2 	feature updates have auto-resumed after being paused
+;
+; PausedFeatureDate
+; @desc       Pauses Feature Updates (new Windows versions, e.g., 22H2 → 23H2)
+;             The device won’t scan for or install Feature Updates until the specified date is reached.
+;             After the date, scans and installs resume automatically.
+;             "YYYY-MM-DDTHH:MM:SSZ"
+;                  The T separates date and time
+;                  The Z means UTC
+;
+; PausedQualityDate
+; @desc       Pauses Quality Updates (monthly cumulative updates, security updates, servicing stack updates).
+;             After the date, scans and installs resume automatically.
+;             "YYYY-MM-DDTHH:MM:SSZ"
+;                  The T separates date and time
+;                  The Z means UTC
+; --------------------------------------------------------------------------------------------------
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\Settings]
 "PausedFeatureStatus"=dword:00000001
@@ -55,21 +158,38 @@ Windows Registry Editor Version 5.00
 "PausedQualityDate"="2025-01-01T00:00:00Z"
 "PausedFeatureDate"="2025-01-01T00:00:00Z"
 
+; --------------------------------------------------------------------------------------------------
 ; @target     Optional / Driver Updates
 ; @desc       Disable optional updates
 ; @ref        https://github.com/Aetherinox/pause-windows-updates/issues/18
+;
+; ExcludeWUDriversInQualityUpdate
+; @desc       Whether Windows Update will also deliver driver updates along with Quality Updates (security and cumulative updates).
+; @options    0 	Drivers ARE included with updates
+;             1 	Drivers are NOT included (excluded)
+; --------------------------------------------------------------------------------------------------
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\Update]
 "ExcludeWUDriversInQualityUpdate"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\default\Update]
-"ExcludeWUDriversInQualityUpdate"=dword:00000001
+; --------------------------------------------------------------------------------------------------
+; Disable Windows Update UX notifications
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\UX\Settings]
+; "UxOption"=dword:00000000
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings]
-"ExcludeWUDriversInQualityUpdate"=dword:00000001
+; --------------------------------------------------------------------------------------------------
+; Disable Windows Update access via Settings
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate]
+; "DisableWindowsUpdateAccess"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate]
-"ExcludeWUDriversInQualityUpdate"=dword:00000001
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\default\Update\ExcludeWUDriversInQualityUpdate]
-"value"=dword:00000001
+; --------------------------------------------------------------------------------------------------
+; Additional policy disable updates in PolicyManager
+; --------------------------------------------------------------------------------------------------
+; 
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\Update]
+; "DisableOSUpgrade"=dword:00000001
+; "DisableUpdateService"=dword:00000001
